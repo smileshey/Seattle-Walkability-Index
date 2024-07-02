@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?><messages><msg code="0" type="2">Start Time: Wednesday, May 22, 2024 10:13:41 AM</msg><msg code="-2147467259" type="100">Failed to execute. Parameters are not valid.</msg><msg code="800" type="100">ERROR 001628: The value is not a layer or table view with joins
+ERROR 000840: The value is not a Raster Layer.
+ERROR 000840: The value is not a Mosaic Layer.
+ERROR 000800: The value is not a member of .</msg><msg code="-2147467259" type="100">Failed to execute (RemoveJoin).</msg><msg code="0" type="3">Failed at Wednesday, May 22, 2024 10:13:42 AM (Elapsed Time: 0.96 seconds)</msg></messages>
