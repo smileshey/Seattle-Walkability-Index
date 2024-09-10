@@ -27,8 +27,12 @@ module.exports = {
     static: path.join(__dirname, 'dist'),
     compress: true,
     port: 8080,
+    host: '0.0.0.0', // Allows access from outside the container
+    allowedHosts: 'all', // Allows any host
+    disableHostCheck: true // Disables host header check
   }
 };
+
 
 
 
