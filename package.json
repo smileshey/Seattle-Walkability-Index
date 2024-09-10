@@ -2,9 +2,9 @@
   "name": "ui",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
+"scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack serve --config webpack.config.js"
+    "start": "node --max_old_space_size=4096 ./node_modules/webpack/bin/webpack.js serve --config webpack.config.js"
   },
   "keywords": [],
   "author": "",
@@ -32,3 +32,4 @@
     "react-dom": "^18.3.1"
   }
 }
+
