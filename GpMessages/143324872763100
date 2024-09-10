@@ -1,2 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?><messages><msg code="0" type="2">Start Time: Friday, June 14, 2024 10:17:36 AM</msg><msg code="-2147467259" type="100">Failed to execute. Parameters are not valid.</msg><msg code="865" type="100">WARNING 001000: Zone Field: Field neighborhood_id does not exist
-ERROR 000865: Input Value Raster: walk_score does not exist.</msg><msg code="-2147467259" type="100">Failed to execute (ZonalStatisticsAsTable).</msg><msg code="0" type="3">Failed at Friday, June 14, 2024 10:17:36 AM (Elapsed Time: 0.05 seconds)</msg></messages>

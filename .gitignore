@@ -1,0 +1,15 @@
+UI/dist/*
+!UI/dist/index.html
+node_modules/
+.backups/
+GpMessages/
+.ipynb_checkpoints/
+ImportLog/
+info/
+output/
+scratch.gbd/
+temp.gbd/
+package-lock.json
+Seattle_Walkability_shared.aprx
+Walkability_Seattle.gdb/
+Walkability_Seattle.gdb.zip

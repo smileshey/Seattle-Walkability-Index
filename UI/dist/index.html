@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>ArcGIS Basic Map</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #viewDiv {
+      height: calc(100%);
+      width: 100%;
+      top: 0px;
+      position: absolute;
+      z-index: 1;
+      pointer-events: auto;
+    }
+
+    .widget-container {
+      width: 220px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0);
+      border-radius: 10px;
+      position: absolute;
+      text-align: center;
+      z-index: 1000;
+      pointer-events: auto;
+    }
+
+    .toggle-container {
+      width: 225px;
+      padding: 0px;
+      background: rgba(255, 255, 255, .7);
+      border-radius: 10px;
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      text-align: center;
+      z-index: 1000;
+      box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+      pointer-events: auto;
+    }
+
+    /* .scaler-popup {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 0;
+      width: 400px;
+      height: 780px;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      z-index: 1000;
+      pointer-events: auto;
+    } */
+
+    /* .distribution-popup {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 0;
+      width: 400px;
+      height: 300px;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      z-index: 1000;
+      pointer-events: auto;
+    } */
+
+    #sliderDiv {
+      bottom: 20px;
+      left: 20px;
+      position: absolute;
+    }
+
+    #legendDiv {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    #headerDiv {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 30%;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="headerDiv"></div> <!-- Placeholder for the React navBar -->
+  <div id="viewDiv"></div> <!-- Container for the map -->
+  <div id="sliderDiv" class="widget-container"></div> <!-- Widget for sliders -->
+  <div id="layerToggleDiv" class="toggle-container"></div> <!-- Toggle widget -->
+  <div id="transparencyWidgetDiv" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);"></div>
+
+  <!-- Scaler Popup -->
+  <div id="scalerPopup" class="scaler-popup">
+    <div id="scalerPopupBody"></div>
+  </div>
+  <div id="root"></div>
+
+  <!-- Distribution Popup -->
+  <div id="distributionPopup" class="distribution-popup">
+    <div id="distributionPopupBody"></div>
+  </div>
+
+  <div id="legendDiv"></div>
+  <div id="topNeighborhoodsDiv"></div>
+
+  <!-- Chart Popout Modal -->
+  <div id="chartPopout" class="modal">
+    <div class="modal-content">
+      <span id="closeChartPopout" class="close">&times;</span>
+      <div class="modal-body">
+        <canvas id="walkscoreChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="bundle.js"></script>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script>
+    var keys = ["Not", "Most"];
+    var colors = [
+      "rgba(230, 238, 207,.4)",  // Color for interval[1]
+      "rgba(155, 196, 193,.4)",  // Color for interval[2]
+      "rgba(105, 168, 183,.4)",  // Color for interval[3]
+      "rgba(75, 126, 152,.4)",   // Color for interval[4]
+      "rgba(46, 85, 122,.4)"     // Color for interval[5]
+    ];
+
+    var svg = d3.select("#legendDiv").append("svg")
+      .attr("width", 300)  // Adjusted width for a smaller legend
+      .attr("height", 80)  // Adjusted height for a smaller legend
+      .style("background", "transparent");
+
+    // Add legend title
+    svg.append("text")
+      .attr("x", 150)  // Center the title
+      .attr("y", 10)   // Position title at the top
+      .attr("text-anchor", "middle")
+      .style("font-size", "12px")
+      .style("fill", "#333")
+      .style("font-weight", "bold")  // Make the title bold
+      .text("Walkability Spectrum");
+
+    svg.selectAll("dots")
+      .data(colors)
+      .enter()
+      .append("circle")
+        .attr("cx", function(d, i) { return 100 + i * 25; })  // Reduce space between circles
+        .attr("cy", 30)  // Adjust position to accommodate title
+        .attr("r", 7)  // Reduced radius for smaller circles
+        .style("fill", function(d, i) { return colors[i]; })
+        .style("stroke", "black")  // Add black border
+        .style("stroke-width", "1");
+
+    // Add labels for the first and last colors
+    svg.append("text")
+      .attr("x", 100)  // Position for the first label
+      .attr("y", 50)  // Position text below the first circle
+      .attr("transform", "rotate(-45, 100, 50)")  // Rotate text around the label position
+      .style("fill", "#333")
+      .style("font-size", "10px")  // Reduced font size for labels
+      .style("font-weight", "bold")  // Make the labels bold
+      .text(keys[0])
+      .attr("text-anchor", "middle")
+      .style("alignment-baseline", "middle");
+
+    svg.append("text")
+      .attr("x", 100 + (colors.length - 1) * 25)  // Position for the last label
+      .attr("y", 50)  // Position text below the last circle
+      .attr("transform", "rotate(-45, " + (100 + (colors.length - 1) * 25) + ", 50)")
+      .style("fill", "#333")
+      .style("font-size", "10px")  // Reduced font size for labels
+      .style("font-weight", "bold")  // Make the labels bold
+      .text(keys[1])
+      .attr("text-anchor", "middle")
+      .style("alignment-baseline", "middle");
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
