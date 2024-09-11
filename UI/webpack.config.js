@@ -5,7 +5,7 @@ module.exports = {
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
-    publicPath: '/', // Ensure this for routing in production
+    publicPath: '/',
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
@@ -24,13 +24,7 @@ module.exports = {
       }
     ]
   },
-  mode: process.env.NODE_ENV || 'development',
-  devServer: {
-    host: '0.0.0.0',
-    port: process.env.PORT || 8080,
-    compress: true,
-    static: path.join(__dirname, 'dist'),
-  }
+  mode: 'production'
 };
 
 
