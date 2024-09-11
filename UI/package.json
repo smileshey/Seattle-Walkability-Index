@@ -4,9 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack serve --config webpack.config.js",
+    "start": "npm run build && npm run serve",
     "build": "webpack --config webpack.config.js --mode production",
-    "serve": "serve -s dist" 
+    "serve": "serve -s dist"
   },
   "keywords": [],
   "author": "",
@@ -36,4 +36,5 @@
     "serve": "^14.0.1"
   }
 }
+
 
