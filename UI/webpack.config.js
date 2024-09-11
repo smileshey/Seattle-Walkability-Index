@@ -4,10 +4,12 @@ module.exports = {
   entry: './src/main.tsx',
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    publicPath: '/', // Ensure this for routing in production
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js']
+    extensions: ['.ts', '.tsx', '.js'],
+    modules: [path.resolve(__dirname, 'node_modules')]
   },
   module: {
     rules: [
@@ -22,16 +24,14 @@ module.exports = {
       }
     ]
   },
-  mode: 'development',
+  mode: process.env.NODE_ENV || 'development',
   devServer: {
-    static: path.join(__dirname, 'dist'),
+    host: '0.0.0.0',
+    port: process.env.PORT || 8080,
     compress: true,
-    port: 8080,
-    host: '0.0.0.0', // Allows access from outside the container
-    allowedHosts: 'all', // Use 'all' to allow requests from any host
+    static: path.join(__dirname, 'dist'),
   }
 };
-
 
 
 
