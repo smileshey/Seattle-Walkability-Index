@@ -1,6 +1,4 @@
 const path = require('path');
-const webpack = require('webpack');
-const dotenv = require('dotenv').config({ path: './.env' }); // Loads the .env file
 
 module.exports = {
   entry: './src/main.tsx',
@@ -30,11 +28,6 @@ module.exports = {
   optimization: {
     minimize: false, // Disable minification
   },
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env': JSON.stringify(dotenv.parsed),
-    }),
-  ],
 };
 
 
