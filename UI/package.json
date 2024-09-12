@@ -5,8 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && npm run serve",
-    "build": "webpack --config webpack.config.js --mode production",
-    "serve": "serve -l $PORT -s dist"
+    "build": "webpack --config webpack.config.js --mode production --progress --verbose",
+    "serve": "serve -l $PORT -s dist --log-level=debug"
   },
   "keywords": [],
   "author": "",
