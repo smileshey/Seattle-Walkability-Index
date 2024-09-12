@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && npm run serve",
     "build": "webpack --config webpack.config.js --mode production --progress && ls -la dist",
-    "serve": "serve -l $PORT -s dist --log-level=debug"
+    "serve": "serve -l $PORT -s dist"
   },
   "keywords": [],
   "author": "",
