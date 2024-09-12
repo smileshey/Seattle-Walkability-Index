@@ -1,2 +1,2 @@
-NODE_OPTIONS=--max-old-space-size=760
+NODE_OPTIONS=--max-old-space-size=6000
 GENERATE_SOURCEMAP=false
