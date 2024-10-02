@@ -1,21 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
+    "target": "es6",
+    "module": "esnext", 
     "strict": true,
-    "jsx": "react",
+    "jsx": "react-jsx", 
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true, // Skip type checking of .d.ts files for performance
+    "typeRoots": ["./node_modules/@types", "./types"],
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
-    "baseUrl": "./src", // Add this line if not present
-    "paths": {
-      "*": ["node_modules/*"]
-    }
+    "baseUrl": "./src"
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }
+
 
 
