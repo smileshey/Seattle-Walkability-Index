@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && npm run serve",
-    "build": "webpack --config webpack.config.js --mode production --progress && ls -la dist",
-    "serve": "serve -l $PORT -s dist",
-    "dev": "webpack serve --config webpack.config.js --mode development --open --hot --port 8080",
-    "clean": "del-cli 'dist/**' '!dist/styles.css' '!dist/index.html'"
-  },
+      "start": "npm run build && npm run serve",
+      "build": "webpack --config webpack.config.js --mode production --progress && ls -la dist",
+      "serve": "serve -l $PORT -s dist",
+      "dev": "webpack serve --config webpack.config.js --mode development --open --hot --port 8080",
+      "clean": "del-cli 'dist/**' '!dist/styles.css' '!dist/index.html'",
+      "build:analyze": "webpack --config webpack.config.js --mode production --progress --analyze"
+    },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -20,6 +20,7 @@
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.1",
     "webpack": "^5.92.1",
+    "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.9.0"
   },
