@@ -32,7 +32,7 @@ module.exports = (env, argv) => {
     optimization: {
       minimize: isProduction, // Minimize only in production
     },
-    devtool: isProduction ? 'source-map' : 'inline-source-map', // Source maps in development for easier debugging
+    devtool: isProduction ? false : 'inline-source-map', // Disable source maps in production
     devServer: {
       static: {
         directory: path.join(__dirname, 'dist'),
@@ -43,13 +43,13 @@ module.exports = (env, argv) => {
       open: true, // Auto-open in the browser
     },
     plugins: [
-      // Add any plugins needed for both environments, or conditionally for specific environments
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(argv.mode), // Define NODE_ENV for production builds
       }),
     ],
   };
 };
+
 
 
 
