@@ -17,7 +17,7 @@ module.exports = (env, argv) => {
   }
 
   return {
-    entry: './UI/src/main.tsx',
+    entry: './src/main.tsx',
     output: {
       filename: 'bundle.js',
       path: path.resolve(__dirname, 'dist'),
