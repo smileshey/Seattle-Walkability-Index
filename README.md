@@ -22,8 +22,6 @@ The platform dynamically recalculates these scores in real-time and displays the
 
 ## How it Works
 
-Here's explainer for how this process works:
-
 ![Alt text](UI/images/WalkscoreAnimation.gif)
 
 To create the walkscore discussed above, the city is first segmented using a fishnet. This fishnet is a series of grids of equal size that is overlaid on top of the map. Within each grid, we use ArcGIS to calculate the area of sidewalks, streets, pathways, and tree canopy. Additionally, we calculate the number of businesses, public amenities (benches, restrooms, water fountains, etc.), as well as the effective slope in each grid.

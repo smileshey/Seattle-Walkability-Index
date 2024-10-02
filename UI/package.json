@@ -6,13 +6,16 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && npm run serve",
     "build": "webpack --config webpack.config.js --mode production --progress && ls -la dist",
-    "serve": "serve -l $PORT -s dist"
+    "serve": "serve -l $PORT -s dist",
+    "dev": "webpack serve --config webpack.config.js --mode development --open --hot --port 8080",
+    "clean": "del-cli 'dist/**' '!dist/styles.css' '!dist/index.html'"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "css-loader": "^7.1.2",
+    "del-cli": "^5.1.0",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.1",
     "webpack": "^5.92.1",
@@ -20,6 +23,7 @@
     "webpack-dev-server": "^4.9.0"
   },
   "dependencies": {
+    "@arcgis/core": "^4.21.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.21",
@@ -28,11 +32,11 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "chart.js": "^4.4.3",
+    "d3": "^7.9.0",
     "mathjs": "^13.0.2",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
-    "@arcgis/core": "^4.21.0",
     "serve": "^14.0.1"
   }
 }

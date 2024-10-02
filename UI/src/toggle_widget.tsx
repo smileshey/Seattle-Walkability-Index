@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Switch, Typography } from '@mui/material';
+import { Box, Switch, Typography, useMediaQuery } from '@mui/material';
+import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template';
+import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 
 interface LayerToggleProps {
   view: __esri.MapView;
@@ -9,45 +11,81 @@ interface LayerToggleProps {
 const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
   const [isFishnetLayer, setIsFishnetLayer] = useState(false);
 
-  const handleToggleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const isFishnet = event.target.checked;
+  // Media query to check for small screens
+  const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
+  const isMobileLandscape = useMediaQuery('(min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
+  const isTabletPortrait = useMediaQuery('(min-width: 601px) and (orientation: portrait)');
+
+  // Check if bottom navigation is visible, in which case don't show the toggle switch here
+  const isBottomNavVisible = isMobilePortrait || isMobileLandscape || isTabletPortrait;
+
+  const handleToggleChange = (isFishnet: boolean) => {
     setIsFishnetLayer(isFishnet);
 
-    // Determine the appropriate layer titles based on the toggle state
     const baseLayerTitle = isFishnet ? "walkscore_fishnet" : "walkscore_neighborhoods";
     const personalizedLayerTitle = isFishnet ? "Personalized Walkscore" : "Personalized Neighborhood Walkscore";
 
-    // Check for the existence of personalized layers
-    const personalizedLayer = webMap.allLayers.find(layer => layer.title === personalizedLayerTitle);
-    const baseLayer = webMap.allLayers.find(layer => layer.title === baseLayerTitle);
+    // Cast to FeatureLayer to access popupTemplate
+    const personalizedLayer = webMap.allLayers.find(layer => layer.title === personalizedLayerTitle) as FeatureLayer;
+    const baseLayer = webMap.allLayers.find(layer => layer.title === baseLayerTitle) as FeatureLayer;
 
-    // If personalized layers exist, use them; otherwise, use base layers
-    const layerToShow = personalizedLayer || baseLayer;
+    let layerToShow = personalizedLayer || baseLayer;
     const otherLayerTitle = isFishnet ? "walkscore_neighborhoods" : "walkscore_fishnet";
     const otherPersonalizedLayerTitle = isFishnet ? "Personalized Neighborhood Walkscore" : "Personalized Walkscore";
-    
-    const otherLayer = webMap.allLayers.find(layer => layer.title === otherPersonalizedLayerTitle) || 
-                        webMap.allLayers.find(layer => layer.title === otherLayerTitle);
 
-    // Show the selected layer
-    if (layerToShow) layerToShow.visible = true;
+    const otherLayer = webMap.allLayers.find(layer => layer.title === otherPersonalizedLayerTitle) as FeatureLayer || 
+                      webMap.allLayers.find(layer => layer.title === otherLayerTitle) as FeatureLayer;
 
-    // Hide the unselected layer
-    if (otherLayer) otherLayer.visible = false;
+    // Ensure layerToShow exists before assigning popupTemplate
+    if (!layerToShow) {
+      console.log("Layer to show is undefined, defaulting to neighborhood layer");
+      layerToShow = baseLayer;
+    }
+
+    if (layerToShow) {
+      layerToShow.when(() => {
+        // Assign the appropriate popup template
+        layerToShow.popupTemplate = isFishnet ? fishnetPopupTemplate : neighborhoodPopupTemplate;
+        layerToShow.visible = true;
+      });
+    }
+
+    // Hide the other layer if defined
+    if (otherLayer) {
+      otherLayer.visible = false;
+    }
   };
 
   useEffect(() => {
-    // Initialize the visibility based on the current state
-    handleToggleChange({ target: { checked: isFishnetLayer } } as React.ChangeEvent<HTMLInputElement>);
+    handleToggleChange(isFishnetLayer);
   }, []);
 
+  if (isBottomNavVisible) {
+    // Do not render the toggle switch when the bottom navigation is visible
+    return null;
+  }
+
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', padding: 1, background: 'transparent', borderRadius: 3, boxShadow: 20 }}>
-      <Typography variant="caption" sx={{ fontWeight: 'bold', marginRight: 1 , fontSize: '12px'}}>
-        Neighborhood View
-      </Typography>
-      <Switch checked={isFishnetLayer} onChange={handleToggleChange} />
-      <Typography variant="caption" sx={{ fontWeight: 'bold', fontSize: '12px' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 1,
+        background: 'rgba(255, 255, 255, 0.7)',
+        borderRadius: 3,
+        boxShadow: 20,
+        position: 'absolute',
+        top: '20px',
+        right: '20px',
+        zIndex: 1000,
+      }}
+    >
+      <Switch
+        checked={isFishnetLayer}
+        onChange={(event) => handleToggleChange(event.target.checked)}
+      />
+      <Typography sx={{ fontSize: '10px', marginLeft: 1 }}>
         Fishnet View
       </Typography>
     </Box>
@@ -55,6 +93,15 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
 };
 
 export default LayerToggle;
+
+
+
+
+
+
+
+
+
 
 
 

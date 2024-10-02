@@ -187,7 +187,7 @@ export const getTopNeighborhoods = async (layer: FeatureLayer, field: string): P
   try {
       const neighborhoodsResult = await layer.queryFeatures(query);
       
-      console.log("Fetched neighborhoods: ", neighborhoodsResult.features);
+      console.log("Fetched neighborhoods");
 
       const topNeighborhoods = neighborhoodsResult.features
           .map(feature => ({
@@ -200,7 +200,7 @@ export const getTopNeighborhoods = async (layer: FeatureLayer, field: string): P
           .sort((a, b) => b.score - a.score)
           .slice(0, 5); // Top 5 neighborhoods
 
-      console.log("Top neighborhoods: ", topNeighborhoods);
+      console.log("Top neighborhoods");
 
       return topNeighborhoods;
   } catch (error) {

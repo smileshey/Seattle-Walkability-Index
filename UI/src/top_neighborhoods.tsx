@@ -6,6 +6,7 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import TextSymbol from "@arcgis/core/symbols/TextSymbol";
 import Point from "@arcgis/core/geometry/Point";
 import { Neighborhood } from './neighborhood_utils';
+import { useMediaQuery } from '@mui/material';
 
 export interface TopNeighborhoodsProps {
   neighborhoods: Neighborhood[];
@@ -17,8 +18,10 @@ export interface TopNeighborhoodsProps {
 }
 
 const TopNeighborhoods: React.FC<TopNeighborhoodsProps> = ({ neighborhoods, view, webMap, onNeighborhoodsLoaded, showTextList = true }) => {
+  const isMobileLandscape = useMediaQuery('(min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
+
   useEffect(() => {
-    console.log("TopNeighborhoods component mounted with neighborhoods:", neighborhoods);
+    console.log("TopNeighborhoods component mounted");
     if (neighborhoods && neighborhoods.length > 0 && onNeighborhoodsLoaded) {
       onNeighborhoodsLoaded(neighborhoods);
       renderNeighborhoodsOnMap(neighborhoods);
@@ -26,7 +29,7 @@ const TopNeighborhoods: React.FC<TopNeighborhoodsProps> = ({ neighborhoods, view
   }, [neighborhoods, onNeighborhoodsLoaded]);
 
   const renderNeighborhoodsOnMap = (neighborhoods: Neighborhood[]) => {
-    console.log("Rendering neighborhoods on the map:", neighborhoods);
+    console.log("Rendering neighborhoods on the map");
     const existingLayer = webMap.findLayerById("neighborhoodMarkers");
     if (existingLayer) {
       webMap.remove(existingLayer);
@@ -88,31 +91,43 @@ const TopNeighborhoods: React.FC<TopNeighborhoodsProps> = ({ neighborhoods, view
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 0.5,
+        gap: isMobileLandscape ? .25 : 1,
       }}
     >
       {neighborhoods.map((neighborhood, index) => {
         // Determine the styling based on the ranking
-        let fontSize = '0.8rem'; // Default font size for ranks 4-5
+        let fontSize = '0.65rem'; // Default font size for ranks 4-5
         let fontWeight = 'normal';
         let color = 'black';
 
+        // Adjust font size for mobile landscape
+        if (isMobileLandscape) {
+          fontSize = '0.7rem'; // Smaller font size for mobile landscape
+        }
+
         if (index === 0) {
-          fontSize = '.89rem'; // Largest font for rank 1
+          fontSize = isMobileLandscape ? '0.7rem' : '.89rem'; // Largest font for rank 1
           fontWeight = 'bold';
           color = 'black'; // Accent color for rank 1
         } else if (index === 1) {
-          fontSize = '.85rem'; // Slightly smaller for rank 2
+          fontSize = isMobileLandscape ? '0.65rem' : '.85rem'; // Slightly smaller for rank 2
           fontWeight = 'bold';
           color = 'black'; // Accent color for rank 2
         } else if (index === 2) {
-          fontSize = '0.8rem'; // Slightly larger for rank 3
+          fontSize = isMobileLandscape ? '0.65rem' : '0.8rem'; // Slightly larger for rank 3
           fontWeight = 'bold';
           color = 'black'; // Accent color for rank 3
         }
 
         return (
-          <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+          <Box
+            key={index}
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: isMobileLandscape ? '2px 0' : '4px 0', // Adjust padding based on mobile landscape
+            }}
+          >
             <Typography variant="caption" sx={{ fontWeight: fontWeight, fontSize: fontSize, color: color }}>
               {index + 1}.
             </Typography>
@@ -130,6 +145,7 @@ const TopNeighborhoods: React.FC<TopNeighborhoodsProps> = ({ neighborhoods, view
 };
 
 export default TopNeighborhoods;
+
 
 
 

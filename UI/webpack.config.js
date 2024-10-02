@@ -1,34 +1,56 @@
 const path = require('path');
+const webpack = require('webpack');
 
-module.exports = {
-  entry: './src/main.tsx',
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-    publicPath: '/',
-  },
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js'],
-    modules: [path.resolve(__dirname, 'node_modules')],
-  },
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
+module.exports = (env, argv) => {
+  const isProduction = argv.mode === 'production';
+
+  return {
+    entry: './src/main.tsx',
+    output: {
+      filename: 'bundle.js',
+      path: path.resolve(__dirname, 'dist'),
+      publicPath: '/',
+    },
+    resolve: {
+      extensions: ['.ts', '.tsx', '.js'],
+      modules: [path.resolve(__dirname, 'node_modules')],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.tsx?$/,
+          use: 'ts-loader',
+          exclude: /node_modules/,
+        },
+        {
+          test: /\.css$/i,
+          use: ['style-loader', 'css-loader'],
+        },
+      ],
+    },
+    mode: isProduction ? 'production' : 'development',
+    optimization: {
+      minimize: isProduction, // Minimize only in production
+    },
+    devtool: isProduction ? 'source-map' : 'inline-source-map', // Source maps in development for easier debugging
+    devServer: {
+      static: {
+        directory: path.join(__dirname, 'dist'),
       },
-      {
-        test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
-      },
+      historyApiFallback: true, // For SPAs, enables serving index.html for 404s
+      port: 8080, // Local server port
+      hot: true, // Enable Hot Module Replacement
+      open: true, // Auto-open in the browser
+    },
+    plugins: [
+      // Add any plugins needed for both environments, or conditionally for specific environments
+      new webpack.DefinePlugin({
+        'process.env.NODE_ENV': JSON.stringify(argv.mode), // Define NODE_ENV for production builds
+      }),
     ],
-  },
-  mode: 'production',
-  optimization: {
-    minimize: false, // Disable minification
-  },
+  };
 };
+
 
 
 
