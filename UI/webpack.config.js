@@ -1,27 +1,15 @@
 const path = require('path');
 const webpack = require('webpack');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
-
-  const plugins = [
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(argv.mode), // Define NODE_ENV for production builds
-    }),
-  ];
-
-  // Conditionally add BundleAnalyzerPlugin in development mode
-  if (!isProduction) {
-    plugins.push(new BundleAnalyzerPlugin());
-  }
 
   return {
     entry: './src/main.tsx',
     output: {
       filename: 'bundle.js',
       path: path.resolve(__dirname, 'dist'),
-      publicPath: '/', // Serve files from the root in production
+      publicPath: '/',
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js'],
@@ -42,9 +30,9 @@ module.exports = (env, argv) => {
     },
     mode: isProduction ? 'production' : 'development',
     optimization: {
-      minimize: isProduction, // Enable minimization only for production builds
+      minimize: isProduction, // Minimize only in production
     },
-    devtool: isProduction ? false : 'inline-source-map', // Disable source maps in production for performance
+    devtool: isProduction ? false : 'inline-source-map', // Disable source maps in production
     devServer: {
       static: {
         directory: path.join(__dirname, 'dist'),
@@ -52,13 +40,15 @@ module.exports = (env, argv) => {
       historyApiFallback: true, // For SPAs, enables serving index.html for 404s
       port: 8080, // Local server port
       hot: true, // Enable Hot Module Replacement
-      open: true, // Auto-open in the browser during development
+      open: true, // Auto-open in the browser
     },
-    plugins, // Use the updated plugins array
+    plugins: [
+      new webpack.DefinePlugin({
+        'process.env.NODE_ENV': JSON.stringify(argv.mode), // Define NODE_ENV for production builds
+      }),
+    ],
   };
 };
-
-
 
 
 
