@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-      "start": "npm run build && npm run serve",
+      "start": "npm run log && npm run build && npm run serve",
       "build": "webpack --config webpack.config.js --mode production --progress && ls -la dist",
       "serve": "serve -l ${PORT:-8081} -s dist",
       "dev": "webpack serve --config webpack.config.js --mode development --open --hot --port 8080",

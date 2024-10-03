@@ -4,12 +4,15 @@ const webpack = require('webpack');
 module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
 
+  console.log('Current build mode:', argv.mode); // Log the current build mode
+  console.log('Dist directory:', path.resolve(__dirname, 'dist')); // Log the path to the dist directory
+
   return {
     entry: './src/main.tsx',
     output: {
       filename: 'bundle.js',
       path: path.resolve(__dirname, 'dist'),
-      publicPath: '/',
+      publicPath: process.env.PUBLIC_PATH || '/',  // Use PUBLIC_PATH environment variable
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js'],
