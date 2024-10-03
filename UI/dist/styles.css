@@ -1,0 +1,202 @@
+/* General styles for desktop */
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrolling */
+}
+
+#viewDiv {
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 1; /* Ensure map is behind the widgets */
+}
+
+.widget-container {
+  width: 220px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0);
+  border-radius: 10px;
+  position: absolute;
+  text-align: center;
+  z-index: 1002; /* Higher than the map */
+  pointer-events: auto;
+}
+
+#sliderDiv {
+  position: absolute;
+  bottom: 20px;
+  left: 10px;
+  z-index: 1003;
+  width: 220px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0);
+  border-radius: 10px;
+}
+
+.legend-container {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1003;
+}
+
+#layerToggleDiv {
+  display: block;
+  position: absolute;
+  bottom: 100px;
+  right: 20px;
+  z-index: 1003;
+  background: rgba(255, 255, 255, 0);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#headerDiv {
+  position: absolute;
+  top: 0;
+  left: 50%; /* Position it from the center */
+  transform: translateX(-50%); /* Ensure it's centered */
+  width: 100%; /* Default width for larger screens */
+  z-index: 1000;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0); /* Make the background visible */
+  padding: 10px;
+  border-radius: 0px 0px 10px 10px; /* Bottom-left and bottom-right rounded corners */
+}
+
+/* Mobile Portrait Layout */
+@media (max-width: 600px) and (orientation: portrait) {
+  #headerDiv {
+    width: 50%;
+    padding: 15px;
+    font-size: 16px;
+    background-color: rgba(240, 240, 240, 0); /* Lighter background on mobile */
+  }
+
+  #sliderDiv {
+    position: absolute;
+    bottom: 100px;
+    z-index: 1003;
+    left: 35%; /* Align the left edge to the center of the viewport */
+    bottom: 110px;
+    transform: translateX(-50%); /* Move the element back by 50% of its own width to center it */
+    padding: 0px;
+    background: rgba(255, 255, 255, 0); /* Adjust transparency as needed */
+    border-radius: 10px;
+  }
+
+  .legend-container {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1003;
+  }
+
+  #layerToggleDiv {
+    display: none; /* Hide the toggle div in portrait mode */
+  }
+
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: white;
+    box-shadow: 0px -1px 6px rgba(0, 0, 0, 0);
+  }
+}
+
+/* Tablet Portrait Layout */
+@media (min-width: 601px) and (orientation: portrait) {
+  #headerDiv {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    background-color: rgba(240, 240, 240, 0); /* Lighter background on tablet */
+  }
+
+  #sliderDiv {
+    position: absolute;
+    bottom: 100px;
+    left: 20px;
+    z-index: 1003;
+    width: 220px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0);
+    border-radius: 10px;
+  }
+
+  .legend-container {
+    position: absolute;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1003;
+  }
+
+  #layerToggleDiv {
+    display: none; /* Hide the toggle div in tablet portrait mode */
+  }
+
+  /* Center and reduce the width of bottom navigation */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 25%; /* 25% left to center it */
+    right: 25%; /* 25% right to center it */
+    width: 50%; /* Width takes only 50% of the screen */
+    z-index: 1000;
+    background-color: white;
+    box-shadow: 0px -1px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Mobile Landscape Layout */
+@media (max-width: 1000px) and (orientation: landscape) {
+  #viewDiv {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    z-index: 1;
+  }
+
+  #headerDiv {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 50%;
+    padding: 10px;
+    font-size: 14px;
+    background-color: rgba(230, 230, 230, 0); /* Adjusted for landscape */
+    z-index: 1004;
+  }
+
+  #sliderDiv {
+    display: block;
+    position: absolute;
+    bottom: 25px;
+    left: 10px;
+    z-index: 1002;
+    visibility: hidden;
+  }
+
+  .legend-container {
+    display: block;
+    position: absolute;
+    bottom: 10px;
+    left: 15%;
+    /* transform: translateX(-50%); */
+    z-index: 1000;
+    visibility: hidden;
+  }
+}
+
+
