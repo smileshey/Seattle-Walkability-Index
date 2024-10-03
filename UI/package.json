@@ -7,8 +7,7 @@
       "build": "webpack --config webpack.config.js --mode production --progress && ls -la dist",
       "serve": "serve -l 8081 -s dist",
       "dev": "webpack serve --config webpack.config.js --mode development --open --hot --port 8080",
-      "clean": "del-cli 'dist/**' '!dist/styles.css' '!dist/index.html'",
-      "build:analyze": "webpack --config webpack.config.js --mode production --progress --analyze"
+      "clean": "del-cli 'dist/**' '!dist/styles.css' '!dist/index.html'"
     },
   "keywords": [],
   "author": "",
