@@ -30,7 +30,7 @@ module.exports = (env, argv) => {
     },
     mode: isProduction ? 'production' : 'development',
     optimization: {
-      minimize: isProduction, // Minimize only in production
+      minimize: false, // Minimize only in production
     },
     devtool: isProduction ? false : 'inline-source-map', // Disable source maps in production
     devServer: {
