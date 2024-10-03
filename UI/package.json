@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-      "start": "npm run log && npm run build && npm run serve",
-      "build": "webpack --config webpack.config.js --mode production --progress && ls -la dist",
-      "serve": "serve -l ${PORT:-8081} -s dist",
-      "dev": "webpack serve --config webpack.config.js --mode development --open --hot --port 8080",
-      "clean": "del-cli 'dist/**' '!dist/styles.css' '!dist/index.html'"
-    },
+    "log": "echo 'Starting deployment from: $(pwd)'",
+    "start": "npm run log && npm run build && npm run serve",
+    "build": "webpack --config webpack.config.js --mode production --progress && ls -la dist",
+    "serve": "serve -l ${PORT:-8081} -s dist",
+    "dev": "webpack serve --config webpack.config.js --mode development --open --hot --port 8080",
+    "clean": "del-cli 'dist/**' '!dist/styles.css' '!dist/index.html'"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
