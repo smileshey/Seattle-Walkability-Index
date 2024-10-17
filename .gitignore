@@ -1,5 +1,6 @@
 UI/dist/*
 !UI/dist/index.html
+!UI/dist/styles.css
 node_modules/
 .backups/
 GpMessages/

@@ -26,10 +26,11 @@ const NavBar = styled(Box)(({ theme }) => ({
 // Custom styled menu to be full-width of the NavBar
 const FullWidthMenu = styled(Menu)<{ isMobilePortrait: boolean }>(({ isMobilePortrait }) => ({
   '.MuiPaper-root': {
-    width: isMobilePortrait ? '60%' : '25%', // Wider dropdown for mobile portrait
+    width: isMobilePortrait ? '60%' : '20%', // Wider dropdown for mobile portrait
     left: '0 !important',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: '0 0 10px 10px',
+    boxShadow: 'none', // Remove shadow from the dropdown menu
   },
 }));
 
@@ -107,7 +108,7 @@ export default function BasicMenu() {
               }}
               PaperProps={{
                 style: {
-                  marginTop: '10px',
+                  marginTop: '9.5px',
                 },
               }}
             >

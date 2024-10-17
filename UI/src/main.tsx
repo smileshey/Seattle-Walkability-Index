@@ -1,6 +1,5 @@
 console.log('main.tsx is being accessed correctly');
 
-
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot, Root } from 'react-dom/client';
 import WebMap from "@arcgis/core/WebMap";
@@ -21,7 +20,7 @@ import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_templat
 
 const webMap = new WebMap({
   portalItem: {
-    id: 'fc18d1fe046a44f39107bb407815adaf'
+    id: 'f5724d71231d4d41a0a633210d109796'
   } 
 },
 );
