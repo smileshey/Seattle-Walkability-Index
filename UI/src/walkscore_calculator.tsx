@@ -8,7 +8,7 @@ import Field from "@arcgis/core/layers/support/Field";
 import Graphic from "@arcgis/core/Graphic";
 import Collection from "@arcgis/core/core/Collection";
 import PopupTemplate from "@arcgis/core/PopupTemplate";
-import { getSlopeScaler, getEffectiveSpeedLimitScaler, getBusinessDensityScaler, getCanopyDensityScaler } from "./scaler_calculations";
+import { getSlopeScaler, getEffectiveSpeedLimitScaler, getBusinessDensityScaler, getCrimeDensityScaler } from "./scaler_calculations";
 import { createPersonalizedNeighborhoodsLayer, rankNormalizeAndScaleScores } from "./neighborhood_utils";
 import TopNeighborhoods from "./top_neighborhoods";
 import { getTopNeighborhoods, Neighborhood } from './neighborhood_utils'; // Ensure this import exists
@@ -17,14 +17,14 @@ interface FeatureAttributes {
   effective_slope: number;
   business_density: number;
   Max_Speed_Limit: number;
+  crime_density: number;
   unadjusted_walkscore: number;
   walk_score: number;
   personalized_walkscore?: number;
   slope_scaler?: number;
   effective_speed_limit_scaler?: number;
   business_density_scaler?: number;
-  public_amenity_density_scaler?: number;
-  tree_density_scaler?: number;  // Add this line
+  crime_density_scaler?: number;
   [key: string]: any;
 }
 
@@ -36,7 +36,7 @@ export const calculateScalerSums = (features: __esri.Graphic[]) => {
   let sumSlope = 0;
   let sumSpeedLimit = 0;
   let sumBusinessDensity = 0;
-  let sumPublicAmenity = 0;
+  let sumCrimeDensity = 0;
   let totalScalerSum = 0;
 
   features.forEach((graphic, index) => {
@@ -45,20 +45,20 @@ export const calculateScalerSums = (features: __esri.Graphic[]) => {
     const slopeScaler = attributes.slope_scaler || 1;
     const effectiveSpeedLimitScaler = attributes.effective_speed_limit_scaler || 1;
     const businessDensityScaler = attributes.business_density_scaler || 1;
-    const publicAmenityDensityScaler = attributes.public_amenity_density_scaler || 1;
+    const crimeDensityScaler = attributes.crime_density_scaler || 1;
 
     sumSlope += slopeScaler;
     sumSpeedLimit += effectiveSpeedLimitScaler;
     sumBusinessDensity += businessDensityScaler;
-    sumPublicAmenity += publicAmenityDensityScaler;
+    sumCrimeDensity += crimeDensityScaler;
 
-    totalScalerSum += slopeScaler + effectiveSpeedLimitScaler + businessDensityScaler + publicAmenityDensityScaler;
+    totalScalerSum += slopeScaler + effectiveSpeedLimitScaler + businessDensityScaler + crimeDensityScaler;
   });
 
   console.log("Sum of Slope Scaler:", sumSlope);
   console.log("Sum of Speed Limit Scaler:", sumSpeedLimit);
   console.log("Sum of Business Density Scaler:", sumBusinessDensity);
-  console.log("Sum of Public Amenity Scaler:", sumPublicAmenity);
+  console.log("Sum of Crime Density Scaler:", sumCrimeDensity);
   console.log("Total Scaler Sum:", totalScalerSum);
 };
 
@@ -96,17 +96,16 @@ const createPersonalizedWalkscoreLayer = async (
       const slopeScaler = getSlopeScaler(attributes.effective_slope, userSliderValues.slope);
       const effectiveSpeedLimitScaler = getEffectiveSpeedLimitScaler(attributes.Max_Speed_Limit, userSliderValues.sidewalk);
       const businessDensityScaler = getBusinessDensityScaler(attributes.business_density, userSliderValues.amenity);
-      const canopyDensityScaler = getCanopyDensityScaler(attributes.tree_density, userSliderValues.canopy); // Add this line
-      console.log()
+      const crimeDensityScaler = getCrimeDensityScaler(attributes.crime_density, userSliderValues.crime);
     
       attributes.slope_scaler = slopeScaler;
       attributes.effective_speed_limit_scaler = effectiveSpeedLimitScaler;
       attributes.business_density_scaler = businessDensityScaler;
-      attributes.canopy_density_scaler = canopyDensityScaler; // Add this line
+      attributes.crime_density_scaler = crimeDensityScaler;
     
       const baseWalkscore = attributes.unadjusted_walkscore;
       attributes.personalized_walkscore = baseWalkscore 
-        ? baseWalkscore * slopeScaler * effectiveSpeedLimitScaler * businessDensityScaler * canopyDensityScaler 
+        ? baseWalkscore * slopeScaler * effectiveSpeedLimitScaler * businessDensityScaler * crimeDensityScaler
         : 0;
     });
 
@@ -265,7 +264,7 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
   }, [webMap]);
 
   return (
-    <button onClick={() => handleRecalculate(view, webMap, { slope: 2, sidewalk: 2, amenity: 2 })}>
+    <button onClick={() => handleRecalculate(view, webMap, { slope: 2, sidewalk: 2, amenity: 2, crime: 2 })}>
       Recalculate Walkscore
     </button>
   );
@@ -273,6 +272,7 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
 
 export default WalkscoreCalculator;
 export { handleRecalculate };
+
 
 
 

@@ -38,7 +38,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
     slope: 2,
     sidewalk: 2,
     amenity: 2,
-    canopy: 2,
+    crime: 2,
   });
   const [previousValues, setPreviousValues] = useState(values);
   const [isLoading, setIsLoading] = useState(false);
@@ -185,13 +185,13 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
                 <Typography variant="caption" sx={{ width: '110px', textAlign: 'center', marginRight: '8px', fontWeight: 'italic', fontSize: isMobile ? '0.7rem' : '0.8rem' }}>
-                  Canopy Coverage
+                  Crime Density
                 </Typography>
                 <Slider
                   size="small"
-                  value={values.canopy}
-                  onChange={handleSliderChange('canopy')}
-                  aria-labelledby="canopy-slider"
+                  value={values.crime}
+                  onChange={handleSliderChange('crime')}
+                  aria-labelledby="crime-slider"
                   min={0}
                   max={4}
                   step={1}
@@ -247,7 +247,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
                     fontSize: isMobile ? '0.6rem' : '0.75rem' // Adjust font size for mobile modes
                   }}
                 >
-                  Canopy: {values.canopy}
+                  Crime: {values.crime}
                 </Typography>
               </Box>
 
