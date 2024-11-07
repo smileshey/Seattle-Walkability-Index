@@ -228,40 +228,39 @@ export const getCrimeDensityScaler = (crimeDensityValue: number, importanceLevel
       return 1.0; // No scaling applied regardless of crimeDensityValue
 
     case 1: // Slightly important
-      if (crimeDensityValue < 2.0) return 1.1;
-      if (crimeDensityValue < 4.0) return 1.00;
-      if (crimeDensityValue < 6.0) return 1.00;
-      if (crimeDensityValue <= 7.0) return 1.0;
+      if (crimeDensityValue < 1) return 1.0;
+      if (crimeDensityValue < 2) return 1.0;
+      if (crimeDensityValue < 3) return 1.0;
+      if (crimeDensityValue <= 4) return 0.8;
       return 1.0;
 
     case 2: // Default importance level (based on Python function)
-      if (crimeDensityValue < 2.0) return 1.1;
-      if (crimeDensityValue < 4.0) return 1.05;
-      if (crimeDensityValue < 6.0) return 1.02;
-      if (crimeDensityValue <= 7.0) return 1.0;
-      return 1.0;
+      if (crimeDensityValue < 1) return 1.0;
+      if (crimeDensityValue < 2) return 0.90;
+      if (crimeDensityValue < 3) return 0.6;
+      if (crimeDensityValue <= 4) return 0.5;
+      return 0.2;
 
     case 3: // Higher importance
-      if (crimeDensityValue < 2.0) return 1.5;
-      if (crimeDensityValue < 4.0) return 1.2;
-      if (crimeDensityValue < 6.0) return 1.05;
-      if (crimeDensityValue <= 7.0) return 1.00;
-      return 0.5;
+      if (crimeDensityValue < 1) return 1.5;
+      if (crimeDensityValue < 2) return 0.8;
+      if (crimeDensityValue < 3) return 0.5;
+      if (crimeDensityValue <= 4) return 0.3;
+      return 0.1;
 
     case 4: // "Crime density is very important"
-      if (crimeDensityValue < 1.0) return 4.0;
-      if (crimeDensityValue < 2.0) return 2.0;
-      if (crimeDensityValue < 3.0) return 1.0;
-      if (crimeDensityValue < 4.0) return 0.5;
-      if (crimeDensityValue < 5.0) return 0.25;
-      if (crimeDensityValue < 6.0) return 0.0;
-      if (crimeDensityValue <= 7.0) return 0.0;
+      if (crimeDensityValue < 1) return 2.0;
+      if (crimeDensityValue < 2) return 0.0;
+      if (crimeDensityValue < 3) return 0.0;
+      if (crimeDensityValue < 4) return 0.00;
+      if (crimeDensityValue <= 5) return 0.00;
       return 0.0;
 
     default:
       return 1.0; // Default case if importance level is not recognized
   }
 };
+
 
 
 
