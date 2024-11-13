@@ -125,99 +125,85 @@ export const getEffectiveSpeedLimitScaler = (speedLimitValue: number, importance
   }
 };
 
-/// business density scaler
-export const getBusinessDensityScaler = (businessDensityValue: number, importanceLevel: number): number => {
-  if (businessDensityValue == null || businessDensityValue < 0) return 1.0;
+/// crash density scaler
+export const getCrashDensityScaler = (crashDensityValue: number, importanceLevel: number): number => {
+  if (crashDensityValue == null || crashDensityValue < 0.1) return 1.0;
 
   switch (importanceLevel) {
-    case 0: // "Business density is not important"
-      return 1.0; // No scaling applied regardless of businessDensityValue
+    case 0: // "Crash density is not important"
+      return 1.0; // No scaling applied regardless of crashDensityValue
 
     case 1: // Slightly important
-      if (businessDensityValue >= 9) return 1.5;
-      if (businessDensityValue >= 8) return 1.4;
-      if (businessDensityValue >= 7) return 1.3;
-      if (businessDensityValue >= 6) return 1.2;
-      if (businessDensityValue >= 5) return 1.1;
-      return 1.0;
+      if (crashDensityValue < 0.5) return 0.98;
+      if (crashDensityValue < 1.5) return 0.95;
+      if (crashDensityValue < 3) return 0.90;
+      return 0.85;
 
-    case 2: // Default importance level (updated to match the Python function)
-      if (businessDensityValue >= 9) return 2.0;
-      if (businessDensityValue >= 8) return 1.8;
-      if (businessDensityValue >= 7) return 1.6;
-      if (businessDensityValue >= 6) return 1.4;
-      if (businessDensityValue >= 5) return 1.2;
-      return 1.0;
+    case 2: // Default importance level
+      if (crashDensityValue < 0.5) return 0.95;
+      if (crashDensityValue < 1.5) return 0.90;
+      if (crashDensityValue < 3) return 0.85;
+      return 0.80;
 
     case 3: // Higher importance
-      if (businessDensityValue >= 9) return 5.0;
-      if (businessDensityValue >= 8) return 2.0;
-      if (businessDensityValue >= 7) return 1.5;
-      if (businessDensityValue >= 6) return 1.0;
-      if (businessDensityValue >= 5) return 1.0;
-      return 0.5;
+      if (crashDensityValue < 0.5) return 0.90;
+      if (crashDensityValue < 1.5) return 0.85;
+      if (crashDensityValue < 3) return 0.75;
+      return 0.70;
 
-    case 4: // "Business density is very important"
-      if (businessDensityValue >= 9.5) return 8.0;
-      if (businessDensityValue >= 9.0) return 4.0;
-      if (businessDensityValue >= 8.5) return 1.0;
-      if (businessDensityValue >= 8) return 1.0;
-      if (businessDensityValue >= 7) return 0.5;
-      if (businessDensityValue >= 6) return 0.25;
-      if (businessDensityValue >= 5) return 0.0;
-      return 0.0;
+    case 4: // "Crash density is very important"
+      if (crashDensityValue < 0.5) return 0.85;
+      if (crashDensityValue < 1.5) return 0.75;
+      if (crashDensityValue < 3) return 0.65;
+      return 0.60;
 
     default:
       return 1.0; // Default case if importance level is not recognized
   }
 };
 
-// Tree canopy density scaler
-export function getCanopyDensityScaler(canopyDensityValue: number | null | undefined, importanceLevel: number): number {
-  if (canopyDensityValue === null || canopyDensityValue === undefined || canopyDensityValue <= 0) {
-      return 1.0;
-  }
+/// business density scaler
+export const getBusinessDensityScaler = (businessDensityValue: number, importanceLevel: number): number => {
+  if (businessDensityValue == null || businessDensityValue <= 0) return 1.0;
 
   switch (importanceLevel) {
-      case 0:
-          return 1.0;
+    case 0: // "Business density is not important"
+      return 1.0; // No scaling applied regardless of businessDensityValue
 
-      case 1:
-          if (canopyDensityValue >= 9) return 1.5;
-          if (canopyDensityValue >= 8) return 1.4;
-          if (canopyDensityValue >= 7) return 1.3;
-          if (canopyDensityValue >= 6) return 1.2;
-          if (canopyDensityValue >= 5) return 1.1;
-          return 1.0;
+    case 1: // Slightly important
+      if (businessDensityValue >= 4) return 1.3;
+      if (businessDensityValue >= 3) return 1.2;
+      if (businessDensityValue >= 2) return 1.1;
+      if (businessDensityValue >= 1) return 1.0;
+      return 1.0;
 
-      case 2:
-          if (canopyDensityValue >= 9) return 2.0;
-          if (canopyDensityValue >= 8) return 1.8;
-          if (canopyDensityValue >= 7) return 1.6;
-          if (canopyDensityValue >= 6) return 1.4;
-          if (canopyDensityValue >= 5) return 1.2;
-          return 1.0;
+    case 2: // Default importance level
+    if (businessDensityValue >= 4) return 2.0;
+    if (businessDensityValue >= 3) return 1.75;
+    if (businessDensityValue >= 2) return 1.25;
+    if (businessDensityValue >= 1) return 1.05;
+    return 1.0;
 
-      case 3:
-          if (canopyDensityValue >= 9) return 3.0;
-          if (canopyDensityValue >= 8) return 2.5;
-          if (canopyDensityValue >= 7) return 2.0;
-          if (canopyDensityValue >= 6) return 1.5;
-          if (canopyDensityValue >= 5) return 1.2;
-          return 1.0;
+    case 3: // Higher importance
+      if (businessDensityValue >= 4) return 3.0;
+      if (businessDensityValue >= 3) return 2.0;
+      if (businessDensityValue >= 2) return 1.0;
+      if (businessDensityValue >= 1) return 0.5;
+      return 0.25;
 
-      case 4:
-          if (canopyDensityValue >= 9) return 10.0;
-          if (canopyDensityValue >= 8) return 3.0;
-          if (canopyDensityValue >= 7) return 1.0;
-          if (canopyDensityValue >= 6) return 1.0;
-          if (canopyDensityValue >= 5) return 0.0;
-          return 0.0;
+    case 4: // "Business density is very important"
+      if (businessDensityValue >= 4.5) return 5.0;
+      if (businessDensityValue >= 4.0) return 4.0;
+      if (businessDensityValue >= 3.0) return 1.0;
+      if (businessDensityValue >= 2) return 0.5;
+      if (businessDensityValue >= 1) return 0.1;
+      return 0.05;
 
-      default:
-          return 1.0;
+    default:
+      return 1.0; // Default case if importance level is not recognized
   }
-}
+};
+
 
 /// Crime density scaler
 export const getCrimeDensityScaler = (crimeDensityValue: number, importanceLevel: number): number => {
@@ -228,38 +214,38 @@ export const getCrimeDensityScaler = (crimeDensityValue: number, importanceLevel
       return 1.0; // No scaling applied regardless of crimeDensityValue
 
     case 1: // Slightly important
-      if (crimeDensityValue < 1) return 1.0;
-      if (crimeDensityValue < 2) return 1.0;
-      if (crimeDensityValue < 3) return 1.0;
-      if (crimeDensityValue <= 4) return 0.8;
-      return 1.0;
+      if (crimeDensityValue < 0.25) return 1.0;
+      if (crimeDensityValue < 0.7) return 1.0;
+      if (crimeDensityValue < 1.5) return 0.95;
+      if (crimeDensityValue < 3) return 0.90;
+      return 0.85;
 
     case 2: // Default importance level (based on Python function)
-      if (crimeDensityValue < 1) return 1.0;
-      if (crimeDensityValue < 2) return 0.90;
-      if (crimeDensityValue < 3) return 0.6;
-      if (crimeDensityValue <= 4) return 0.5;
-      return 0.2;
+      if (crimeDensityValue < 0.25) return 1.0;
+      if (crimeDensityValue < 0.7) return 0.95;
+      if (crimeDensityValue < 1.5) return 0.90;
+      if (crimeDensityValue < 3) return 0.85;
+      return 0.80;
 
     case 3: // Higher importance
-      if (crimeDensityValue < 1) return 1.5;
-      if (crimeDensityValue < 2) return 0.8;
-      if (crimeDensityValue < 3) return 0.5;
-      if (crimeDensityValue <= 4) return 0.3;
-      return 0.1;
+      if (crimeDensityValue < 0.25) return 2.0;
+      if (crimeDensityValue < 0.7) return 1.0;
+      if (crimeDensityValue < 1.5) return 0.5;
+      if (crimeDensityValue < 3) return 0.1;
+      return 0.0;
 
     case 4: // "Crime density is very important"
-      if (crimeDensityValue < 1) return 2.0;
-      if (crimeDensityValue < 2) return 0.0;
+      if (crimeDensityValue < 0.25) return 3.0;
+      if (crimeDensityValue < 0.7) return 0.75;
+      if (crimeDensityValue < 1.5) return 0.1;
       if (crimeDensityValue < 3) return 0.0;
-      if (crimeDensityValue < 4) return 0.00;
-      if (crimeDensityValue <= 5) return 0.00;
       return 0.0;
 
     default:
       return 1.0; // Default case if importance level is not recognized
   }
 };
+
 
 
 
