@@ -80,7 +80,7 @@ export const createPersonalizedNeighborhoodsLayer = async (
 
     const neighborhoodsResult = await neighborhoodsLayer.queryFeatures(neighborhoodsQuery);
 
-    normalizeScoresByArea(neighborhoodsResult.features, scoresByNeighborhood,.8);
+    normalizeScoresByArea(neighborhoodsResult.features, scoresByNeighborhood,.85);
     rankNormalizeAndScaleScores(neighborhoodsResult.features);
 
     // Get the existing fields

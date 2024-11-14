@@ -148,8 +148,8 @@ export const getCrashDensityScaler = (crashDensityValue: number, importanceLevel
     case 3: // Higher importance
       if (crashDensityValue < 0.5) return 1.0;
       if (crashDensityValue < 1.5) return 0.85;
-      if (crashDensityValue < 3) return 0.75;
-      return 0.70;
+      if (crashDensityValue < 3) return 0.5;
+      return 0.25;
 
     case 4: // "Crash density is very important"
       if (crashDensityValue < 0.1) return 2.0;
@@ -184,13 +184,13 @@ export const getBusinessDensityScaler = (businessDensityValue: number, importanc
     case 3: // Higher importance
       if (businessDensityValue >= 1.5 && businessDensityValue <= 5) return 2.5;
       if (businessDensityValue >= 1.0 && businessDensityValue < 1.5) return 1.25;
-      if (businessDensityValue >= 0.5 && businessDensityValue < 1.0) return 1.00;
+      if (businessDensityValue >= 0.5 && businessDensityValue < 1.0) return 1.0;
       return .5;
 
     case 4: // "Business density is very important"
-      if (businessDensityValue >= 1.5 && businessDensityValue <= 5) return 3.0;
-      if (businessDensityValue >= 1.0 && businessDensityValue < 1.5) return 1.0;
-      if (businessDensityValue >= 0.5 && businessDensityValue < 1.0) return 0.1;
+      if (businessDensityValue >= 1.5 && businessDensityValue <= 5) return 2.5;
+      if (businessDensityValue >= 1.0 && businessDensityValue < 1.5) return 1.75;
+      if (businessDensityValue >= 0.5 && businessDensityValue < 1.0) return 1.5;
       return 0.0;
 
     default:
@@ -223,7 +223,7 @@ export const getCrimeDensityScaler = (crimeDensityValue: number, importanceLevel
     case 3: // Higher importance
       if (crimeDensityValue < 0.25) return 1.25;
       if (crimeDensityValue < 0.7) return 1.0;
-      if (crimeDensityValue < 1.5) return 0.5;
+      if (crimeDensityValue < 1.5) return 0.25;
       if (crimeDensityValue < 3) return 0.0;
       return 0.0;
 
