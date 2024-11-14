@@ -16,8 +16,8 @@ interface FeatureAttributes {
   effective_slope: number;
   business_density: number;
   Max_Speed_Limit: number;
-  neighborhood_crime_density: number;
-  crash_density: number;
+  crime_density_normalized: number;
+  crash_density_normalized: number;
   unadjusted_walkscore: number;
   walk_score: number;
   personalized_walkscore?: number;
@@ -67,8 +67,8 @@ const createPersonalizedWalkscoreLayer = async (
       const slopeScaler = getSlopeScaler(attributes.effective_slope, userSliderValues.slope);
       const effectiveSpeedLimitScaler = getEffectiveSpeedLimitScaler(attributes.Max_Speed_Limit, userSliderValues.streets);
       const businessDensityScaler = getBusinessDensityScaler(attributes.business_density, userSliderValues.amenity);
-      const crimeDensityScaler = getCrimeDensityScaler(attributes.crime_density, userSliderValues.crime);
-      const crashDensityScaler = getCrashDensityScaler(attributes.crash_density, userSliderValues.streets); // Using same user input as effectiveSpeedLimitScaler
+      const crimeDensityScaler = getCrimeDensityScaler(attributes.crime_density_normalized, userSliderValues.crime);
+      const crashDensityScaler = getCrashDensityScaler(attributes.crash_density_normalized, userSliderValues.streets); // Using same user input as effectiveSpeedLimitScaler
 
       attributes.slope_scaler = slopeScaler;
       attributes.effective_speed_limit_scaler = effectiveSpeedLimitScaler;

@@ -36,7 +36,7 @@ const valueLabelFormat = (value: number) => {
 const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapView; webMap: __esri.WebMap; triggerRecalculate: () => void }) => {
   const [values, setValues] = useState({
     slope: 2,
-    sidewalk: 2,
+    streets: 2, // Changed from sidewalk to streets
     amenity: 2,
     crime: 2,
   });
@@ -61,7 +61,10 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
     setIsLoading(true);
     setTopNeighborhoods(null);
     setPreviousValues(values);
+    console.log('Slider Values:', values); // Add this in `SliderWidget` before calling `handleRecalculate`
+
     const topNeighborhoods = await handleRecalculate(view, webMap, values);
+
     if (topNeighborhoods && topNeighborhoods.length > 0) {
       setTopNeighborhoods(topNeighborhoods);
     }
@@ -149,13 +152,13 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
                 <Typography variant="caption" sx={{ width: '110px', textAlign: 'center', marginRight: '8px', fontWeight: 'italic', fontSize: isMobile ? '0.7rem' : '0.8rem' }}>
-                  Calm Traffic
+                  Calm Streets
                 </Typography>
                 <Slider
                   size="small"
-                  value={values.sidewalk}
-                  onChange={handleSliderChange('sidewalk')}
-                  aria-labelledby="sidewalk-slider"
+                  value={values.streets} 
+                  onChange={handleSliderChange('streets')}
+                  aria-labelledby="streets-slider"
                   min={0}
                   max={4}
                   step={1}
@@ -217,7 +220,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
                   variant="caption"
                   sx={{
                     fontWeight: 'normal',
-                    fontSize: isMobile ? '0.6rem' : '0.75rem' // Adjust font size for mobile modes
+                    fontSize: isMobile ? '0.6rem' : '0.75rem', // Adjust font size for mobile modes
                   }}
                 >
                   Slope: {values.slope}
@@ -226,16 +229,16 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
                   variant="caption"
                   sx={{
                     fontWeight: 'normal',
-                    fontSize: isMobile ? '0.6rem' : '0.75rem' // Adjust font size for mobile modes
+                    fontSize: isMobile ? '0.6rem' : '0.75rem', // Adjust font size for mobile modes
                   }}
                 >
-                  Calm: {values.sidewalk}
+                  Streets: {values.streets} {/* Changed from Calm to Streets */}
                 </Typography>
                 <Typography
                   variant="caption"
                   sx={{
                     fontWeight: 'normal',
-                    fontSize: isMobile ? '0.6rem' : '0.75rem' // Adjust font size for mobile modes
+                    fontSize: isMobile ? '0.6rem' : '0.75rem', // Adjust font size for mobile modes
                   }}
                 >
                   Business: {values.amenity}
@@ -244,7 +247,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
                   variant="caption"
                   sx={{
                     fontWeight: 'normal',
-                    fontSize: isMobile ? '0.6rem' : '0.75rem' // Adjust font size for mobile modes
+                    fontSize: isMobile ? '0.6rem' : '0.75rem', // Adjust font size for mobile modes
                   }}
                 >
                   Crime: {values.crime}
@@ -284,9 +287,11 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
       )}
     </Box>
   );
+  
 };
 
 export default SliderWidget;
+
 
 
 

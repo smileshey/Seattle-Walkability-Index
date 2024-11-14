@@ -9,9 +9,9 @@ export const neighborhoodPopupTemplate = new PopupTemplate({
       fieldInfos: [
         { fieldName: "OBJECTID", label: "Object ID" },
         { fieldName: "nested", label: "Nested" },
-        { fieldName: "business_density", label: "Business Density" },
-        { fieldName: "amenity_density", label: "Amenity Density" },
-        { fieldName: "tree_density", label: "Tree Density" },
+        // { fieldName: "business_density", label: "Business Density" },
+        // { fieldName: "amenity_density", label: "Amenity Density" },
+        // { fieldName: "tree_density", label: "Tree Density" },
         { fieldName: "rank_normalized_walkscore", label: "Rank Normalized Walkscore" },
         { fieldName: "personalized_walkscore", label: "Personalized Walkscore" },
       ]
@@ -27,11 +27,13 @@ export const fishnetPopupTemplate = new PopupTemplate({
       type: "fields", // Specify that you want to show fields
       fieldInfos: [
         { fieldName: "OID", label: "OID" },
-        { fieldName: "MAX_effective_SPEEDLIMIT", label: "Max Effective Speed Limit" },
-        { fieldName: "effective_slope", label: "Effective Slope" },
         { fieldName: "nested", label: "Nested" },
+        { fieldName: "Max_Speed_Limit", label: "Max Speed Limit" },
+        { fieldName: "effective_slope", label: "Effective Slope" },
         { fieldName: "business_density", label: "Business Density" },
-        { fieldName: "tree_density", label: "Tree Density" },
+        { fieldName: "crash_density_scaler", label: "Crash Density Scaler" },
+        { fieldName: "effective_speed_limit_scaler", label: "Speed Scaler" },
+        { fieldName: "crime_density_scaler", label: "Crime Scaler" },
         { fieldName: "walk_score", label: "Walk Score" },
         { fieldName: "personalized_walkscore", label: "Personalized Walkscore" },
       ]
