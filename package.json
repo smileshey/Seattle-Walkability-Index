@@ -1,6 +1,8 @@
 {
   "dependencies": {
-    "@types/axios": "^0.14.4",
     "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.4"
   }
 }
