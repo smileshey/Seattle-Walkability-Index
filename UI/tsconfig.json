@@ -1,22 +1,18 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "esnext", 
+    "module": "esnext",
     "strict": true,
-    "jsx": "react-jsx", 
+    "jsx": "react-jsx",
     "esModuleInterop": true,
-    "skipLibCheck": true, // Skip type checking of .d.ts files for performance
-    "typeRoots": ["./node_modules/@types", "./types"],
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "types": ["axios"]
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }
 
 
