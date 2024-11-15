@@ -32,17 +32,17 @@ A base `unadjusted_walkscore` field is then created using the `walkscore_calcula
 
 ```python
 positive_weights = {
-    sidewalk_score_field: 0.7,
-    park_score_field: 0.075,
-    trail_score_field: 0.2,
-    bike_score_field: 0.025
+    sidewalk_score_field: 0.5,
+    park_score_field: 0.4,
+    trail_score_field: 0.05,
+    bike_score_field: 0.05
 }
 ```
 
 These weights are applied to the sum of the area for each asset provided above, such that the `unadjusted_walkscore` field is calculated like:
 
 $$
-W_{\text{unadjusted}} = 0.7 \times A_{\text{sidewalk}} + 0.075 \times A_{\text{park}} + 0.2 \times A_{\text{trail}} + 0.025 \times A_{\text{bike}}
+W_{\text{unadjusted}} = 0.5 \times A_{\text{sidewalk}} + 0.4 \times A_{\text{park}} + 0.05 \times A_{\text{trail}} + 0.05 \times A_{\text{bike}}
 $$
 
 Where:
@@ -51,19 +51,19 @@ Where:
 - $A_{\text{trail}}$ is the sum of trail area,
 - $A_{\text{bike}}$ is the sum of bike lane area.
 
-The final walkscore for each grid $W_{\text{walkscore}}$ is calculated by multiplying the unadjusted walkscore $W_{\text{unadjusted}}$ by scalers that adjust for specific factors such as slope, business density, canopy coverage, public amenities, and calm traffic:
+The final walkscore for each grid $W_{\text{walkscore}}$ is calculated by multiplying the unadjusted walkscore $W_{\text{unadjusted}}$ by scalers that adjust for specific factors such as slope, business density, crime density, and calm traffic:
 
 
 $$
-W_{\text{walkscore}} = W_{\text{unadjusted}} \times S_{\text{slope}} \times S_{\text{business}} \times S_{\text{canopy}} \times S_{\text{amenity}} \times S_{\text{traffic}}
+W_{\text{walkscore}} = W_{\text{unadjusted}} \times S_{\text{slope}} \times S_{\text{business}} \times S_{\text{crime}} \times S_{\text{traffic}} \times S_{\text{traffic}}
 $$
 
 where:
 - $S_{\text{slope}}$ is the slope scaler,
 - $S_{\text{business}}$ is the business density scaler,
-- $S_{\text{canopy}}$ is the canopy coverage scaler,
-- $S_{\text{amenity}}$ is the public amenity scaler,
 - $S_{\text{traffic}}$ is the calm traffic scaler.
+- $S_{\text{traffic}}$ is the crime density scaler.
+
 
 These scalers allow us to adjust the importance of each geographic characteristic as it pertains to walkability and are calculated using a function that takes in the value for each fishnet grid and returns a value between 0-1 for the slope, calm traffic scalers, and tree canopy scalers, and 0-10 for the business density and public amenity scalers.
 
@@ -98,10 +98,12 @@ Here's a rough outline for how the scalers are calculated:
     - In each grid we find the maximum speed limt and then adjust the max speed limit depending on the use. This speed limit adjustment is defined like:
         ```python
         speed_limit_scalers = {
-            "Industrial": 1.75,
-            "ParkingLots": 1.50,
-            "Hospitals": 2.0
-        } 
+            "Industrial": 1.25,
+            "ParkingLots": 1.1,
+            "GolfCourse": 1.1,
+            "Cemeteries": 1.1,
+            "Hospitals": 1.5,
+                } 
         ```
         where the resulting 'effective_speed_limit' is calculated like: 
         

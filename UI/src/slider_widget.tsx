@@ -7,6 +7,8 @@ import { handleRecalculate } from './walkscore_calculator';
 import TopNeighborhoods from './top_neighborhoods';
 import { Neighborhood } from './neighborhood_utils';
 import { useMediaQuery } from '@mui/material'; // Import useMediaQuery
+import axios from 'axios';
+
 
 const marks = [
   { value: 0 },
@@ -61,16 +63,25 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
     setIsLoading(true);
     setTopNeighborhoods(null);
     setPreviousValues(values);
-    console.log('Slider Values:', values); // Add this in `SliderWidget` before calling `handleRecalculate`
-
-    const topNeighborhoods = await handleRecalculate(view, webMap, values);
-
-    if (topNeighborhoods && topNeighborhoods.length > 0) {
-      setTopNeighborhoods(topNeighborhoods);
+  
+    try {
+      // Send a POST request to the server to log button click
+      await axios.post('/recalculate', {
+        values,
+      });
+  
+      const topNeighborhoods = await handleRecalculate(view, webMap, values);
+  
+      if (topNeighborhoods && topNeighborhoods.length > 0) {
+        setTopNeighborhoods(topNeighborhoods);
+      }
+      setIsLoading(false);
+      setRecalculated(true);
+      triggerRecalculate();
+    } catch (error) {
+      console.error('Error during recalculation:', error);
+      setIsLoading(false);
     }
-    setIsLoading(false);
-    setRecalculated(true);
-    triggerRecalculate();
   };
 
   const handleReset = () => {

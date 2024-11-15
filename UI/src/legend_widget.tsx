@@ -8,11 +8,11 @@ const LegendWidget: React.FC = () => {
 
     const keys = ["Not", "Most"];
     const colors: string[] = [
-      "rgba(230, 238, 207,.4)",  // Color for interval[1]
-      "rgba(155, 196, 193,.4)",  // Color for interval[2]
-      "rgba(105, 168, 183,.4)",  // Color for interval[3]
-      "rgba(75, 126, 152,.4)",   // Color for interval[4]
-      "rgba(46, 85, 122,.4)"     // Color for interval[5]
+      "rgba(230, 238, 207,.7)",  // Color for interval[1]
+      "rgba(155, 196, 193,.7)",  // Color for interval[2]
+      "rgba(105, 168, 183,.7)",  // Color for interval[3]
+      "rgba(75, 126, 152,.7)",   // Color for interval[4]
+      "rgba(46, 85, 122,.7)"     // Color for interval[5]
     ];
 
     // Append the SVG to the legend-container
