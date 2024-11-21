@@ -9,7 +9,6 @@ import { Neighborhood } from './neighborhood_utils';
 import { useMediaQuery } from '@mui/material'; // Import useMediaQuery
 import axios from 'axios';
 
-
 const marks = [
   { value: 0 },
   { value: 1 },
@@ -66,10 +65,11 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
   
     try {
       // Send a POST request to the server to log button click
-      await axios.post('/recalculate', {
-        values,
-      });
+      // await axios.post('/recalculate', {
+      //   values,
+      // });
   
+      // Updated call to handleRecalculate with all five arguments
       const topNeighborhoods = await handleRecalculate(view, webMap, values);
   
       if (topNeighborhoods && topNeighborhoods.length > 0) {
@@ -298,40 +298,8 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
       )}
     </Box>
   );
-  
 };
 
 export default SliderWidget;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

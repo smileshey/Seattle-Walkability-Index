@@ -40,11 +40,16 @@ html, body {
 
 .legend-container {
   position: absolute;
-  bottom: 20px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1003;
+  padding: 10px;  /* Add padding for spacing */
+  background: rgba(255, 255, 255, 0.8);  /* Slightly transparent white background */
+  border-radius: 15px;  /* Rounded corners */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);  /* Optional shadow for depth */
 }
+
 
 #layerToggleDiv {
   display: block;

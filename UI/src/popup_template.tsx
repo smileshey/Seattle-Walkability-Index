@@ -9,9 +9,6 @@ export const neighborhoodPopupTemplate = new PopupTemplate({
       fieldInfos: [
         { fieldName: "OBJECTID", label: "Object ID" },
         { fieldName: "nested", label: "Nested" },
-        // { fieldName: "business_density", label: "Business Density" },
-        // { fieldName: "amenity_density", label: "Amenity Density" },
-        // { fieldName: "tree_density", label: "Tree Density" },
         { fieldName: "rank_normalized_walkscore", label: "Rank Normalized Walkscore" },
         { fieldName: "personalized_walkscore", label: "Personalized Walkscore" },
       ]

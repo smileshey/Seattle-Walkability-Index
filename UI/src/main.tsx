@@ -17,13 +17,12 @@ import ToggleIcon from '@mui/icons-material/ToggleOn';
 import LegendIcon from '@mui/icons-material/Map';
 import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template'; // Import templates
 
-
 const webMap = new WebMap({
   portalItem: {
-    id: '9b4a62767ee746858e6eed1337bcd5d6'
-  } 
-},
-);
+    id: 'd50d84100894480ca401a350ae85c60a'
+  }
+});
+
 console.log('webmap loaded');
 
 const view = new MapView({
@@ -40,7 +39,6 @@ const view = new MapView({
 let sliderRoot: Root | null = null;
 let legendRoot: Root | null = null;
 let toggleRoot: Root | null = null;
-
 
 const MainComponent = () => {
   const [recalculateTriggered, setRecalculateTriggered] = useState(false);
@@ -59,86 +57,74 @@ const MainComponent = () => {
   const prevIsDesktop = useRef(isDesktop);
 
   // Track visibility for all widgets
-  const [sliderVisible, setSliderVisible] = useState(!isMobilePortrait && !isTabletPortrait); 
-  const [legendVisible, setLegendVisible] = useState(!isMobilePortrait && !isTabletPortrait); 
-  const [toggleVisible, setToggleVisible] = useState(!isMobilePortrait && !isTabletPortrait); 
-  
+  const [sliderVisible, setSliderVisible] = useState(!isMobilePortrait && !isTabletPortrait);
+  const [legendVisible, setLegendVisible] = useState(!isMobilePortrait && !isTabletPortrait);
+  const [toggleVisible, setToggleVisible] = useState(!isMobilePortrait && !isTabletPortrait);
 
   const forceRenderWidgets = () => {
     const sliderDiv = document.querySelector("#sliderDiv") as HTMLElement;
     const legendDiv = document.querySelector(".legend-container") as HTMLElement;
-    const toggleDiv = document.querySelector("#layerToggleDiv") as HTMLElement;
 
-    // Render the slider and legend widgets only in desktop mode
     if (isDesktop) {
-        setSliderVisible(true);
-        setLegendVisible(true);
+      setSliderVisible(true);
+      setLegendVisible(true);
 
-        // Render the slider widget
-        if (!sliderRoot || sliderDiv.style.visibility === 'hidden') {
-            sliderRoot = createRoot(sliderDiv);
-            sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
-        }
-        sliderDiv.style.visibility = 'visible';
+      if (!sliderRoot || sliderDiv.style.visibility === 'hidden') {
+        sliderRoot = createRoot(sliderDiv);
+        sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
+      }
+      sliderDiv.style.visibility = 'visible';
 
-        // Render the legend widget
-        if (!legendRoot || legendDiv.style.visibility === 'hidden') {
-            if (!legendRoot) {
-                legendRoot = createRoot(legendDiv);
-            }
-            legendRoot.render(<LegendWidget />);
+      if (!legendRoot || legendDiv.style.visibility === 'hidden') {
+        if (!legendRoot) {
+          legendRoot = createRoot(legendDiv);
         }
-        legendDiv.style.visibility = 'visible';
+        legendRoot.render(<LegendWidget />);
+      }
+      legendDiv.style.visibility = 'visible';
     } else if (isMobileLandscape) {
-        // Do not render the widgets by default in mobile landscape mode
-        setSliderVisible(false);
-        setLegendVisible(false);
+      setSliderVisible(false);
+      setLegendVisible(false);
 
-        // Hide the slider and legend widgets
-        if (sliderDiv) sliderDiv.style.visibility = 'hidden';
-        if (legendDiv) legendDiv.style.visibility = 'hidden';
+      if (sliderDiv) sliderDiv.style.visibility = 'hidden';
+      if (legendDiv) legendDiv.style.visibility = 'hidden';
     } else {
-        // Hide the widgets in mobile portrait
-        if (sliderDiv) sliderDiv.style.visibility = 'hidden';
-        if (legendDiv) legendDiv.style.visibility = 'hidden';
+      if (sliderDiv) sliderDiv.style.visibility = 'hidden';
+      if (legendDiv) legendDiv.style.visibility = 'hidden';
     }
-};
+  };
 
   const resetWidgets = () => {
     setTimeout(() => {
       const sliderDiv = document.querySelector("#sliderDiv") as HTMLElement;
       const legendDiv = document.querySelector(".legend-container") as HTMLElement;
-  
+
       if (sliderDiv) {
-        sliderDiv.style.visibility = 'hidden'; // Hide the slider in portrait mode
+        sliderDiv.style.visibility = 'hidden';
       }
-  
+
       if (legendDiv) {
-        legendDiv.style.visibility = 'hidden'; // Hide the legend in portrait mode
+        legendDiv.style.visibility = 'hidden';
       }
-  
-      setSelectedWidget(null); // Reset the selected widget
+
+      setSelectedWidget(null);
     }, 0);
   };
-  
 
   const unmountWidget = (widget: 'slider' | 'legend') => {
     setTimeout(() => {
       const sliderDiv = document.querySelector("#sliderDiv") as HTMLElement;
       const legendDiv = document.querySelector(".legend-container") as HTMLElement;
-  
+
       if (widget === 'slider' && sliderRoot && sliderDiv) {
-        console.log("Hiding slider widget");
-        sliderDiv.style.visibility = 'hidden'; // Hide but don't unmount
+        sliderDiv.style.visibility = 'hidden';
       }
-  
+
       if (widget === 'legend' && legendRoot && legendDiv) {
-        console.log("Hiding legend widget");
-        legendDiv.style.visibility = 'hidden'; // Hide but don't unmount
+        legendDiv.style.visibility = 'hidden';
       }
     }, 0);
   };
-  
 
   const fetchAndRenderNeighborhoods = async () => {
     const personalizedLayer = webMap.allLayers.find(layer => layer.title === "Personalized Neighborhood Walkscore") as FeatureLayer;
@@ -168,82 +154,80 @@ const MainComponent = () => {
     }
   };
 
-  const handleLayerToggle = (isFishnet: boolean) => {
-    setIsFishnetLayer(isFishnet);
+  const handleLayerToggle = (isHeatmap: boolean) => {
+    console.log("Handling layer toggle. Toggle state:", isHeatmap);
+    setIsFishnetLayer(isHeatmap);
   
-    const baseLayerTitle = isFishnet ? "walkscore_fishnet" : "walkscore_neighborhoods";
-    const personalizedLayerTitle = isFishnet ? "Personalized Walkscore" : "Personalized Neighborhood Walkscore";
+    const heatmapLayerTitle = "Personalized Heatmap";
+    const personalizedNeighborhoodLayerTitle = "Personalized Neighborhood Walkscore";
+    const baseNeighborhoodLayerTitle = "walkscore_neighborhoods";
+    const baseHeatmapLayerTitle = "walkscore_fishnet_points";
   
-    // Cast to FeatureLayer to access popupTemplate
-    const personalizedLayer = webMap.allLayers.find(layer => layer.title === personalizedLayerTitle) as FeatureLayer;
-    const baseLayer = webMap.allLayers.find(layer => layer.title === baseLayerTitle) as FeatureLayer;
+    const heatmapLayer = webMap.allLayers.find(layer => layer.title === heatmapLayerTitle) as FeatureLayer;
+    const personalizedNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === personalizedNeighborhoodLayerTitle) as FeatureLayer;
+    const baseNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === baseNeighborhoodLayerTitle) as FeatureLayer;
+    const baseHeatmapLayer = webMap.allLayers.find(layer => layer.title === baseHeatmapLayerTitle) as FeatureLayer;
   
-    let layerToShow = personalizedLayer || baseLayer;
-    const otherLayerTitle = isFishnet ? "walkscore_neighborhoods" : "walkscore_fishnet";
-    const otherPersonalizedLayerTitle = isFishnet ? "Personalized Neighborhood Walkscore" : "Personalized Walkscore";
+    // Decide which layer to show based on toggle
+    let layerToShow = isHeatmap ? heatmapLayer : personalizedNeighborhoodLayer || baseNeighborhoodLayer;
   
-    const otherLayer = webMap.allLayers.find(layer => layer.title === otherPersonalizedLayerTitle) as FeatureLayer || 
-                      webMap.allLayers.find(layer => layer.title === otherLayerTitle) as FeatureLayer;
-  
-    // Ensure layerToShow exists before assigning popupTemplate
-    if (!layerToShow) {
-      console.log("Layer to show is undefined, defaulting to neighborhood layer");
-      layerToShow = baseLayer;
-    }
+    console.log("Layer to show decided:", layerToShow?.title || "None");
   
     if (layerToShow) {
       layerToShow.when(() => {
-        // Assign the appropriate popup template
-        layerToShow.popupTemplate = isFishnet ? fishnetPopupTemplate : neighborhoodPopupTemplate;
         layerToShow.visible = true;
+        console.log(`Setting visibility to true for: ${layerToShow.title}`);
       });
     }
   
-    // Hide the other layer if defined
-    if (otherLayer) {
-      otherLayer.visible = false;
+    // Hide the other layers
+    if (isHeatmap) {
+      if (personalizedNeighborhoodLayer) {
+        personalizedNeighborhoodLayer.visible = false;
+        console.log(`Setting visibility to false for: ${personalizedNeighborhoodLayer.title}`);
+      }
+      if (baseNeighborhoodLayer) {
+        baseNeighborhoodLayer.visible = false;
+        console.log(`Setting visibility to false for: ${baseNeighborhoodLayer.title}`);
+      }
+      if (baseHeatmapLayer) {
+        baseHeatmapLayer.visible = false;
+        console.log(`Setting visibility to false for: ${baseHeatmapLayer.title}`);
+      }
+    } else {
+      if (heatmapLayer) {
+        heatmapLayer.visible = false;
+        console.log(`Setting visibility to false for: ${heatmapLayer.title}`);
+      }
+      if (baseHeatmapLayer) {
+        baseHeatmapLayer.visible = false;
+        console.log(`Setting visibility to false for: ${baseHeatmapLayer.title}`);
+      }
     }
   };
-
+  
+  
+  
   useEffect(() => {
     if (isMobilePortrait) {
-      resetWidgets(); // Reset and hide widgets when switching to mobile portrait
+      resetWidgets();
     } else if (isDesktop || isMobileLandscape) {
-      forceRenderWidgets(); // Force rendering widgets in landscape/desktop
+      forceRenderWidgets();
     }
   }, [isMobilePortrait, isDesktop, isMobileLandscape]);
-  
 
   useEffect(() => {
-    // Wait for the map view to be ready before rendering any widgets
     view.when(() => {
       const toggleDiv = document.querySelector("#layerToggleDiv");
       if (toggleDiv) {
-        if (!toggleRoot) { // Check if toggleRoot has not been initialized
-          toggleRoot = createRoot(toggleDiv); // Create root only if it doesn't exist
+        if (!toggleRoot) {
+          toggleRoot = createRoot(toggleDiv);
         }
         toggleRoot.render(<LayerToggle view={view} webMap={webMap} />);
       }
       forceRenderWidgets();
-
     });
   }, []);
-  
-  useEffect(() => {
-    if (prevIsMobilePortrait.current === false && (isMobilePortrait || isTabletPortrait || isMobileLandscape)) {
-      console.log("Switched to mobile mode, resetting widgets...");
-      resetWidgets();
-    }
-  
-    if ((!isMobilePortrait && !isTabletPortrait && (isDesktop)) || (prevIsMobilePortrait.current === true && !isMobilePortrait && !isTabletPortrait)) {
-      console.log("Switched to desktop mode, force rendering widgets...");
-      setTimeout(() => forceRenderWidgets(), 0);
-    }
-  
-    prevIsMobilePortrait.current = isMobilePortrait;
-    prevIsMobileLandscape.current = isMobileLandscape;
-    prevIsDesktop.current = isDesktop;
-  }, [isMobilePortrait, isMobileLandscape, isDesktop]);
 
   useEffect(() => {
     if (recalculateTriggered) {
@@ -253,50 +237,11 @@ const MainComponent = () => {
     }
   }, [recalculateTriggered]);
 
-  useEffect(() => {
-    if (selectedWidget === 'slider') {
-      const sliderDiv = document.querySelector("#sliderDiv") as HTMLElement;
-  
-      if (sliderDiv) {
-        sliderDiv.style.visibility = 'visible';
-        if (!sliderRoot) {
-          console.log("Rendering slider widget for the first time");
-          sliderRoot = createRoot(sliderDiv); // Create root only if it doesn't exist
-        }
-        sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
-      }
-    }
-  }, [selectedWidget]);
-
-  useEffect(() => {
-    if (selectedWidget === 'slider') {
-      const sliderDiv = document.querySelector("#sliderDiv") as HTMLElement;
-
-      if (sliderDiv) {
-        sliderDiv.style.visibility = 'visible';
-      }
-
-      if (sliderDiv && !sliderRoot) {
-        console.log("Rendering slider widget for the first time");
-        if (sliderDiv) {
-          if (!sliderRoot) {
-            sliderRoot = createRoot(sliderDiv); // Only create if not initialized
-          }
-          sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
-        }
-      } else if (sliderRoot) {
-        console.log("Re-rendering slider widget");
-        sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
-      }
-    }
-  }, [selectedWidget]);
-
-  // Fix for the Bottom Navigation handling of 'toggle'
   const handleBottomNavChange = (newValue: 'slider' | 'legend' | 'toggle') => {
     if (newValue === 'toggle') {
       console.log("Toggling layers via bottom navigation...");
-      setIsFishnetLayer(prev => !prev); // Toggle the fishnet layer state
-      handleLayerToggle(!isFishnetLayer); // Pass the updated layer state to the toggle handler
+      setIsFishnetLayer(prev => !prev);
+      handleLayerToggle(!isFishnetLayer);
     } else if (selectedWidget === newValue) {
       if (newValue === 'slider') {
         unmountWidget('slider');
@@ -307,21 +252,8 @@ const MainComponent = () => {
     } else {
       if (newValue === 'slider') {
         setSliderVisible(true);
-        const sliderDiv = document.querySelector("#sliderDiv") as HTMLElement;
-        if (sliderDiv) sliderDiv.style.visibility = 'visible';
       } else if (newValue === 'legend') {
         setLegendVisible(true);
-        const legendDiv = document.querySelector(".legend-container") as HTMLElement;
-
-        // Ensure the legend widget is rendered when the button is clicked
-        if (!legendRoot && legendDiv) {
-          legendRoot = createRoot(legendDiv);
-          legendRoot.render(<LegendWidget />); // Render the LegendWidget if not already initialized
-        }
-
-        if (legendDiv) {
-          legendDiv.style.visibility = 'visible'; // Make sure the legend is visible
-        }
       }
       setSelectedWidget(newValue);
     }
@@ -329,33 +261,31 @@ const MainComponent = () => {
 
   return (
     <div id="appRoot">
-      {/* Render BasicMenu (navBar) at the top of the application */}
       <BasicMenu />
 
       <div className="widget-container" id="sliderDiv"></div>
       <div className="legend-container"></div>
 
-      {/* Mobile-specific Bottom Navigation */}
       {(isMobilePortrait || isTabletPortrait) && (
         <div>
           <Box
             sx={{
               position: 'fixed',
               bottom: 20,
-              left: '10%',  // Reduce the width by shifting it away from the left
-              right: '10%', // Reduce the width by shifting it away from the right
+              left: '10%',
+              right: '10%',
               zIndex: 1000,
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',  // Semi-transparent background
-              border: '2px solid rgba(0, 0, 0, 0.4)',  // Subtle border
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+              border: '2px solid rgba(0, 0, 0, 0.4)',
               padding: '10px',
               boxShadow: '0px -1px 6px rgba(0, 0, 0, 0.1)',
               borderRadius: '80px 80px 80px 80px',
-              maxWidth: '400px',  // Set the maximum width for the container
-              margin: '0 auto',  // Center the container if width exceeds maxWidth
+              maxWidth: '400px',
+              margin: '0 auto',
             }}
           >
             <BottomNavigation
@@ -413,30 +343,29 @@ const MainComponent = () => {
         </div>
       )}
 
-      {/* // Mobile Landscape Layout */}
       {isMobileLandscape && (
         <div>
           <Box
             sx={{
-              position: 'fixed',  // Keep the container fixed
-              top: '5px',        // Offset from the top
-              right: '5px',      // Offset from the right
+              position: 'fixed',
+              top: '5px',
+              right: '5px',
               zIndex: 1000,
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'center',  // Center buttons vertically within the container
+              justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',  // Semi-transparent background
-              padding: '0px',  // Add padding for spacing around the button group
-              borderRadius: '15px',  // Adjusted for slightly rounded corners
-              border: '2px solid rgba(0, 0, 0, 0.4)',  // Subtle border
-              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',  // Light shadow for depth
-              minWidth: '80px',  // Set a minimum width for the container
-              maxWidth: '100px',  // Set a max width for the container to make it responsive
-              minHeight: '200px',  // Set a minimum height for the container
-              width: 'auto',  // Allow width to auto-adjust based on content
-              height: 'auto',  // Allow height to auto-adjust based on content
-              maxHeight: '250px',  // Limit maximum height to maintain a responsive design
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+              padding: '0px',
+              borderRadius: '15px',
+              border: '2px solid rgba(0, 0, 0, 0.4)',
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+              minWidth: '80px',
+              maxWidth: '100px',
+              minHeight: '200px',
+              width: 'auto',
+              height: 'auto',
+              maxHeight: '250px',
             }}
           >
             <BottomNavigation
@@ -497,6 +426,7 @@ const MainComponent = () => {
     </div>
   );
 };
+
 document.addEventListener('DOMContentLoaded', () => {
   const rootElement = document.getElementById('root');
   if (rootElement) {
@@ -506,3 +436,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export default MainComponent;
+

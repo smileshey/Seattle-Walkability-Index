@@ -9,7 +9,7 @@ interface LayerToggleProps {
 }
 
 const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
-  const [isFishnetLayer, setIsFishnetLayer] = useState(false);
+  const [isHeatmapView, setIsHeatmapView] = useState(true);
 
   // Media query to check for small screens
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
@@ -19,45 +19,73 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
   // Check if bottom navigation is visible, in which case don't show the toggle switch here
   const isBottomNavVisible = isMobilePortrait || isMobileLandscape || isTabletPortrait;
 
-  const handleToggleChange = (isFishnet: boolean) => {
-    setIsFishnetLayer(isFishnet);
+  const handleToggleChange = (isHeatmap: boolean) => {
+    setIsHeatmapView(isHeatmap);
 
-    const baseLayerTitle = isFishnet ? "walkscore_fishnet" : "walkscore_neighborhoods";
-    const personalizedLayerTitle = isFishnet ? "Personalized Walkscore" : "Personalized Neighborhood Walkscore";
+    console.log("Handling layer toggle. Toggle state (isHeatmapView):", isHeatmap);
 
-    // Cast to FeatureLayer to access popupTemplate
-    const personalizedLayer = webMap.allLayers.find(layer => layer.title === personalizedLayerTitle) as FeatureLayer;
-    const baseLayer = webMap.allLayers.find(layer => layer.title === baseLayerTitle) as FeatureLayer;
+    // Define layer titles
+    const baseHeatmapLayerTitle = "walkscore_fishnet_points";
+    const personalizedHeatmapLayerTitle = "Personalized Heatmap";
+    const baseNeighborhoodLayerTitle = "walkscore_neighborhoods";
+    const personalizedNeighborhoodLayerTitle = "Personalized Neighborhood Walkscore";
 
-    let layerToShow = personalizedLayer || baseLayer;
-    const otherLayerTitle = isFishnet ? "walkscore_neighborhoods" : "walkscore_fishnet";
-    const otherPersonalizedLayerTitle = isFishnet ? "Personalized Neighborhood Walkscore" : "Personalized Walkscore";
+    // Get layers by title
+    const baseHeatmapLayer = webMap.allLayers.find(layer => layer.title === baseHeatmapLayerTitle) as FeatureLayer;
+    const personalizedHeatmapLayer = webMap.allLayers.find(layer => layer.title === personalizedHeatmapLayerTitle) as FeatureLayer;
+    const baseNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === baseNeighborhoodLayerTitle) as FeatureLayer;
+    const personalizedNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === personalizedNeighborhoodLayerTitle) as FeatureLayer;
 
-    const otherLayer = webMap.allLayers.find(layer => layer.title === otherPersonalizedLayerTitle) as FeatureLayer || 
-                      webMap.allLayers.find(layer => layer.title === otherLayerTitle) as FeatureLayer;
+    if (isHeatmap) {
+      // Show the personalized heatmap if it exists, otherwise show the base heatmap
+      if (personalizedHeatmapLayer) {
+        personalizedHeatmapLayer.visible = true;
+        console.log("Showing Personalized Heatmap Layer:", personalizedHeatmapLayer.title);
+      } else if (baseHeatmapLayer) {
+        baseHeatmapLayer.visible = true;
+        console.log("Showing Base Heatmap Layer:", baseHeatmapLayer.title);
+      }
 
-    // Ensure layerToShow exists before assigning popupTemplate
-    if (!layerToShow) {
-      console.log("Layer to show is undefined, defaulting to neighborhood layer");
-      layerToShow = baseLayer;
+      // Hide both neighborhood layers
+      if (baseNeighborhoodLayer) {
+        baseNeighborhoodLayer.visible = false;
+        console.log("Hiding Base Neighborhood Layer:", baseNeighborhoodLayer.title);
+      }
+      if (personalizedNeighborhoodLayer) {
+        personalizedNeighborhoodLayer.visible = false;
+        console.log("Hiding Personalized Neighborhood Layer:", personalizedNeighborhoodLayer.title);
+      }
+    } else {
+      // Show the personalized neighborhood layer if it exists, otherwise show the base neighborhood layer
+      if (personalizedNeighborhoodLayer) {
+        personalizedNeighborhoodLayer.visible = true;
+        console.log("Showing Personalized Neighborhood Layer:", personalizedNeighborhoodLayer.title);
+      } else if (baseNeighborhoodLayer) {
+        baseNeighborhoodLayer.visible = true;
+        console.log("Showing Base Neighborhood Layer:", baseNeighborhoodLayer.title);
+      }
+
+      // Hide both heatmap layers
+      if (baseHeatmapLayer) {
+        baseHeatmapLayer.visible = false;
+        console.log("Hiding Base Heatmap Layer:", baseHeatmapLayer.title);
+      }
+      if (personalizedHeatmapLayer) {
+        personalizedHeatmapLayer.visible = false;
+        console.log("Hiding Personalized Heatmap Layer:", personalizedHeatmapLayer.title);
+      }
     }
-
-    if (layerToShow) {
-      layerToShow.when(() => {
-        // Assign the appropriate popup template
-        layerToShow.popupTemplate = isFishnet ? fishnetPopupTemplate : neighborhoodPopupTemplate;
-        layerToShow.visible = true;
-      });
-    }
-
-    // Hide the other layer if defined
-    if (otherLayer) {
-      otherLayer.visible = false;
-    }
+    
+    console.log(`Visibility status after toggling: 
+      Base Heatmap Layer (${baseHeatmapLayerTitle}): ${baseHeatmapLayer ? baseHeatmapLayer.visible : "not found"},
+      Personalized Heatmap Layer (${personalizedHeatmapLayerTitle}): ${personalizedHeatmapLayer ? personalizedHeatmapLayer.visible : "not found"},
+      Base Neighborhood Layer (${baseNeighborhoodLayerTitle}): ${baseNeighborhoodLayer ? baseNeighborhoodLayer.visible : "not found"},
+      Personalized Neighborhood Layer (${personalizedNeighborhoodLayerTitle}): ${personalizedNeighborhoodLayer ? personalizedNeighborhoodLayer.visible : "not found"}
+    `);
   };
 
   useEffect(() => {
-    handleToggleChange(isFishnetLayer);
+    handleToggleChange(true); // Set to show personalized heatmap by default after recalculation
   }, []);
 
   if (isBottomNavVisible) {
@@ -82,17 +110,19 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
       }}
     >
       <Switch
-        checked={isFishnetLayer}
+        checked={isHeatmapView}
         onChange={(event) => handleToggleChange(event.target.checked)}
       />
       <Typography sx={{ fontSize: '10px', marginLeft: 1 }}>
-        Fishnet View
+        Heatmap View
       </Typography>
     </Box>
   );
 };
 
 export default LayerToggle;
+
+
 
 
 

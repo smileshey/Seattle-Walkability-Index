@@ -80,7 +80,7 @@ export const createPersonalizedNeighborhoodsLayer = async (
 
     const neighborhoodsResult = await neighborhoodsLayer.queryFeatures(neighborhoodsQuery);
 
-    normalizeScoresByArea(neighborhoodsResult.features, scoresByNeighborhood,.85);
+    normalizeScoresByArea(neighborhoodsResult.features, scoresByNeighborhood, .85);
     rankNormalizeAndScaleScores(neighborhoodsResult.features);
 
     // Get the existing fields
@@ -103,13 +103,14 @@ export const createPersonalizedNeighborhoodsLayer = async (
       type: "color",
       field: "personalized_walkscore",
       stops: [
-        { value: intervals[1] - 0.00001, color: new Color([230, 238, 207, .7]) },
-        { value: intervals[2] - 0.00001, color: new Color([155, 196, 193, .7]) },
-        { value: intervals[3] - 0.00001, color: new Color([105, 168, 183, .7]) },
-        { value: intervals[4] - 0.00001, color: new Color([75, 126, 152, .7]) },
-        { value: intervals[5], color: new Color([46, 85, 122, .7]) }
+        { value: intervals[1] - 0.00001, color: new Color([255, 0, 0, 0.5]) }, // Red for low values
+        { value: intervals[2] - 0.00001, color: new Color([255, 165, 0, 0.5]) }, // Orange for lower-mid values
+        { value: intervals[3] - 0.00001, color: new Color([255, 255, 0, 0.5]) }, // Yellow for mid values
+        { value: intervals[4] - 0.00001, color: new Color([173, 255, 47, 0.5]) }, // Light green for higher-mid values
+        { value: intervals[5], color: new Color([0, 255, 0, 0.5]) } // Green for high values
       ]
     };
+    
 
     const fillSymbol = new SimpleFillSymbol({
       color: "transparent",
@@ -165,6 +166,15 @@ export const createPersonalizedNeighborhoodsLayer = async (
     await personalizedLayer.when();
     personalizedLayer.refresh();
 
+    // Explicitly hide the heatmap after adding the personalized neighborhood layer
+    const heatmapLayer = webMap.allLayers.find(layer => layer.title === "Personalized Heatmap") as FeatureLayer;
+    const neighborhoodLayer = webMap.allLayers.find(layer => layer.title === title) as FeatureLayer;
+
+    if (heatmapLayer) {
+      heatmapLayer.visible = true
+      neighborhoodLayer.visible = false;
+    }
+
     // Return the top neighborhoods
     return getTopNeighborhoods(personalizedLayer, "personalized_walkscore");
   } catch (error) {
@@ -172,6 +182,7 @@ export const createPersonalizedNeighborhoodsLayer = async (
     throw error;
   }
 };
+
 
 
 export const getTopNeighborhoods = async (layer: FeatureLayer, field: string): Promise<Neighborhood[]> => {
