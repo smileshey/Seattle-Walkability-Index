@@ -150,6 +150,9 @@ const createPersonalizedWalkscoreLayer = async (
     await temporaryLayer.when();
     temporaryLayer.refresh();
 
+    // Force renderer update post-load
+    temporaryLayer.renderer = temporaryLayer.renderer;
+
     console.log("Added personalized walkscore layer to the map.");
     return temporaryLayer;
   } catch (error) {
@@ -157,7 +160,6 @@ const createPersonalizedWalkscoreLayer = async (
     throw error;
   }
 };
-
 
 // Function to generate a HeatmapRenderer based on the given field
 const createHeatmapLayer = async (
@@ -179,10 +181,22 @@ const createHeatmapLayer = async (
     const heatmapRenderer = new HeatmapRenderer({
       field: field,
       colorStops: [
-        { ratio: 0, color: [255, 255, 255, 0] },
-        { ratio: 0.001, color: [255, 0, 0, 0.5] }, // Red
-        { ratio: 0.5, color: [255, 255, 0, 0.6] }, // Yellow
-        { ratio: 1, color: [0, 255, 0, 0.4] }, // Green
+        {
+          ratio: 0,
+          color: [255, 255, 255, 0], // Full transparency for very low values
+        },
+        {
+          ratio: 0.001,
+          color: [255, 0, 0, 0.5], // Red with 50% transparency
+        },
+        {
+          ratio: 0.5,
+          color: [255, 255, 0, 0.6], // Yellow with 60% transparency
+        },
+        {
+          ratio: 1,
+          color: [0, 255, 0, 0.4], // Green with 40% transparency
+        },
       ],
       referenceScale: 55500,
       radius: 30
@@ -202,14 +216,13 @@ const createHeatmapLayer = async (
 
     // Apply the heatmap renderer after the layer is added to the map
     pointsLayer.renderer = heatmapRenderer;
-    // pointsLayer.visible = true; // Make sure this layer is visible
-    // console.log(`Heatmap layer ${outputTitle} created successfully with field: ${field}, visibility set to true.`);
+    // Force renderer update post-load
+    pointsLayer.renderer = pointsLayer.renderer;
 
   } catch (error) {
     console.error("Error creating heatmap layer:", error);
   }
 };
-
 
 const handleRecalculate = async (
   view: MapView,
@@ -275,6 +288,8 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
       const walkscoreFishnetLayer = webMap.allLayers.find((layer) => layer.title === "walkscore_fishnet_points") as FeatureLayer;
       if (walkscoreFishnetLayer) {
         await createHeatmapLayer(walkscoreFishnetLayer, "Initial Heatmap", "walk_score", webMap);
+        // Force renderer update post-load
+        walkscoreFishnetLayer.renderer = walkscoreFishnetLayer.renderer;
       }
     };
 
@@ -290,5 +305,6 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
 
 export default WalkscoreCalculator;
 export { handleRecalculate };
+
 
 
