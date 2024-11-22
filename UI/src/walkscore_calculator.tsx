@@ -179,22 +179,10 @@ const createHeatmapLayer = async (
     const heatmapRenderer = new HeatmapRenderer({
       field: field,
       colorStops: [
-        {
-          ratio: 0,
-          color: [255, 255, 255, 0], // Full transparency for very low values
-        },
-        {
-          ratio: 0.001,
-          color: [255, 0, 0, 0.5], // Red with 50% transparency
-        },
-        {
-          ratio: 0.5,
-          color: [255, 255, 0, 0.6], // Yellow with 60% transparency
-        },
-        {
-          ratio: 1,
-          color: [0, 255, 0, 0.4], // Green with 40% transparency
-        },
+        { ratio: 0, color: [255, 255, 255, 0] },
+        { ratio: 0.001, color: [255, 0, 0, 0.5] }, // Red
+        { ratio: 0.5, color: [255, 255, 0, 0.6] }, // Yellow
+        { ratio: 1, color: [0, 255, 0, 0.4] }, // Green
       ],
       referenceScale: 55500,
       radius: 30
