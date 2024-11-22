@@ -171,19 +171,18 @@ export const createPersonalizedNeighborhoodsLayer = async (
     const neighborhoodLayer = webMap.allLayers.find(layer => layer.title === title) as FeatureLayer;
 
     if (heatmapLayer) {
-      heatmapLayer.visible = true
+      heatmapLayer.visible = true;
       neighborhoodLayer.visible = false;
     }
 
     // Return the top neighborhoods
-    return getTopNeighborhoods(personalizedLayer, "personalized_walkscore");
+    const topNeighborhoods = await getTopNeighborhoods(personalizedLayer, "personalized_walkscore");
+    return topNeighborhoods;
   } catch (error) {
     console.error("Error creating personalized neighborhoods layer:", error);
     throw error;
   }
 };
-
-
 
 export const getTopNeighborhoods = async (layer: FeatureLayer, field: string): Promise<Neighborhood[]> => {
   const query = layer.createQuery();
@@ -196,27 +195,27 @@ export const getTopNeighborhoods = async (layer: FeatureLayer, field: string): P
   const excluded_nhoods = ['Sand Point', 'Discovery Park', 'Seward Park', 'University of Washington', 'Centennial Park', 'Pike-Market'];
 
   try {
-      const neighborhoodsResult = await layer.queryFeatures(query);
-      
-      console.log("Fetched neighborhoods");
+    const neighborhoodsResult = await layer.queryFeatures(query);
+    
+    console.log("Fetched neighborhoods");
 
-      const topNeighborhoods = neighborhoodsResult.features
-          .map(feature => ({
-              name: feature.attributes["nested"],
-              score: feature.attributes[field],
-              latitude: feature.attributes["latitude"],
-              longitude: feature.attributes["longitude"],
-          }))
-          .filter(nhood => !excluded_nhoods.includes(nhood.name)) // Exclude specified neighborhoods
-          .sort((a, b) => b.score - a.score)
-          .slice(0, 5); // Top 5 neighborhoods
+    const topNeighborhoods = neighborhoodsResult.features
+      .map(feature => ({
+        name: feature.attributes["nested"],
+        score: feature.attributes[field],
+        latitude: feature.attributes["latitude"],
+        longitude: feature.attributes["longitude"],
+      }))
+      .filter(nhood => !excluded_nhoods.includes(nhood.name)) // Exclude specified neighborhoods
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5); // Top 5 neighborhoods
 
-      console.log("Top neighborhoods");
+    console.log("Top neighborhoods", topNeighborhoods);
 
-      return topNeighborhoods;
+    return topNeighborhoods;
   } catch (error) {
-      console.error("Error creating top neighborhoods list:", error);
-      throw error;
+    console.error("Error creating top neighborhoods list:", error);
+    throw error;
   }
 };
 

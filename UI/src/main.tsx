@@ -43,7 +43,7 @@ let toggleRoot: Root | null = null;
 const MainComponent = () => {
   const [recalculateTriggered, setRecalculateTriggered] = useState(false);
   const [selectedWidget, setSelectedWidget] = useState<null | 'slider' | 'legend'>(null);
-  const [isFishnetLayer, setIsFishnetLayer] = useState(false);
+  const [isFishnetLayer, setIsFishnetLayer] = useState(true); // Set to true initially as the heatmap layer is visible first
 
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
   const isMobileLandscape = useMediaQuery('(min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
@@ -112,18 +112,20 @@ const MainComponent = () => {
   };
 
   const unmountWidget = (widget: 'slider' | 'legend') => {
-    setTimeout(() => {
-      const sliderDiv = document.querySelector("#sliderDiv") as HTMLElement;
-      const legendDiv = document.querySelector(".legend-container") as HTMLElement;
+    const sliderDiv = document.querySelector("#sliderDiv") as HTMLElement;
+    const legendDiv = document.querySelector(".legend-container") as HTMLElement;
 
-      if (widget === 'slider' && sliderRoot && sliderDiv) {
-        sliderDiv.style.visibility = 'hidden';
-      }
+    if (widget === 'slider' && sliderRoot && sliderDiv) {
+      sliderRoot.unmount();  // Unmount the slider completely
+      sliderDiv.style.visibility = 'hidden';
+      sliderRoot = null;  // Reset the slider root to allow proper re-rendering
+    }
 
-      if (widget === 'legend' && legendRoot && legendDiv) {
-        legendDiv.style.visibility = 'hidden';
-      }
-    }, 0);
+    if (widget === 'legend' && legendRoot && legendDiv) {
+      legendRoot.unmount();  // Unmount the legend completely
+      legendDiv.style.visibility = 'hidden';
+      legendRoot = null;  // Reset the legend root to allow proper re-rendering
+    }
   };
 
   const fetchAndRenderNeighborhoods = async () => {
@@ -156,58 +158,48 @@ const MainComponent = () => {
 
   const handleLayerToggle = (isHeatmap: boolean) => {
     console.log("Handling layer toggle. Toggle state:", isHeatmap);
-    setIsFishnetLayer(isHeatmap);
-  
+
     const heatmapLayerTitle = "Personalized Heatmap";
-    const personalizedNeighborhoodLayerTitle = "Personalized Neighborhood Walkscore";
-    const baseNeighborhoodLayerTitle = "walkscore_neighborhoods";
     const baseHeatmapLayerTitle = "walkscore_fishnet_points";
-  
+    const neighborhoodLayerTitle = "walkscore_neighborhoods";
+    const personalizedNeighborhoodLayerTitle = "Personalized Neighborhood Walkscore";
+
     const heatmapLayer = webMap.allLayers.find(layer => layer.title === heatmapLayerTitle) as FeatureLayer;
-    const personalizedNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === personalizedNeighborhoodLayerTitle) as FeatureLayer;
-    const baseNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === baseNeighborhoodLayerTitle) as FeatureLayer;
     const baseHeatmapLayer = webMap.allLayers.find(layer => layer.title === baseHeatmapLayerTitle) as FeatureLayer;
-  
-    // Decide which layer to show based on toggle
-    let layerToShow = isHeatmap ? heatmapLayer : personalizedNeighborhoodLayer || baseNeighborhoodLayer;
-  
-    console.log("Layer to show decided:", layerToShow?.title || "None");
-  
-    if (layerToShow) {
-      layerToShow.when(() => {
-        layerToShow.visible = true;
-        console.log(`Setting visibility to true for: ${layerToShow.title}`);
-      });
-    }
-  
-    // Hide the other layers
+    const neighborhoodLayer = webMap.allLayers.find(layer => layer.title === neighborhoodLayerTitle) as FeatureLayer;
+    const personalizedNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === personalizedNeighborhoodLayerTitle) as FeatureLayer;
+
+    // Ensure all layers are hidden first
+    [heatmapLayer, baseHeatmapLayer, neighborhoodLayer, personalizedNeighborhoodLayer].forEach(layer => {
+      if (layer) {
+        layer.visible = false;
+        console.log(`Setting visibility to false for: ${layer.title}`);
+      }
+    });
+
+    // Show the appropriate layer based on the toggle state
     if (isHeatmap) {
-      if (personalizedNeighborhoodLayer) {
-        personalizedNeighborhoodLayer.visible = false;
-        console.log(`Setting visibility to false for: ${personalizedNeighborhoodLayer.title}`);
-      }
-      if (baseNeighborhoodLayer) {
-        baseNeighborhoodLayer.visible = false;
-        console.log(`Setting visibility to false for: ${baseNeighborhoodLayer.title}`);
-      }
-      if (baseHeatmapLayer) {
-        baseHeatmapLayer.visible = false;
-        console.log(`Setting visibility to false for: ${baseHeatmapLayer.title}`);
+      if (heatmapLayer) {
+        heatmapLayer.visible = true;
+        console.log(`Setting visibility to true for: ${heatmapLayer.title}`);
+      } else if (baseHeatmapLayer) {
+        baseHeatmapLayer.visible = true;
+        console.log(`Setting visibility to true for: ${baseHeatmapLayer.title}`);
       }
     } else {
-      if (heatmapLayer) {
-        heatmapLayer.visible = false;
-        console.log(`Setting visibility to false for: ${heatmapLayer.title}`);
-      }
-      if (baseHeatmapLayer) {
-        baseHeatmapLayer.visible = false;
-        console.log(`Setting visibility to false for: ${baseHeatmapLayer.title}`);
+      if (personalizedNeighborhoodLayer) {
+        personalizedNeighborhoodLayer.visible = true;
+        console.log(`Setting visibility to true for: ${personalizedNeighborhoodLayer.title}`);
+      } else if (neighborhoodLayer) {
+        neighborhoodLayer.visible = true;
+        console.log(`Setting visibility to true for: ${neighborhoodLayer.title}`);
       }
     }
+
+    // Update the state to reflect the current visible layer
+    setIsFishnetLayer(isHeatmap);
   };
-  
-  
-  
+
   useEffect(() => {
     if (isMobilePortrait) {
       resetWidgets();
@@ -240,8 +232,9 @@ const MainComponent = () => {
   const handleBottomNavChange = (newValue: 'slider' | 'legend' | 'toggle') => {
     if (newValue === 'toggle') {
       console.log("Toggling layers via bottom navigation...");
-      setIsFishnetLayer(prev => !prev);
-      handleLayerToggle(!isFishnetLayer);
+      const newIsFishnetLayer = !isFishnetLayer;
+      handleLayerToggle(newIsFishnetLayer);
+      setIsFishnetLayer(newIsFishnetLayer); // Set the state after updating the layers
     } else if (selectedWidget === newValue) {
       if (newValue === 'slider') {
         unmountWidget('slider');
@@ -252,8 +245,20 @@ const MainComponent = () => {
     } else {
       if (newValue === 'slider') {
         setSliderVisible(true);
+        const sliderDiv = document.querySelector("#sliderDiv") as HTMLElement;
+        if (!sliderRoot) {
+          sliderRoot = createRoot(sliderDiv);
+        }
+        sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
+        sliderDiv.style.visibility = 'visible';
       } else if (newValue === 'legend') {
         setLegendVisible(true);
+        const legendDiv = document.querySelector(".legend-container") as HTMLElement;
+        if (!legendRoot) {
+          legendRoot = createRoot(legendDiv);
+        }
+        legendRoot.render(<LegendWidget />);
+        legendDiv.style.visibility = 'visible';
       }
       setSelectedWidget(newValue);
     }
@@ -299,42 +304,42 @@ const MainComponent = () => {
               }}
               showLabels
             >
-              <BottomNavigationAction 
-                label="Custom Walkscore" 
-                icon={<InfoIcon />} 
-                value="slider" 
-                sx={{ 
-                  justifyContent: 'center', 
+              <BottomNavigationAction
+                label="Custom Walkscore"
+                icon={<InfoIcon />}
+                value="slider"
+                sx={{
+                  justifyContent: 'center',
                   padding: '8px',
-                  whiteSpace: 'normal', 
+                  whiteSpace: 'normal',
                   textAlign: 'center',
-                  lineHeight: 1.2, 
+                  lineHeight: 1.2,
                   maxWidth: '80px'
                 }}
               />
-              <BottomNavigationAction 
-                label="View Toggle" 
-                icon={<ToggleIcon />} 
-                value="toggle" 
-                sx={{ 
-                  justifyContent: 'center', 
+              <BottomNavigationAction
+                label="Heatmap Toggle"
+                icon={<ToggleIcon />}
+                value="toggle"
+                sx={{
+                  justifyContent: 'center',
                   padding: '8px',
-                  whiteSpace: 'normal', 
+                  whiteSpace: 'normal',
                   textAlign: 'center',
-                  lineHeight: 1.2, 
+                  lineHeight: 1.2,
                   maxWidth: '80px'
                 }}
               />
-              <BottomNavigationAction 
-                label="Legend" 
-                icon={<LegendIcon />} 
-                value="legend" 
-                sx={{ 
-                  justifyContent: 'center', 
+              <BottomNavigationAction
+                label="Legend"
+                icon={<LegendIcon />}
+                value="legend"
+                sx={{
+                  justifyContent: 'center',
                   padding: '8px',
-                  whiteSpace: 'normal', 
+                  whiteSpace: 'normal',
                   textAlign: 'center',
-                  lineHeight: 1.2, 
+                  lineHeight: 1.2,
                   maxWidth: '80px'
                 }}
               />
@@ -380,42 +385,42 @@ const MainComponent = () => {
               }}
               showLabels
             >
-              <BottomNavigationAction 
-                label="Custom Walkscore" 
-                icon={<InfoIcon />} 
-                value="slider" 
-                sx={{ 
-                  justifyContent: 'center', 
+              <BottomNavigationAction
+                label="Custom Walkscore"
+                icon={<InfoIcon />}
+                value="slider"
+                sx={{
+                  justifyContent: 'center',
                   padding: '8px',
-                  whiteSpace: 'normal', 
+                  whiteSpace: 'normal',
                   textAlign: 'center',
-                  lineHeight: 1.2, 
+                  lineHeight: 1.2,
                   maxWidth: '80px'
                 }}
               />
-              <BottomNavigationAction 
-                label="View Toggle" 
-                icon={<ToggleIcon />} 
-                value="toggle" 
-                sx={{ 
-                  justifyContent: 'center', 
+              <BottomNavigationAction
+                label="View Toggle"
+                icon={<ToggleIcon />}
+                value="toggle"
+                sx={{
+                  justifyContent: 'center',
                   padding: '8px',
-                  whiteSpace: 'normal', 
+                  whiteSpace: 'normal',
                   textAlign: 'center',
-                  lineHeight: 1.2, 
+                  lineHeight: 1.2,
                   maxWidth: '80px'
                 }}
               />
-              <BottomNavigationAction 
-                label="Legend" 
-                icon={<LegendIcon />} 
-                value="legend" 
-                sx={{ 
-                  justifyContent: 'center', 
+              <BottomNavigationAction
+                label="Legend"
+                icon={<LegendIcon />}
+                value="legend"
+                sx={{
+                  justifyContent: 'center',
                   padding: '8px',
-                  whiteSpace: 'normal', 
+                  whiteSpace: 'normal',
                   textAlign: 'center',
-                  lineHeight: 1.2, 
+                  lineHeight: 1.2,
                   maxWidth: '80px'
                 }}
               />
@@ -436,4 +441,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export default MainComponent;
+
 

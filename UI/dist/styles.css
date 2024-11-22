@@ -18,7 +18,7 @@ html, body {
 
 .widget-container {
   width: 220px;
-  padding: 10px;
+  padding: 20px;
   background: rgba(255, 255, 255, 0);
   border-radius: 10px;
   position: absolute;
@@ -29,7 +29,7 @@ html, body {
 
 #sliderDiv {
   position: absolute;
-  bottom: 20px;
+  bottom: 10px;
   left: 10px;
   z-index: 1003;
   width: 220px;
@@ -40,16 +40,19 @@ html, body {
 
 .legend-container {
   position: absolute;
-  bottom: 10px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1003;
-  padding: 10px;  /* Add padding for spacing */
-  background: rgba(255, 255, 255, 0.8);  /* Slightly transparent white background */
-  border-radius: 15px;  /* Rounded corners */
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);  /* Optional shadow for depth */
+  padding: 10px; /* Increase padding for spacing */
+  background: rgba(255, 255, 255, 0.8); /* Slightly transparent white background for better visibility */
+  border-radius: 15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  text-align: center; /* Ensure contents are centered horizontally */
+  display: flex;
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
 }
-
 
 #layerToggleDiv {
   display: block;
@@ -98,7 +101,7 @@ html, body {
 
   .legend-container {
     position: absolute;
-    bottom: 80px;
+    bottom: 105px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1003;
@@ -130,7 +133,7 @@ html, body {
 
   #sliderDiv {
     position: absolute;
-    bottom: 100px;
+    bottom: 20px;
     left: 20px;
     z-index: 1003;
     width: 220px;
@@ -141,7 +144,7 @@ html, body {
 
   .legend-container {
     position: absolute;
-    bottom: 90px;
+    bottom: 100px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1003;

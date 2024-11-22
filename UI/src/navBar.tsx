@@ -131,7 +131,7 @@ export default function BasicMenu() {
               </MenuItem>
               <MenuItem
                 onClick={() =>
-                  window.open('https://https://github.com/smileshey/Seattle-Walkability-Index.com', '_blank')
+                  window.open('https://github.com/smileshey/', '_blank')
                 }
               >
                 GitHub

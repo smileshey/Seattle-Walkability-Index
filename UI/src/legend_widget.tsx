@@ -6,28 +6,29 @@ const LegendWidget: React.FC = () => {
     // Remove any existing legend SVG to avoid duplicate rendering
     d3.select(".legend-container svg").remove(); // Target the container directly
 
-    const keys = ["Not", "Most"];
+    // Set up the data for 5 dots in the legend
+    const keys = ["Not", "", "", "", "Most"];
     const colors: string[] = [
-      "rgba(230, 238, 207,.7)",  // Color for interval[1]
-      "rgba(155, 196, 193,.7)",  // Color for interval[2]
-      "rgba(105, 168, 183,.7)",  // Color for interval[3]
-      "rgba(75, 126, 152,.7)",   // Color for interval[4]
-      "rgba(46, 85, 122,.7)"     // Color for interval[5]
+      "rgba(255, 0, 0, 0.6)",   // Red (Least walkable)
+      "rgba(255, 127, 0, 0.6)", // Orange
+      "rgba(255, 255, 0, 0.6)", // Yellow
+      "rgba(127, 255, 0, 0.6)", // Light Green
+      "rgba(56, 168, 0, 0.6)"   // Green (Most walkable)
     ];
 
     // Append the SVG to the legend-container
     const svg = d3.select(".legend-container").append("svg")
       .attr("id", "legendSvg")  // Add ID to remove duplicates later
-      .attr("width", 300)
-      .attr("height", 80)
+      .attr("width", 200)       // Set the width to make the legend compact
+      .attr("height", 60)       // Reduced height for a more compact look
       .style("background", "transparent");
 
     // Add the title
     svg.append("text")
-      .attr("x", 150)
-      .attr("y", 10)
+      .attr("x", 100)
+      .attr("y", 12) // Adjusted y-position for better alignment
       .attr("text-anchor", "middle")
-      .style("font-size", "12px")
+      .style("font-size", "11px") // Slightly increased font size closer to original
       .style("fill", "#333")
       .style("font-weight", "bold")
       .text("Walkability Spectrum");
@@ -37,33 +38,31 @@ const LegendWidget: React.FC = () => {
       .data(colors)
       .enter()
       .append("circle")
-        .attr("cx", (_d: string, i: number) => 100 + i * 25)  // Typed the parameters
+        .attr("cx", (_d: string, i: number) => 40 + i * 30)  // Adjust spacing for 5 dots, keeping it compact
         .attr("cy", 30)
-        .attr("r", 7)
+        .attr("r", 6)  // Slightly increased the radius for better visibility
         .style("fill", (_d: string, i: number) => colors[i])
         .style("stroke", "black")
-        .style("stroke-width", "1");
+        .style("stroke-width", "0.75"); // Medium stroke width for visibility
 
     // Add the text for the two extremes (Not and Most)
     svg.append("text")
-      .attr("x", 100)
+      .attr("x", 40)  // Align with the first dot
       .attr("y", 50)
-      .attr("transform", "rotate(-45, 100, 50)")
       .style("fill", "#333")
-      .style("font-size", "10px")
+      .style("font-size", "9px") // Increase the font size of the labels closer to original
       .style("font-weight", "bold")
       .text(keys[0])
       .attr("text-anchor", "middle")
       .style("alignment-baseline", "middle");
 
     svg.append("text")
-      .attr("x", 100 + (colors.length - 1) * 25)
+      .attr("x", 40 + (colors.length - 1) * 30)  // Align with the last dot
       .attr("y", 50)
-      .attr("transform", `rotate(-45, ${100 + (colors.length - 1) * 25}, 50)`)
       .style("fill", "#333")
-      .style("font-size", "10px")
+      .style("font-size", "9px") // Increase the font size of the labels closer to original
       .style("font-weight", "bold")
-      .text(keys[1])
+      .text(keys[4])
       .attr("text-anchor", "middle")
       .style("alignment-baseline", "middle");
   }, []);
@@ -72,5 +71,9 @@ const LegendWidget: React.FC = () => {
 };
 
 export default LegendWidget;
+
+
+
+
 
 

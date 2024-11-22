@@ -214,14 +214,13 @@ const createHeatmapLayer = async (
 
     // Apply the heatmap renderer after the layer is added to the map
     pointsLayer.renderer = heatmapRenderer;
-    pointsLayer.visible = true; // Make sure this layer is visible
-    console.log(`Heatmap layer ${outputTitle} created successfully with field: ${field}, visibility set to true.`);
+    // pointsLayer.visible = true; // Make sure this layer is visible
+    // console.log(`Heatmap layer ${outputTitle} created successfully with field: ${field}, visibility set to true.`);
 
   } catch (error) {
     console.error("Error creating heatmap layer:", error);
   }
 };
-
 
 
 const handleRecalculate = async (
@@ -262,22 +261,24 @@ const handleRecalculate = async (
     // Generate the heatmap based on the personalized scores
     console.log("Creating personalized heatmap layer...");
     await createHeatmapLayer(personalizedPointsLayer, "Personalized Heatmap", "personalized_walkscore", webMap);
-    await createPersonalizedNeighborhoodsLayer(personalizedPointsLayer, walkscoreNeighborhoodsLayer, webMap);
+
+    // Create personalized neighborhood scores and get top neighborhoods
+    const topNeighborhoods = await createPersonalizedNeighborhoodsLayer(personalizedPointsLayer, walkscoreNeighborhoodsLayer, webMap);
 
     // Ensure the neighborhood layer is still hidden
     walkscoreNeighborhoodsLayer.visible = false;
     console.log("Re-ensuring neighborhood layer visibility set to false.");
+
+    view.extent = currentExtent;
+    view.zoom = currentZoom;
+
+    console.log("Finished recalculating, returning to original view.");
+
+    return topNeighborhoods; // Return the recalculated top neighborhoods
   }
 
-  view.extent = currentExtent;
-  view.zoom = currentZoom;
-
-  console.log("Finished recalculating, returning to original view.");
-
-  return []; // No need to return top neighborhoods here since they will be handled separately
+  return [];
 };
-
-
 
 const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = ({ view, webMap }) => {
   useEffect(() => {

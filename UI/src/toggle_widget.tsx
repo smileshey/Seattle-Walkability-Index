@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Switch, Typography, useMediaQuery } from '@mui/material';
-import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template';
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 
 interface LayerToggleProps {
@@ -20,8 +19,6 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
   const isBottomNavVisible = isMobilePortrait || isMobileLandscape || isTabletPortrait;
 
   const handleToggleChange = (isHeatmap: boolean) => {
-    setIsHeatmapView(isHeatmap);
-
     console.log("Handling layer toggle. Toggle state (isHeatmapView):", isHeatmap);
 
     // Define layer titles
@@ -36,8 +33,16 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
     const baseNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === baseNeighborhoodLayerTitle) as FeatureLayer;
     const personalizedNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === personalizedNeighborhoodLayerTitle) as FeatureLayer;
 
+    // Hide all layers first
+    [baseHeatmapLayer, personalizedHeatmapLayer, baseNeighborhoodLayer, personalizedNeighborhoodLayer].forEach(layer => {
+      if (layer) {
+        layer.visible = false;
+        console.log(`Setting visibility to false for: ${layer.title}`);
+      }
+    });
+
+    // Show the appropriate layer based on the toggle state
     if (isHeatmap) {
-      // Show the personalized heatmap if it exists, otherwise show the base heatmap
       if (personalizedHeatmapLayer) {
         personalizedHeatmapLayer.visible = true;
         console.log("Showing Personalized Heatmap Layer:", personalizedHeatmapLayer.title);
@@ -45,18 +50,7 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
         baseHeatmapLayer.visible = true;
         console.log("Showing Base Heatmap Layer:", baseHeatmapLayer.title);
       }
-
-      // Hide both neighborhood layers
-      if (baseNeighborhoodLayer) {
-        baseNeighborhoodLayer.visible = false;
-        console.log("Hiding Base Neighborhood Layer:", baseNeighborhoodLayer.title);
-      }
-      if (personalizedNeighborhoodLayer) {
-        personalizedNeighborhoodLayer.visible = false;
-        console.log("Hiding Personalized Neighborhood Layer:", personalizedNeighborhoodLayer.title);
-      }
     } else {
-      // Show the personalized neighborhood layer if it exists, otherwise show the base neighborhood layer
       if (personalizedNeighborhoodLayer) {
         personalizedNeighborhoodLayer.visible = true;
         console.log("Showing Personalized Neighborhood Layer:", personalizedNeighborhoodLayer.title);
@@ -64,18 +58,11 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
         baseNeighborhoodLayer.visible = true;
         console.log("Showing Base Neighborhood Layer:", baseNeighborhoodLayer.title);
       }
-
-      // Hide both heatmap layers
-      if (baseHeatmapLayer) {
-        baseHeatmapLayer.visible = false;
-        console.log("Hiding Base Heatmap Layer:", baseHeatmapLayer.title);
-      }
-      if (personalizedHeatmapLayer) {
-        personalizedHeatmapLayer.visible = false;
-        console.log("Hiding Personalized Heatmap Layer:", personalizedHeatmapLayer.title);
-      }
     }
-    
+
+    // Update the state to reflect the current view
+    setIsHeatmapView(isHeatmap);
+
     console.log(`Visibility status after toggling: 
       Base Heatmap Layer (${baseHeatmapLayerTitle}): ${baseHeatmapLayer ? baseHeatmapLayer.visible : "not found"},
       Personalized Heatmap Layer (${personalizedHeatmapLayerTitle}): ${personalizedHeatmapLayer ? personalizedHeatmapLayer.visible : "not found"},
@@ -85,8 +72,17 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
   };
 
   useEffect(() => {
-    handleToggleChange(true); // Set to show personalized heatmap by default after recalculation
+    // Set to show personalized heatmap by default after recalculation
+    handleToggleChange(true);
   }, []);
+
+  const toggleHeatmapView = () => {
+    setIsHeatmapView(prevState => {
+      const newState = !prevState;
+      handleToggleChange(newState);
+      return newState;
+    });
+  };
 
   if (isBottomNavVisible) {
     // Do not render the toggle switch when the bottom navigation is visible
@@ -111,7 +107,7 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
     >
       <Switch
         checked={isHeatmapView}
-        onChange={(event) => handleToggleChange(event.target.checked)}
+        onChange={toggleHeatmapView}
       />
       <Typography sx={{ fontSize: '10px', marginLeft: 1 }}>
         Heatmap View
@@ -121,6 +117,8 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
 };
 
 export default LayerToggle;
+
+
 
 
 

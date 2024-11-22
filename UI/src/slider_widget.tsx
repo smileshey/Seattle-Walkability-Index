@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { Box, Slider, Typography, Tooltip, IconButton, Button } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'; // Icons for expand/collapse
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { handleRecalculate } from './walkscore_calculator';
 import TopNeighborhoods from './top_neighborhoods';
 import { Neighborhood } from './neighborhood_utils';
-import { useMediaQuery } from '@mui/material'; // Import useMediaQuery
-import axios from 'axios';
+import { useMediaQuery } from '@mui/material';
 
 const marks = [
   { value: 0 },
@@ -37,7 +36,7 @@ const valueLabelFormat = (value: number) => {
 const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapView; webMap: __esri.WebMap; triggerRecalculate: () => void }) => {
   const [values, setValues] = useState({
     slope: 2,
-    streets: 2, // Changed from sidewalk to streets
+    streets: 2,
     amenity: 2,
     crime: 2,
   });
@@ -45,11 +44,10 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
   const [isLoading, setIsLoading] = useState(false);
   const [topNeighborhoods, setTopNeighborhoods] = useState<Neighborhood[] | null>(null);
   const [recalculated, setRecalculated] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true); // State to track expand/collapse
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // Combine conditions for mobile portrait and landscape
   const isMobile = useMediaQuery('(max-width:1000px) and (orientation: portrait), (min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
-  const isTabletPortrait = useMediaQuery('(min-width:601px) and (max-width:900px) and (orientation: portrait)');
 
   const handleSliderChange = (name: string) => (event: Event, value: number | number[]) => {
     setValues({
@@ -60,24 +58,20 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
 
   const handleRecalculateButton = async () => {
     setIsLoading(true);
-    setTopNeighborhoods(null);
+    setTopNeighborhoods(null); // Clear out old neighborhoods
     setPreviousValues(values);
-  
+
     try {
-      // Send a POST request to the server to log button click
-      // await axios.post('/recalculate', {
-      //   values,
-      // });
-  
-      // Updated call to handleRecalculate with all five arguments
-      const topNeighborhoods = await handleRecalculate(view, webMap, values);
-  
-      if (topNeighborhoods && topNeighborhoods.length > 0) {
-        setTopNeighborhoods(topNeighborhoods);
+      // Updated call to handleRecalculate with all arguments
+      const recalculatedNeighborhoods = await handleRecalculate(view, webMap, values);
+
+      if (recalculatedNeighborhoods && recalculatedNeighborhoods.length > 0) {
+        setTopNeighborhoods(recalculatedNeighborhoods);
+        setRecalculated(true);
       }
+
       setIsLoading(false);
-      setRecalculated(true);
-      triggerRecalculate();
+      triggerRecalculate(); // Trigger recalculation of widgets
     } catch (error) {
       console.error('Error during recalculation:', error);
       setIsLoading(false);
@@ -92,20 +86,20 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
   };
 
   const toggleExpand = () => {
-    setIsExpanded(!isExpanded); // Toggle between expanded and collapsed
+    setIsExpanded(!isExpanded);
   };
 
   return (
     <Box
       sx={{
-        width: isMobile ? '110%' : '125%', // Set the width for mobile modes (portrait and landscape)
-        padding: isMobile ? 0.6 : 1, // Apply similar padding for mobile modes
+        width: isMobile ? '110%' : '125%',
+        padding: isMobile ? 0.6 : 1,
         background: 'white',
         borderRadius: 3,
         boxShadow: 20,
         display: 'flex',
         flexDirection: 'column',
-        gap: isMobile ? 0.1 : 0.1, // Adjust gap between sliders for mobile modes
+        gap: isMobile ? 0.1 : 0.1,
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -123,12 +117,11 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
             </IconButton>
           </Tooltip>
           <IconButton size="small" onClick={toggleExpand}>
-            {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            {isExpanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}
           </IconButton>
         </Box>
       </Box>
 
-      {/* Only show content when expanded */}
       {isExpanded && (
         <>
           <Box sx={{ borderBottom: '1px solid #ddd', marginBottom: isMobile ? 0.2 : 1, width: '100%' }}></Box>
@@ -139,10 +132,9 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
               <div className="loading-circle">Loading...</div>
             </Box>
           ) : topNeighborhoods ? (
-            <TopNeighborhoods neighborhoods={topNeighborhoods} view={view} webMap={webMap} />
+            <TopNeighborhoods neighborhoods={topNeighborhoods} view={view} webMap={webMap} showTextList={true} />
           ) : (
             <Box>
-              {/* Adjust spacing and font size for mobile */}
               <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
                 <Typography variant="caption" sx={{ width: '110px', textAlign: 'center', marginRight: '8px', fontWeight: 'italic', fontSize: isMobile ? '0.7rem' : '0.8rem' }}>
                   Flat Ground
@@ -158,7 +150,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
                   marks={marks}
                   valueLabelDisplay="auto"
                   valueLabelFormat={valueLabelFormat}
-                  sx={{ width: isMobile ? '120px' : '150px' }} // Adjust slider width for mobile modes
+                  sx={{ width: isMobile ? '120px' : '150px' }}
                 />
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
@@ -167,7 +159,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
                 </Typography>
                 <Slider
                   size="small"
-                  value={values.streets} 
+                  value={values.streets}
                   onChange={handleSliderChange('streets')}
                   aria-labelledby="streets-slider"
                   min={0}
@@ -176,7 +168,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
                   marks={marks}
                   valueLabelDisplay="auto"
                   valueLabelFormat={valueLabelFormat}
-                  sx={{ width: isMobile ? '120px' : '150px' }} // Adjust slider width for mobile modes
+                  sx={{ width: isMobile ? '120px' : '150px' }}
                 />
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
@@ -194,7 +186,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
                   marks={marks}
                   valueLabelDisplay="auto"
                   valueLabelFormat={valueLabelFormat}
-                  sx={{ width: isMobile ? '120px' : '150px' }} // Adjust slider width for mobile modes
+                  sx={{ width: isMobile ? '120px' : '150px' }}
                 />
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
@@ -212,7 +204,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
                   marks={marks}
                   valueLabelDisplay="auto"
                   valueLabelFormat={valueLabelFormat}
-                  sx={{ width: isMobile ? '120px' : '150px' }} // Adjust slider width for mobile modes
+                  sx={{ width: isMobile ? '120px' : '150px' }}
                 />
               </Box>
             </Box>
@@ -220,56 +212,16 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
         </>
       )}
 
-      {/* Recalculate or Reset Button */}
       {isExpanded && (
         <>
           <Box sx={{ borderBottom: '1px solid #ddd', margin: '1px 0', width: '100%' }}></Box>
           {recalculated ? (
             <>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '2px', gap: '8px' }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 'normal',
-                    fontSize: isMobile ? '0.6rem' : '0.75rem', // Adjust font size for mobile modes
-                  }}
-                >
-                  Slope: {values.slope}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 'normal',
-                    fontSize: isMobile ? '0.6rem' : '0.75rem', // Adjust font size for mobile modes
-                  }}
-                >
-                  Streets: {values.streets} {/* Changed from Calm to Streets */}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 'normal',
-                    fontSize: isMobile ? '0.6rem' : '0.75rem', // Adjust font size for mobile modes
-                  }}
-                >
-                  Business: {values.amenity}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 'normal',
-                    fontSize: isMobile ? '0.6rem' : '0.75rem', // Adjust font size for mobile modes
-                  }}
-                >
-                  Crime: {values.crime}
-                </Typography>
-              </Box>
-
               <Button
                 onClick={handleReset}
                 color="secondary"
                 sx={{
-                  fontSize: isMobile ? '0.6rem' : '0.75rem', // Smaller font size for mobile modes
+                  fontSize: isMobile ? '0.6rem' : '0.75rem',
                   backgroundColor: '#f50057',
                   color: 'white',
                   '&:hover': {
@@ -287,7 +239,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
               onClick={handleRecalculateButton}
               color="primary"
               sx={{
-                fontSize: isMobile ? '0.55rem' : '0.65rem', // Smaller font size for mobile modes
+                fontSize: isMobile ? '0.55rem' : '0.65rem',
                 width: '100%',
               }}
             >
@@ -301,5 +253,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
 };
 
 export default SliderWidget;
+
+
 
 
