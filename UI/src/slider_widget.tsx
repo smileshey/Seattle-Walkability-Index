@@ -48,6 +48,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
 
   // Combine conditions for mobile portrait and landscape
   const isMobile = useMediaQuery('(max-width:1000px) and (orientation: portrait), (min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
+  const isDesktop = useMediaQuery('(min-width: 1001px)'); // Use this to determine if the device is a desktop
 
   const handleSliderChange = (name: string) => (event: Event, value: number | number[]) => {
     setValues({
@@ -63,7 +64,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
 
     try {
       // Updated call to handleRecalculate with all arguments
-      const recalculatedNeighborhoods = await handleRecalculate(view, webMap, values);
+      const recalculatedNeighborhoods = await handleRecalculate(view, webMap, values, isDesktop);
 
       if (recalculatedNeighborhoods && recalculatedNeighborhoods.length > 0) {
         setTopNeighborhoods(recalculatedNeighborhoods);

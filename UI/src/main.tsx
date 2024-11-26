@@ -53,16 +53,20 @@ view.when(async () => {
     }
   });
 
+  // Determine if the device is desktop or not (boolean)
+  const isDesktop = window.innerWidth > 1000;
+
   // Trigger the recalculation to generate the personalized heatmap on load
   try {
     console.log("Initial load: Triggering recalculation to generate personalized heatmap.");
     const userSliderValues = { slope: 2, streets: 2, amenity: 2, crime: 2 };
-    await handleRecalculate(view, webMap, userSliderValues);
+    await handleRecalculate(view, webMap, userSliderValues, isDesktop);
     console.log("Initial recalculation completed successfully.");
   } catch (error) {
     console.error("Error during initial recalculation for personalized heatmap:", error);
   }
 });
+
 
 
 // Persistent roots outside of the component to prevent re-creation during re-renders

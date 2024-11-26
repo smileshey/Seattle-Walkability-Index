@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useMediaQuery } from "@mui/material";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import MapView from "@arcgis/core/views/MapView";
 import HeatmapRenderer from "@arcgis/core/renderers/HeatmapRenderer";
@@ -166,7 +167,8 @@ const createHeatmapLayer = async (
   pointsLayer: FeatureLayer,
   outputTitle: string,
   field: string,
-  webMap: __esri.WebMap
+  webMap: __esri.WebMap,
+  isDesktop: boolean
 ) => {
   try {
     console.log(`Creating heatmap layer: ${outputTitle} using field: ${field}`);
@@ -198,8 +200,8 @@ const createHeatmapLayer = async (
           color: [0, 181, 26, 0.6], // Green with 40% transparency
         },
       ],
-      referenceScale: 55500,
-      radius: 25
+      referenceScale: isDesktop ? 55500 : 30000, // Adjust reference scale based on device type
+      radius: isDesktop ? 25 : 15 // Adjust radius based on device type
     });
 
     // Remove any previous heatmap layers with the same title
@@ -227,7 +229,8 @@ const createHeatmapLayer = async (
 const handleRecalculate = async (
   view: MapView,
   webMap: __esri.WebMap,
-  userSliderValues: { [key: string]: number }
+  userSliderValues: { [key: string]: number },
+  isDesktop: boolean
 ): Promise<Neighborhood[]> => {
   const currentExtent = view.extent.clone();
   const currentZoom = view.zoom;
@@ -265,7 +268,7 @@ const handleRecalculate = async (
 
     // Generate the heatmap based on the personalized scores
     console.log("Creating personalized heatmap layer...");
-    await createHeatmapLayer(personalizedPointsLayer, "Personalized Heatmap", "personalized_walkscore", webMap);
+    await createHeatmapLayer(personalizedPointsLayer, "Personalized Heatmap", "personalized_walkscore", webMap, isDesktop);
 
     // Create personalized neighborhood scores and get top neighborhoods
     const topNeighborhoods = await createPersonalizedNeighborhoodsLayer(personalizedPointsLayer, walkscoreNeighborhoodsLayer, webMap);
@@ -287,6 +290,8 @@ const handleRecalculate = async (
 
 
 const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = ({ view, webMap }) => {
+  const isDesktop = useMediaQuery("(min-width: 1001px)");
+
   useEffect(() => {
     const initialLoad = async () => {
       try {
@@ -296,7 +301,7 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
         const userSliderValues = { slope: 2, streets: 2, amenity: 2, crime: 2 };
   
         // Trigger recalculation to create a personalized walkscore layer and heatmap
-        await handleRecalculate(view, webMap, userSliderValues);
+        await handleRecalculate(view, webMap, userSliderValues, isDesktop);
         console.log("Personalized heatmap and walkscore layers created successfully on initial load.");
   
       } catch (error) {
@@ -305,10 +310,10 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
     };
   
     initialLoad();
-  }, [webMap, view]);
+  }, [webMap, view, isDesktop]);
   
   return (
-    <button onClick={() => handleRecalculate(view, webMap, { slope: 2, streets: 2, amenity: 2, crime: 2 })}>
+    <button onClick={() => handleRecalculate(view, webMap, { slope: 2, streets: 2, amenity: 2, crime: 2 }, isDesktop)}>
       Recalculate Walkscore
     </button>
   );
@@ -316,6 +321,7 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
 
 export default WalkscoreCalculator;
 export { handleRecalculate };
+
 
 
 
