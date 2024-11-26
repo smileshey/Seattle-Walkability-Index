@@ -200,7 +200,7 @@ const createHeatmapLayer = async (
           color: [0, 181, 26, 0.6], // Green with 40% transparency
         },
       ],
-      referenceScale: isDesktop ? 55500 : 30000, // Adjust reference scale based on device type
+      referenceScale: isDesktop ? 55500 : 10000, // Adjust reference scale based on device type
       radius: isDesktop ? 25 : 15 // Adjust radius based on device type
     });
 
