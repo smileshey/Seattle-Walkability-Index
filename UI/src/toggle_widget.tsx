@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Switch, Typography, useMediaQuery } from '@mui/material';
+import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template';
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 
 interface LayerToggleProps {
@@ -18,74 +19,90 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
   // Check if bottom navigation is visible, in which case don't show the toggle switch here
   const isBottomNavVisible = isMobilePortrait || isMobileLandscape || isTabletPortrait;
 
-  const handleToggleChange = (isHeatmap: boolean) => {
-    console.log("Handling layer toggle. Toggle state (isHeatmapView):", isHeatmap);
-
-    // Define layer titles
+  const syncToggleStateWithLayer = () => {
     const baseHeatmapLayerTitle = "walkscore_fishnet_points";
     const personalizedHeatmapLayerTitle = "Personalized Heatmap";
     const baseNeighborhoodLayerTitle = "walkscore_neighborhoods";
     const personalizedNeighborhoodLayerTitle = "Personalized Neighborhood Walkscore";
 
-    // Get layers by title
     const baseHeatmapLayer = webMap.allLayers.find(layer => layer.title === baseHeatmapLayerTitle) as FeatureLayer;
     const personalizedHeatmapLayer = webMap.allLayers.find(layer => layer.title === personalizedHeatmapLayerTitle) as FeatureLayer;
     const baseNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === baseNeighborhoodLayerTitle) as FeatureLayer;
     const personalizedNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === personalizedNeighborhoodLayerTitle) as FeatureLayer;
 
-    // Hide all layers first
-    [baseHeatmapLayer, personalizedHeatmapLayer, baseNeighborhoodLayer, personalizedNeighborhoodLayer].forEach(layer => {
-      if (layer) {
-        layer.visible = false;
-        console.log(`Setting visibility to false for: ${layer.title}`);
-      }
-    });
+    // Determine if the heatmap is currently visible
+    if ((baseHeatmapLayer && baseHeatmapLayer.visible) || (personalizedHeatmapLayer && personalizedHeatmapLayer.visible)) {
+      setIsHeatmapView(true);
+    } else if ((baseNeighborhoodLayer && baseNeighborhoodLayer.visible) || (personalizedNeighborhoodLayer && personalizedNeighborhoodLayer.visible)) {
+      setIsHeatmapView(false);
+    }
+  };
 
-    // Show the appropriate layer based on the toggle state
+  const handleToggleChange = (isHeatmap: boolean) => {
+    setIsHeatmapView(isHeatmap);
+    console.log("Handling layer toggle. Toggle state (isHeatmapView):", isHeatmap);
+  
+    // Define layer titles
+    const baseHeatmapLayerTitle = "walkscore_fishnet_points";
+    const personalizedHeatmapLayerTitle = "Personalized Heatmap";
+    const baseNeighborhoodLayerTitle = "walkscore_neighborhoods";
+    const personalizedNeighborhoodLayerTitle = "Personalized Neighborhood Walkscore";
+  
+    // Get layers by title
+    const baseHeatmapLayer = webMap.allLayers.find(layer => layer.title === baseHeatmapLayerTitle) as FeatureLayer;
+    const personalizedHeatmapLayer = webMap.allLayers.find(layer => layer.title === personalizedHeatmapLayerTitle) as FeatureLayer;
+    const baseNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === baseNeighborhoodLayerTitle) as FeatureLayer;
+    const personalizedNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === personalizedNeighborhoodLayerTitle) as FeatureLayer;
+  
+    // Set visibility based on the toggle state
     if (isHeatmap) {
-      if (personalizedHeatmapLayer) {
+      if (personalizedHeatmapLayer && !personalizedHeatmapLayer.visible) {
         personalizedHeatmapLayer.visible = true;
-        console.log("Showing Personalized Heatmap Layer:", personalizedHeatmapLayer.title);
-      } else if (baseHeatmapLayer) {
+        console.log(`Setting visibility to true for: ${personalizedHeatmapLayer.title}`);
+      } else if (baseHeatmapLayer && !baseHeatmapLayer.visible) {
         baseHeatmapLayer.visible = true;
-        console.log("Showing Base Heatmap Layer:", baseHeatmapLayer.title);
+        console.log(`Setting visibility to true for: ${baseHeatmapLayer.title}`);
+      }
+  
+      // Hide both neighborhood layers if they are visible
+      if (baseNeighborhoodLayer && baseNeighborhoodLayer.visible) {
+        baseNeighborhoodLayer.visible = false;
+        console.log(`Setting visibility to false for: ${baseNeighborhoodLayer.title}`);
+      }
+      if (personalizedNeighborhoodLayer && personalizedNeighborhoodLayer.visible) {
+        personalizedNeighborhoodLayer.visible = false;
+        console.log(`Setting visibility to false for: ${personalizedNeighborhoodLayer.title}`);
       }
     } else {
-      if (personalizedNeighborhoodLayer) {
+      if (personalizedNeighborhoodLayer && !personalizedNeighborhoodLayer.visible) {
         personalizedNeighborhoodLayer.visible = true;
-        console.log("Showing Personalized Neighborhood Layer:", personalizedNeighborhoodLayer.title);
-      } else if (baseNeighborhoodLayer) {
+        console.log(`Setting visibility to true for: ${personalizedNeighborhoodLayer.title}`);
+      } else if (baseNeighborhoodLayer && !baseNeighborhoodLayer.visible) {
         baseNeighborhoodLayer.visible = true;
-        console.log("Showing Base Neighborhood Layer:", baseNeighborhoodLayer.title);
+        console.log(`Setting visibility to true for: ${baseNeighborhoodLayer.title}`);
+      }
+  
+      // Hide both heatmap layers if they are visible
+      if (baseHeatmapLayer && baseHeatmapLayer.visible) {
+        baseHeatmapLayer.visible = false;
+        console.log(`Setting visibility to false for: ${baseHeatmapLayer.title}`);
+      }
+      if (personalizedHeatmapLayer && personalizedHeatmapLayer.visible) {
+        personalizedHeatmapLayer.visible = false;
+        console.log(`Setting visibility to false for: ${personalizedHeatmapLayer.title}`);
       }
     }
-
-    // Update the state to reflect the current view
-    setIsHeatmapView(isHeatmap);
-
-    console.log(`Visibility status after toggling: 
-      Base Heatmap Layer (${baseHeatmapLayerTitle}): ${baseHeatmapLayer ? baseHeatmapLayer.visible : "not found"},
-      Personalized Heatmap Layer (${personalizedHeatmapLayerTitle}): ${personalizedHeatmapLayer ? personalizedHeatmapLayer.visible : "not found"},
-      Base Neighborhood Layer (${baseNeighborhoodLayerTitle}): ${baseNeighborhoodLayer ? baseNeighborhoodLayer.visible : "not found"},
-      Personalized Neighborhood Layer (${personalizedNeighborhoodLayerTitle}): ${personalizedNeighborhoodLayer ? personalizedNeighborhoodLayer.visible : "not found"}
-    `);
+  
+    // Sync the state again after handling the toggle
+    syncToggleStateWithLayer();
   };
+  
 
   useEffect(() => {
-    // Set to show personalized heatmap by default after recalculation
-    handleToggleChange(true);
-  }, []);
-
-  const toggleHeatmapView = () => {
-    setIsHeatmapView(prevState => {
-      const newState = !prevState;
-      handleToggleChange(newState);
-      return newState;
-    });
-  };
+    syncToggleStateWithLayer(); // Sync toggle state with layer visibility on load
+  }, [webMap]);
 
   if (isBottomNavVisible) {
-    // Do not render the toggle switch when the bottom navigation is visible
     return null;
   }
 
@@ -107,7 +124,7 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
     >
       <Switch
         checked={isHeatmapView}
-        onChange={toggleHeatmapView}
+        onChange={(event) => handleToggleChange(event.target.checked)}
       />
       <Typography sx={{ fontSize: '10px', marginLeft: 1 }}>
         Heatmap View
@@ -117,6 +134,7 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
 };
 
 export default LayerToggle;
+
 
 
 

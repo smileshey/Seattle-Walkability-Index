@@ -16,6 +16,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import ToggleIcon from '@mui/icons-material/ToggleOn';
 import LegendIcon from '@mui/icons-material/Map';
 import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template'; // Import templates
+import { handleRecalculate } from './walkscore_calculator';
+
 
 const webMap = new WebMap({
   portalItem: {
@@ -34,6 +36,34 @@ const view = new MapView({
     components: ["attribution"]
   }
 });
+
+// Log all initial layers and their visibility states
+view.when(async () => {
+  console.log("Initial load: Checking all layer visibility.");
+  webMap.allLayers.forEach(layer => {
+    console.log(`Layer: ${layer.title}, Visibility: ${layer.visible}`);
+  });
+
+  // Explicitly set visibility for all non-basemap layers
+  const layersToHide = ["walkscore_fishnet_points", "Personalized Heatmap", "walkscore_neighborhoods", "Personalized Neighborhood Walkscore"];
+  webMap.allLayers.forEach(layer => {
+    if (layersToHide.includes(layer.title)) {
+      layer.visible = false;
+      console.log(`Setting visibility to false for layer: ${layer.title}`);
+    }
+  });
+
+  // Trigger the recalculation to generate the personalized heatmap on load
+  try {
+    console.log("Initial load: Triggering recalculation to generate personalized heatmap.");
+    const userSliderValues = { slope: 2, streets: 2, amenity: 2, crime: 2 };
+    await handleRecalculate(view, webMap, userSliderValues);
+    console.log("Initial recalculation completed successfully.");
+  } catch (error) {
+    console.error("Error during initial recalculation for personalized heatmap:", error);
+  }
+});
+
 
 // Persistent roots outside of the component to prevent re-creation during re-renders
 let sliderRoot: Root | null = null;
@@ -158,17 +188,17 @@ const MainComponent = () => {
 
   const handleLayerToggle = (isHeatmap: boolean) => {
     console.log("Handling layer toggle. Toggle state:", isHeatmap);
-
+  
     const heatmapLayerTitle = "Personalized Heatmap";
     const baseHeatmapLayerTitle = "walkscore_fishnet_points";
     const neighborhoodLayerTitle = "walkscore_neighborhoods";
     const personalizedNeighborhoodLayerTitle = "Personalized Neighborhood Walkscore";
-
+  
     const heatmapLayer = webMap.allLayers.find(layer => layer.title === heatmapLayerTitle) as FeatureLayer;
     const baseHeatmapLayer = webMap.allLayers.find(layer => layer.title === baseHeatmapLayerTitle) as FeatureLayer;
     const neighborhoodLayer = webMap.allLayers.find(layer => layer.title === neighborhoodLayerTitle) as FeatureLayer;
     const personalizedNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === personalizedNeighborhoodLayerTitle) as FeatureLayer;
-
+  
     // Ensure all layers are hidden first
     [heatmapLayer, baseHeatmapLayer, neighborhoodLayer, personalizedNeighborhoodLayer].forEach(layer => {
       if (layer) {
@@ -176,7 +206,7 @@ const MainComponent = () => {
         console.log(`Setting visibility to false for: ${layer.title}`);
       }
     });
-
+  
     // Show the appropriate layer based on the toggle state
     if (isHeatmap) {
       if (heatmapLayer) {
@@ -195,10 +225,11 @@ const MainComponent = () => {
         console.log(`Setting visibility to true for: ${neighborhoodLayer.title}`);
       }
     }
-
+  
     // Update the state to reflect the current visible layer
     setIsFishnetLayer(isHeatmap);
   };
+  
 
   useEffect(() => {
     if (isMobilePortrait) {

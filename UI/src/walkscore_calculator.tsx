@@ -181,35 +181,26 @@ const createHeatmapLayer = async (
     const heatmapRenderer = new HeatmapRenderer({
       field: field,
       colorStops: [
-        { ratio: 0, color: [255, 0, 0, 1.0] }, // Red with no transparency
-        { ratio: 1, color: [0, 255, 0, 1.0] }, // Green with no transparency
+        {
+          ratio: 0,
+          color: [255, 255, 255, 0], // Full transparency for very low values
+        },
+        {
+          ratio: 0.001,
+          color: [255, 0, 0, 0.6], // Red with 50% transparency
+        },
+        {
+          ratio: 0.5,
+          color: [255, 240, 0, 0.6], // Yellow with 60% transparency
+        },
+        {
+          ratio: 1,
+          color: [0, 181, 26, 0.6], // Green with 40% transparency
+        },
       ],
-      radius: 30,
+      referenceScale: 55500,
+      radius: 25
     });
-
-    // const heatmapRenderer = new HeatmapRenderer({
-    //   field: field,
-    //   colorStops: [
-    //     {
-    //       ratio: 0,
-    //       color: [255, 255, 255, 0], // Full transparency for very low values
-    //     },
-    //     {
-    //       ratio: 0.001,
-    //       color: [255, 0, 0, 0.5], // Red with 50% transparency
-    //     },
-    //     {
-    //       ratio: 0.5,
-    //       color: [255, 255, 0, 0.6], // Yellow with 60% transparency
-    //     },
-    //     {
-    //       ratio: 1,
-    //       color: [0, 255, 0, 0.4], // Green with 40% transparency
-    //     },
-    //   ],
-    //   referenceScale: 55500,
-    //   radius: 30
-    // });
 
     // Remove any previous heatmap layers with the same title
     let heatmapLayer = webMap.allLayers.find((layer) => layer.title === outputTitle);
@@ -254,6 +245,9 @@ const handleRecalculate = async (
   // Set neighborhood layer visibility to false
   walkscoreNeighborhoodsLayer.visible = false;
   console.log("Setting neighborhood layer visibility to false.");
+  
+  // Log visibility state of walkscorePointsLayer before recalculating
+  console.log(`walkscore_fishnet_points layer visibility before recalculating: ${walkscorePointsLayer.visible}`);
 
   console.log("Creating personalized walkscore layer...");
   const personalizedPointsLayer = await createPersonalizedWalkscoreLayer(
@@ -267,6 +261,7 @@ const handleRecalculate = async (
     // Hide original walkscore points heatmap
     walkscorePointsLayer.visible = false;
     console.log("Hiding original walkscore points layer.");
+    console.log(`walkscore_fishnet_points layer visibility after hiding: ${walkscorePointsLayer.visible}`);
 
     // Generate the heatmap based on the personalized scores
     console.log("Creating personalized heatmap layer...");
@@ -278,7 +273,7 @@ const handleRecalculate = async (
     // Ensure the neighborhood layer is still hidden
     walkscoreNeighborhoodsLayer.visible = false;
     console.log("Re-ensuring neighborhood layer visibility set to false.");
-
+    
     view.extent = currentExtent;
     view.zoom = currentZoom;
 
@@ -290,21 +285,28 @@ const handleRecalculate = async (
   return [];
 };
 
+
 const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = ({ view, webMap }) => {
   useEffect(() => {
     const initialLoad = async () => {
-      console.log("Initial load, creating base heatmap.");
-      const walkscoreFishnetLayer = webMap.allLayers.find((layer) => layer.title === "walkscore_fishnet_points") as FeatureLayer;
-      if (walkscoreFishnetLayer) {
-        await createHeatmapLayer(walkscoreFishnetLayer, "Initial Heatmap", "walk_score", webMap);
-        // Force renderer update post-load
-        walkscoreFishnetLayer.renderer = walkscoreFishnetLayer.renderer;
+      try {
+        console.log("Initial load: Triggering recalculation to generate personalized heatmap.");
+  
+        // Use base case values for sliders
+        const userSliderValues = { slope: 2, streets: 2, amenity: 2, crime: 2 };
+  
+        // Trigger recalculation to create a personalized walkscore layer and heatmap
+        await handleRecalculate(view, webMap, userSliderValues);
+        console.log("Personalized heatmap and walkscore layers created successfully on initial load.");
+  
+      } catch (error) {
+        console.error("Error during initial recalculation for personalized heatmap:", error);
       }
     };
-
+  
     initialLoad();
-  }, [webMap]);
-
+  }, [webMap, view]);
+  
   return (
     <button onClick={() => handleRecalculate(view, webMap, { slope: 2, streets: 2, amenity: 2, crime: 2 })}>
       Recalculate Walkscore
@@ -314,6 +316,8 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
 
 export default WalkscoreCalculator;
 export { handleRecalculate };
+
+
 
 
 
