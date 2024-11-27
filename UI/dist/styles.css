@@ -27,6 +27,16 @@ html, body {
   pointer-events: auto;
 }
 
+#hexbin-container {
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 1003; /* Ensure hexbin container is above the map */
+  pointer-events: none; /* Allow interaction with map through the hexbin container */
+}
+
 #sliderDiv {
   position: absolute;
   bottom: 10px;

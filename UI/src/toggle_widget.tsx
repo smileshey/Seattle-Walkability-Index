@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Switch, Typography, useMediaQuery } from '@mui/material';
 import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template';
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+import * as d3 from 'd3';
 
 interface LayerToggleProps {
   view: __esri.MapView;
@@ -13,7 +14,7 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
 
   // Media query to check for small screens
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
-  const isMobileLandscape = useMediaQuery('(min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
+  const isMobileLandscape = useMediaQuery('(min-width: 600px) and (orientation: landscape)');
   const isTabletPortrait = useMediaQuery('(min-width: 601px) and (orientation: portrait)');
 
   // Check if bottom navigation is visible, in which case don't show the toggle switch here
@@ -21,19 +22,14 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
 
   const syncToggleStateWithLayer = () => {
     const baseHeatmapLayerTitle = "walkscore_fishnet_points";
-    const personalizedHeatmapLayerTitle = "Personalized Heatmap";
-    const baseNeighborhoodLayerTitle = "walkscore_neighborhoods";
-    const personalizedNeighborhoodLayerTitle = "Personalized Neighborhood Walkscore";
+    const hexbinContainer = d3.select("#hexbin-container");
 
     const baseHeatmapLayer = webMap.allLayers.find(layer => layer.title === baseHeatmapLayerTitle) as FeatureLayer;
-    const personalizedHeatmapLayer = webMap.allLayers.find(layer => layer.title === personalizedHeatmapLayerTitle) as FeatureLayer;
-    const baseNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === baseNeighborhoodLayerTitle) as FeatureLayer;
-    const personalizedNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === personalizedNeighborhoodLayerTitle) as FeatureLayer;
 
     // Determine if the heatmap is currently visible
-    if ((baseHeatmapLayer && baseHeatmapLayer.visible) || (personalizedHeatmapLayer && personalizedHeatmapLayer.visible)) {
+    if ((baseHeatmapLayer && baseHeatmapLayer.visible) || (!hexbinContainer.empty() && hexbinContainer.style("display") !== "none")) {
       setIsHeatmapView(true);
-    } else if ((baseNeighborhoodLayer && baseNeighborhoodLayer.visible) || (personalizedNeighborhoodLayer && personalizedNeighborhoodLayer.visible)) {
+    } else {
       setIsHeatmapView(false);
     }
   };
@@ -41,62 +37,42 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
   const handleToggleChange = (isHeatmap: boolean) => {
     setIsHeatmapView(isHeatmap);
     console.log("Handling layer toggle. Toggle state (isHeatmapView):", isHeatmap);
-  
+
     // Define layer titles
     const baseHeatmapLayerTitle = "walkscore_fishnet_points";
-    const personalizedHeatmapLayerTitle = "Personalized Heatmap";
-    const baseNeighborhoodLayerTitle = "walkscore_neighborhoods";
-    const personalizedNeighborhoodLayerTitle = "Personalized Neighborhood Walkscore";
-  
+    const hexbinContainer = d3.select("#hexbin-container");
+
     // Get layers by title
     const baseHeatmapLayer = webMap.allLayers.find(layer => layer.title === baseHeatmapLayerTitle) as FeatureLayer;
-    const personalizedHeatmapLayer = webMap.allLayers.find(layer => layer.title === personalizedHeatmapLayerTitle) as FeatureLayer;
-    const baseNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === baseNeighborhoodLayerTitle) as FeatureLayer;
-    const personalizedNeighborhoodLayer = webMap.allLayers.find(layer => layer.title === personalizedNeighborhoodLayerTitle) as FeatureLayer;
-  
+
     // Set visibility based on the toggle state
     if (isHeatmap) {
-      if (personalizedHeatmapLayer && !personalizedHeatmapLayer.visible) {
-        personalizedHeatmapLayer.visible = true;
-        console.log(`Setting visibility to true for: ${personalizedHeatmapLayer.title}`);
-      } else if (baseHeatmapLayer && !baseHeatmapLayer.visible) {
+      if (baseHeatmapLayer && !baseHeatmapLayer.visible) {
         baseHeatmapLayer.visible = true;
         console.log(`Setting visibility to true for: ${baseHeatmapLayer.title}`);
       }
-  
-      // Hide both neighborhood layers if they are visible
-      if (baseNeighborhoodLayer && baseNeighborhoodLayer.visible) {
-        baseNeighborhoodLayer.visible = false;
-        console.log(`Setting visibility to false for: ${baseNeighborhoodLayer.title}`);
-      }
-      if (personalizedNeighborhoodLayer && personalizedNeighborhoodLayer.visible) {
-        personalizedNeighborhoodLayer.visible = false;
-        console.log(`Setting visibility to false for: ${personalizedNeighborhoodLayer.title}`);
+
+      // Hide hexbin container if it exists
+      if (!hexbinContainer.empty()) {
+        hexbinContainer.style("display", "none");
+        console.log("Setting visibility to none for hexbin container");
       }
     } else {
-      if (personalizedNeighborhoodLayer && !personalizedNeighborhoodLayer.visible) {
-        personalizedNeighborhoodLayer.visible = true;
-        console.log(`Setting visibility to true for: ${personalizedNeighborhoodLayer.title}`);
-      } else if (baseNeighborhoodLayer && !baseNeighborhoodLayer.visible) {
-        baseNeighborhoodLayer.visible = true;
-        console.log(`Setting visibility to true for: ${baseNeighborhoodLayer.title}`);
-      }
-  
-      // Hide both heatmap layers if they are visible
       if (baseHeatmapLayer && baseHeatmapLayer.visible) {
         baseHeatmapLayer.visible = false;
         console.log(`Setting visibility to false for: ${baseHeatmapLayer.title}`);
       }
-      if (personalizedHeatmapLayer && personalizedHeatmapLayer.visible) {
-        personalizedHeatmapLayer.visible = false;
-        console.log(`Setting visibility to false for: ${personalizedHeatmapLayer.title}`);
+
+      // Show hexbin container if it exists
+      if (!hexbinContainer.empty()) {
+        hexbinContainer.style("display", "block");
+        console.log("Setting visibility to block for hexbin container");
       }
     }
-  
+
     // Sync the state again after handling the toggle
     syncToggleStateWithLayer();
   };
-  
 
   useEffect(() => {
     syncToggleStateWithLayer(); // Sync toggle state with layer visibility on load

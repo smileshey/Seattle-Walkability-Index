@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { useMediaQuery } from "@mui/material";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import MapView from "@arcgis/core/views/MapView";
-import HeatmapRenderer from "@arcgis/core/renderers/HeatmapRenderer";
 import Field from "@arcgis/core/layers/support/Field";
 import Graphic from "@arcgis/core/Graphic";
 import Collection from "@arcgis/core/core/Collection";
@@ -19,6 +18,7 @@ import {
   rankNormalizeAndScaleScores,
 } from "./neighborhood_utils";
 import { getTopNeighborhoods, Neighborhood } from "./neighborhood_utils";
+import { createHeatmapLayer } from './heatmap_render'; // Update the import here to 'createHeatmapLayer'
 
 interface FeatureAttributes {
   effective_slope: number;
@@ -86,8 +86,8 @@ const createPersonalizedWalkscoreLayer = async (
 
       const baseWalkscore = attributes.unadjusted_walkscore;
       attributes.personalized_walkscore = baseWalkscore
-        ? (baseWalkscore * slopeScaler * effectiveSpeedLimitScaler * businessDensityScaler * crimeDensityScaler * crashDensityScaler) + 0.001 // Adding 0.0001 to ensure non-zero scores
-        : 0.001; // Setting a minimum value of 0.0001
+        ? (baseWalkscore * slopeScaler * effectiveSpeedLimitScaler * businessDensityScaler * crimeDensityScaler * crashDensityScaler) + 0.001 // Adding 0.001 to ensure non-zero scores
+        : 0.001; // Setting a minimum value of 0.001
     });
 
     // Normalize and scale the scores
@@ -151,78 +151,11 @@ const createPersonalizedWalkscoreLayer = async (
     await temporaryLayer.when();
     temporaryLayer.refresh();
 
-    // Force renderer update post-load
-    temporaryLayer.renderer = temporaryLayer.renderer;
-
     console.log("Added personalized walkscore layer to the map.");
     return temporaryLayer;
   } catch (error) {
     console.error("Error creating personalized walkscore layer:", error);
     throw error;
-  }
-};
-
-// Function to generate a HeatmapRenderer based on the given field
-const createHeatmapLayer = async (
-  pointsLayer: FeatureLayer,
-  outputTitle: string,
-  field: string,
-  webMap: __esri.WebMap,
-  isDesktop: boolean
-) => {
-  try {
-    console.log(`Creating heatmap layer: ${outputTitle} using field: ${field}`);
-
-    // Get min and max values for debugging
-    const featuresArray = pointsLayer.source.toArray();
-    const scores = featuresArray.map(feature => feature.attributes[field]);
-    const minScore = Math.min(...scores);
-    const maxScore = Math.max(...scores);
-    console.log(`Heatmap values range from ${minScore} to ${maxScore}`);
-
-    const heatmapRenderer = new HeatmapRenderer({
-      field: field,
-      colorStops: [
-        {
-          ratio: 0,
-          color: [255, 255, 255, 0], // Full transparency for very low values
-        },
-        {
-          ratio: 0.001,
-          color: [255, 0, 0, 0.6], // Red with 50% transparency
-        },
-        {
-          ratio: 0.5,
-          color: [255, 240, 0, 0.6], // Yellow with 60% transparency
-        },
-        {
-          ratio: 1,
-          color: [0, 181, 26, 0.6], // Green with 40% transparency
-        },
-      ],
-      referenceScale: isDesktop ? 55500 : 10000, // Adjust reference scale based on device type
-      radius: isDesktop ? 25 : 15 // Adjust radius based on device type
-    });
-
-    // Remove any previous heatmap layers with the same title
-    let heatmapLayer = webMap.allLayers.find((layer) => layer.title === outputTitle);
-    if (heatmapLayer) {
-      console.log(`Removing existing heatmap layer: ${outputTitle}`);
-      webMap.remove(heatmapLayer);
-    }
-
-    // Add the layer to the map first before applying the renderer
-    pointsLayer.title = outputTitle;
-    webMap.add(pointsLayer);
-    await pointsLayer.when();
-
-    // Apply the heatmap renderer after the layer is added to the map
-    pointsLayer.renderer = heatmapRenderer;
-    // Force renderer update post-load
-    pointsLayer.renderer = pointsLayer.renderer;
-
-  } catch (error) {
-    console.error("Error creating heatmap layer:", error);
   }
 };
 
@@ -248,9 +181,6 @@ const handleRecalculate = async (
   // Set neighborhood layer visibility to false
   walkscoreNeighborhoodsLayer.visible = false;
   console.log("Setting neighborhood layer visibility to false.");
-  
-  // Log visibility state of walkscorePointsLayer before recalculating
-  console.log(`walkscore_fishnet_points layer visibility before recalculating: ${walkscorePointsLayer.visible}`);
 
   console.log("Creating personalized walkscore layer...");
   const personalizedPointsLayer = await createPersonalizedWalkscoreLayer(
@@ -261,14 +191,13 @@ const handleRecalculate = async (
   );
 
   if (personalizedPointsLayer) {
-    // Hide original walkscore points heatmap
+    // Hide original walkscore points layer
     walkscorePointsLayer.visible = false;
     console.log("Hiding original walkscore points layer.");
-    console.log(`walkscore_fishnet_points layer visibility after hiding: ${walkscorePointsLayer.visible}`);
 
-    // Generate the heatmap based on the personalized scores
+    // Generate the heatmap visualization based on the personalized scores
     console.log("Creating personalized heatmap layer...");
-    await createHeatmapLayer(personalizedPointsLayer, "Personalized Heatmap", "personalized_walkscore", webMap, isDesktop);
+    await createHeatmapLayer(personalizedPointsLayer, "Personalized Heatmap", "personalized_walkscore", webMap, view);
 
     // Create personalized neighborhood scores and get top neighborhoods
     const topNeighborhoods = await createPersonalizedNeighborhoodsLayer(personalizedPointsLayer, walkscoreNeighborhoodsLayer, webMap);
@@ -276,7 +205,7 @@ const handleRecalculate = async (
     // Ensure the neighborhood layer is still hidden
     walkscoreNeighborhoodsLayer.visible = false;
     console.log("Re-ensuring neighborhood layer visibility set to false.");
-    
+
     view.extent = currentExtent;
     view.zoom = currentZoom;
 
@@ -288,30 +217,29 @@ const handleRecalculate = async (
   return [];
 };
 
-
 const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = ({ view, webMap }) => {
   const isDesktop = useMediaQuery("(min-width: 1001px)");
 
   useEffect(() => {
     const initialLoad = async () => {
       try {
-        console.log("Initial load: Triggering recalculation to generate personalized heatmap.");
-  
+        console.log("Initial load: Triggering recalculation to generate personalized heatmap visualization.");
+
         // Use base case values for sliders
         const userSliderValues = { slope: 2, streets: 2, amenity: 2, crime: 2 };
-  
-        // Trigger recalculation to create a personalized walkscore layer and heatmap
+
+        // Trigger recalculation to create a personalized walkscore layer and heatmap visualization
         await handleRecalculate(view, webMap, userSliderValues, isDesktop);
         console.log("Personalized heatmap and walkscore layers created successfully on initial load.");
-  
+
       } catch (error) {
         console.error("Error during initial recalculation for personalized heatmap:", error);
       }
     };
-  
+
     initialLoad();
   }, [webMap, view, isDesktop]);
-  
+
   return (
     <button onClick={() => handleRecalculate(view, webMap, { slope: 2, streets: 2, amenity: 2, crime: 2 }, isDesktop)}>
       Recalculate Walkscore
@@ -321,6 +249,10 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
 
 export default WalkscoreCalculator;
 export { handleRecalculate };
+
+
+
+
 
 
 
