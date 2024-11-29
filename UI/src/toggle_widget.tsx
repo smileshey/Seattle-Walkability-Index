@@ -1,35 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Switch, Typography, useMediaQuery } from '@mui/material';
-import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template';
-import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
-import * as d3 from 'd3';
+import VisibilityState from './visibility_state'; // Import the VisibilityState class
 
 interface LayerToggleProps {
   view: __esri.MapView;
   webMap: __esri.WebMap;
+  visibilityState: VisibilityState; // Add VisibilityState as a prop
 }
 
-const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
+const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState }) => {
   const [isHeatmapView, setIsHeatmapView] = useState(true);
 
   // Media query to check for small screens
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
-  const isMobileLandscape = useMediaQuery('(min-width: 600px) and (orientation: landscape)');
+  const isMobileLandscape = useMediaQuery('(min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
   const isTabletPortrait = useMediaQuery('(min-width: 601px) and (orientation: portrait)');
 
   // Check if bottom navigation is visible, in which case don't show the toggle switch here
   const isBottomNavVisible = isMobilePortrait || isMobileLandscape || isTabletPortrait;
 
   const syncToggleStateWithLayer = () => {
-    const baseHeatmapLayerTitle = "walkscore_fishnet_points";
-    const hexbinContainer = d3.select("#hexbin-container");
-
-    const baseHeatmapLayer = webMap.allLayers.find(layer => layer.title === baseHeatmapLayerTitle) as FeatureLayer;
-
-    // Determine if the heatmap is currently visible
-    if ((baseHeatmapLayer && baseHeatmapLayer.visible) || (!hexbinContainer.empty() && hexbinContainer.style("display") !== "none")) {
+    // Use VisibilityState to determine which layer is currently visible and update the state accordingly
+    const visibleLayer = visibilityState.getCurrentVisibleLayer();
+    if (visibleLayer === "walkscore_fishnet_points" || visibleLayer === "Personalized Heatmap") {
       setIsHeatmapView(true);
-    } else {
+    } else if (visibleLayer === "walkscore_neighborhoods" || visibleLayer === "Personalized Neighborhood Walkscore") {
       setIsHeatmapView(false);
     }
   };
@@ -38,35 +33,18 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
     setIsHeatmapView(isHeatmap);
     console.log("Handling layer toggle. Toggle state (isHeatmapView):", isHeatmap);
 
-    // Define layer titles
-    const baseHeatmapLayerTitle = "walkscore_fishnet_points";
-    const hexbinContainer = d3.select("#hexbin-container");
-
-    // Get layers by title
-    const baseHeatmapLayer = webMap.allLayers.find(layer => layer.title === baseHeatmapLayerTitle) as FeatureLayer;
-
-    // Set visibility based on the toggle state
+    // Use VisibilityState to update the visibility based on the toggle
     if (isHeatmap) {
-      if (baseHeatmapLayer && !baseHeatmapLayer.visible) {
-        baseHeatmapLayer.visible = true;
-        console.log(`Setting visibility to true for: ${baseHeatmapLayer.title}`);
-      }
-
-      // Hide hexbin container if it exists
-      if (!hexbinContainer.empty()) {
-        hexbinContainer.style("display", "none");
-        console.log("Setting visibility to none for hexbin container");
+      if (visibilityState.isPersonalizedLayerAvailable("Personalized Heatmap")) {
+        visibilityState.setVisibilityForLayerType("personalizedHeatmap");
+      } else {
+        visibilityState.setVisibilityForLayerType("baseHeatmap");
       }
     } else {
-      if (baseHeatmapLayer && baseHeatmapLayer.visible) {
-        baseHeatmapLayer.visible = false;
-        console.log(`Setting visibility to false for: ${baseHeatmapLayer.title}`);
-      }
-
-      // Show hexbin container if it exists
-      if (!hexbinContainer.empty()) {
-        hexbinContainer.style("display", "block");
-        console.log("Setting visibility to block for hexbin container");
+      if (visibilityState.isPersonalizedLayerAvailable("Personalized Neighborhood Walkscore")) {
+        visibilityState.setVisibilityForLayerType("personalizedNeighborhood");
+      } else {
+        visibilityState.setVisibilityForLayerType("neighborhood");
       }
     }
 
@@ -110,6 +88,9 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap }) => {
 };
 
 export default LayerToggle;
+
+
+
 
 
 

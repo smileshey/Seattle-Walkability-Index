@@ -27,16 +27,6 @@ html, body {
   pointer-events: auto;
 }
 
-#hexbin-container {
-  height: 100%;
-  width: 100%;
-  top: 0;
-  left: 0;
-  position: absolute;
-  z-index: 1003; /* Ensure hexbin container is above the map */
-  pointer-events: none; /* Allow interaction with map through the hexbin container */
-}
-
 #sliderDiv {
   position: absolute;
   bottom: 10px;
@@ -54,14 +44,14 @@ html, body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 1003;
-  padding: 10px; /* Increase padding for spacing */
-  background: rgba(255, 255, 255, 0.8); /* Slightly transparent white background for better visibility */
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.8);
   border-radius: 15px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-  text-align: center; /* Ensure contents are centered horizontally */
+  text-align: center;
   display: flex;
-  justify-content: center; /* Center content horizontally */
-  align-items: center; /* Center content vertically */
+  justify-content: center;
+  align-items: center;
 }
 
 #layerToggleDiv {
@@ -75,18 +65,6 @@ html, body {
   border-radius: 5px;
 }
 
-#headerDiv {
-  position: absolute;
-  top: 0;
-  left: 50%; /* Position it from the center */
-  transform: translateX(-50%); /* Ensure it's centered */
-  width: 100%; /* Default width for larger screens */
-  z-index: 1000;
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0); /* Make the background visible */
-  padding: 10px;
-  border-radius: 0px 0px 10px 10px; /* Bottom-left and bottom-right rounded corners */
-}
 
 /* Mobile Portrait Layout */
 @media (max-width: 600px) and (orientation: portrait) {
@@ -94,18 +72,17 @@ html, body {
     width: 50%;
     padding: 15px;
     font-size: 16px;
-    background-color: rgba(240, 240, 240, 0); /* Lighter background on mobile */
+    background-color: rgba(240, 240, 240, 0);
   }
 
   #sliderDiv {
     position: absolute;
     bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1003;
-    left: 35%; /* Align the left edge to the center of the viewport */
-    bottom: 110px;
-    transform: translateX(-50%); /* Move the element back by 50% of its own width to center it */
     padding: 0px;
-    background: rgba(255, 255, 255, 0); /* Adjust transparency as needed */
+    background: rgba(255, 255, 255, 0);
     border-radius: 10px;
   }
 
@@ -138,7 +115,7 @@ html, body {
     width: 100%;
     padding: 15px;
     font-size: 16px;
-    background-color: rgba(240, 240, 240, 0); /* Lighter background on tablet */
+    background-color: rgba(240, 240, 240, 0);
   }
 
   #sliderDiv {
@@ -164,13 +141,12 @@ html, body {
     display: none; /* Hide the toggle div in tablet portrait mode */
   }
 
-  /* Center and reduce the width of bottom navigation */
   .bottom-nav {
     position: fixed;
     bottom: 0;
-    left: 25%; /* 25% left to center it */
-    right: 25%; /* 25% right to center it */
-    width: 50%; /* Width takes only 50% of the screen */
+    left: 25%;
+    right: 25%;
+    width: 50%;
     z-index: 1000;
     background-color: white;
     box-shadow: 0px -1px 6px rgba(0, 0, 0, 0.1);
@@ -193,7 +169,7 @@ html, body {
     width: 50%;
     padding: 10px;
     font-size: 14px;
-    background-color: rgba(230, 230, 230, 0); /* Adjusted for landscape */
+    background-color: rgba(230, 230, 230, 0);
     z-index: 1004;
   }
 
@@ -211,10 +187,21 @@ html, body {
     position: absolute;
     bottom: 10px;
     left: 15%;
-    /* transform: translateX(-50%); */
     z-index: 1000;
     visibility: hidden;
   }
+
+  #layerToggleDiv {
+    display: block; /* Ensure the toggle div is visible in mobile landscape mode */
+    position: absolute;
+    bottom: 80px;
+    right: 20px;
+    z-index: 1004;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 5px;
+  }
 }
+
 
 

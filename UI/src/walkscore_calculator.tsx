@@ -19,6 +19,7 @@ import {
 } from "./neighborhood_utils";
 import { getTopNeighborhoods, Neighborhood } from "./neighborhood_utils";
 import { createHeatmapLayer } from './heatmap_render'; // Update the import here to 'createHeatmapLayer'
+import VisibilityState from './visibility_state'; // Import VisibilityState class
 
 interface FeatureAttributes {
   effective_slope: number;
@@ -41,7 +42,8 @@ const createPersonalizedWalkscoreLayer = async (
   originalLayer: FeatureLayer,
   title: string,
   userSliderValues: { [key: string]: number },
-  webMap: __esri.WebMap
+  webMap: __esri.WebMap,
+  visibilityState: VisibilityState // Inject the visibilityState instance
 ) => {
   try {
     console.log("Creating personalized walkscore layer...");
@@ -163,7 +165,8 @@ const handleRecalculate = async (
   view: MapView,
   webMap: __esri.WebMap,
   userSliderValues: { [key: string]: number },
-  isDesktop: boolean
+  isDesktop: boolean,
+  visibilityState: VisibilityState // Inject visibilityState
 ): Promise<Neighborhood[]> => {
   const currentExtent = view.extent.clone();
   const currentZoom = view.zoom;
@@ -178,26 +181,25 @@ const handleRecalculate = async (
     return [];
   }
 
-  // Set neighborhood layer visibility to false
-  walkscoreNeighborhoodsLayer.visible = false;
-  console.log("Setting neighborhood layer visibility to false.");
+  // Reset visibility for all layers before making updates
+  visibilityState.resetLayerVisibility();
 
   console.log("Creating personalized walkscore layer...");
   const personalizedPointsLayer = await createPersonalizedWalkscoreLayer(
     walkscorePointsLayer,
     "Personalized Walkscore",
     userSliderValues,
-    webMap
+    webMap,
+    visibilityState
   );
 
   if (personalizedPointsLayer) {
-    // Hide original walkscore points layer
-    walkscorePointsLayer.visible = false;
-    console.log("Hiding original walkscore points layer.");
-
     // Generate the heatmap visualization based on the personalized scores
     console.log("Creating personalized heatmap layer...");
     await createHeatmapLayer(personalizedPointsLayer, "Personalized Heatmap", "personalized_walkscore", webMap, view);
+
+    // Set the personalized heatmap to visible
+    visibilityState.setLayerVisible("Personalized Heatmap");
 
     // Create personalized neighborhood scores and get top neighborhoods
     const topNeighborhoods = await createPersonalizedNeighborhoodsLayer(personalizedPointsLayer, walkscoreNeighborhoodsLayer, webMap);
@@ -219,6 +221,7 @@ const handleRecalculate = async (
 
 const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = ({ view, webMap }) => {
   const isDesktop = useMediaQuery("(min-width: 1001px)");
+  const visibilityState = new VisibilityState({ webMap }); // Create an instance of VisibilityState
 
   useEffect(() => {
     const initialLoad = async () => {
@@ -229,7 +232,7 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
         const userSliderValues = { slope: 2, streets: 2, amenity: 2, crime: 2 };
 
         // Trigger recalculation to create a personalized walkscore layer and heatmap visualization
-        await handleRecalculate(view, webMap, userSliderValues, isDesktop);
+        await handleRecalculate(view, webMap, userSliderValues, isDesktop, visibilityState);
         console.log("Personalized heatmap and walkscore layers created successfully on initial load.");
 
       } catch (error) {
@@ -241,7 +244,7 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
   }, [webMap, view, isDesktop]);
 
   return (
-    <button onClick={() => handleRecalculate(view, webMap, { slope: 2, streets: 2, amenity: 2, crime: 2 }, isDesktop)}>
+    <button onClick={() => handleRecalculate(view, webMap, { slope: 2, streets: 2, amenity: 2, crime: 2 }, isDesktop, visibilityState)}>
       Recalculate Walkscore
     </button>
   );
@@ -249,6 +252,7 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
 
 export default WalkscoreCalculator;
 export { handleRecalculate };
+
 
 
 

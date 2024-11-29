@@ -7,6 +7,7 @@ import { handleRecalculate } from './walkscore_calculator';
 import TopNeighborhoods from './top_neighborhoods';
 import { Neighborhood } from './neighborhood_utils';
 import { useMediaQuery } from '@mui/material';
+import VisibilityState from './visibility_state'; // Import VisibilityState
 
 const marks = [
   { value: 0 },
@@ -50,6 +51,9 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
   const isMobile = useMediaQuery('(max-width:1000px) and (orientation: portrait), (min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
   const isDesktop = useMediaQuery('(min-width: 1001px)'); // Use this to determine if the device is a desktop
 
+  // Create an instance of VisibilityState
+  const visibilityState = new VisibilityState({ webMap });
+
   const handleSliderChange = (name: string) => (event: Event, value: number | number[]) => {
     setValues({
       ...values,
@@ -63,8 +67,8 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
     setPreviousValues(values);
 
     try {
-      // Updated call to handleRecalculate with all arguments
-      const recalculatedNeighborhoods = await handleRecalculate(view, webMap, values, isDesktop);
+      // Call handleRecalculate with updated slider values and visibilityState instance
+      const recalculatedNeighborhoods = await handleRecalculate(view, webMap, values, isDesktop, visibilityState);
 
       if (recalculatedNeighborhoods && recalculatedNeighborhoods.length > 0) {
         setTopNeighborhoods(recalculatedNeighborhoods);
@@ -136,78 +140,26 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
             <TopNeighborhoods neighborhoods={topNeighborhoods} view={view} webMap={webMap} showTextList={true} />
           ) : (
             <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
-                <Typography variant="caption" sx={{ width: '110px', textAlign: 'center', marginRight: '8px', fontWeight: 'italic', fontSize: isMobile ? '0.7rem' : '0.8rem' }}>
-                  Flat Ground
-                </Typography>
-                <Slider
-                  size="small"
-                  value={values.slope}
-                  onChange={handleSliderChange('slope')}
-                  aria-labelledby="slope-slider"
-                  min={0}
-                  max={4}
-                  step={1}
-                  marks={marks}
-                  valueLabelDisplay="auto"
-                  valueLabelFormat={valueLabelFormat}
-                  sx={{ width: isMobile ? '120px' : '150px' }}
-                />
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
-                <Typography variant="caption" sx={{ width: '110px', textAlign: 'center', marginRight: '8px', fontWeight: 'italic', fontSize: isMobile ? '0.7rem' : '0.8rem' }}>
-                  Calm Streets
-                </Typography>
-                <Slider
-                  size="small"
-                  value={values.streets}
-                  onChange={handleSliderChange('streets')}
-                  aria-labelledby="streets-slider"
-                  min={0}
-                  max={4}
-                  step={1}
-                  marks={marks}
-                  valueLabelDisplay="auto"
-                  valueLabelFormat={valueLabelFormat}
-                  sx={{ width: isMobile ? '120px' : '150px' }}
-                />
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
-                <Typography variant="caption" sx={{ width: '110px', textAlign: 'center', marginRight: '8px', fontWeight: 'italic', fontSize: isMobile ? '0.7rem' : '0.8rem' }}>
-                  Business Density
-                </Typography>
-                <Slider
-                  size="small"
-                  value={values.amenity}
-                  onChange={handleSliderChange('amenity')}
-                  aria-labelledby="amenity-slider"
-                  min={0}
-                  max={4}
-                  step={1}
-                  marks={marks}
-                  valueLabelDisplay="auto"
-                  valueLabelFormat={valueLabelFormat}
-                  sx={{ width: isMobile ? '120px' : '150px' }}
-                />
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
-                <Typography variant="caption" sx={{ width: '110px', textAlign: 'center', marginRight: '8px', fontWeight: 'italic', fontSize: isMobile ? '0.7rem' : '0.8rem' }}>
-                  Crime Density
-                </Typography>
-                <Slider
-                  size="small"
-                  value={values.crime}
-                  onChange={handleSliderChange('crime')}
-                  aria-labelledby="crime-slider"
-                  min={0}
-                  max={4}
-                  step={1}
-                  marks={marks}
-                  valueLabelDisplay="auto"
-                  valueLabelFormat={valueLabelFormat}
-                  sx={{ width: isMobile ? '120px' : '150px' }}
-                />
-              </Box>
+              {['slope', 'streets', 'amenity', 'crime'].map((feature) => (
+                <Box key={feature} sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
+                  <Typography variant="caption" sx={{ width: '110px', textAlign: 'center', marginRight: '8px', fontWeight: 'italic', fontSize: isMobile ? '0.7rem' : '0.8rem' }}>
+                    {feature.charAt(0).toUpperCase() + feature.slice(1)} Density
+                  </Typography>
+                  <Slider
+                    size="small"
+                    value={values[feature as keyof typeof values]}
+                    onChange={handleSliderChange(feature)}
+                    aria-labelledby={`${feature}-slider`}
+                    min={0}
+                    max={4}
+                    step={1}
+                    marks={marks}
+                    valueLabelDisplay="auto"
+                    valueLabelFormat={valueLabelFormat}
+                    sx={{ width: isMobile ? '120px' : '150px' }}
+                  />
+                </Box>
+              ))}
             </Box>
           )}
         </>
@@ -254,6 +206,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
 };
 
 export default SliderWidget;
+
 
 
 
