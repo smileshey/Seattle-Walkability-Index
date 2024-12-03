@@ -12,22 +12,30 @@ export const createHeatmapLayer = async (
   view: MapView
 ) => {
   try {
-    console.log(`Creating heatmap layer: ${outputTitle}`);
-
     // Initialize the VisibilityState instance
     const visibilityManager = new VisibilityState({ webMap });
 
     // Wait for the pointsLayer to load
     await pointsLayer.when();
-    console.log("Points layer loaded successfully.");
+    
+    // List of possible layers to hide
+    const possibleLayersToHide = [
+        "walkscore_fishnet_points",
+        "walkscore_neighborhoods",
+        "Personalized Heatmap",
+        "Personalized Neighborhood Walkscore"
+      ];
+  
+      // Filter layers to hide by checking their availability in the webMap
+      const layersToHide = possibleLayersToHide.filter(layerTitle => {
+        const layer = webMap.allLayers.find(layer => layer.title === layerTitle);
+        return !!layer; // Only include if layer exists
+      });
 
-    // Hide the base heatmap and other related layers first
-    const layersToHide = [
-      "walkscore_fishnet_points",
-      "Personalized Heatmap",
-      "Personalized Neighborhood Walkscore"
-    ];
-    visibilityManager.hideAllLayers(layersToHide);
+      console.log(layersToHide)
+  
+      // Hide the layers that exist in the map
+      visibilityManager.hideAllLayers(layersToHide);
 
     // Query the features from the pointsLayer
     console.log("Querying features from points layer...");
@@ -43,11 +51,7 @@ export const createHeatmapLayer = async (
       console.error("No features found in the layer.");
       return;
     }
-
-    console.log(`Number of features found: ${featuresArray.length}`);
-
     // Create heatmap renderer
-    console.log("Creating heatmap renderer...");
     const heatmapRenderer = new HeatmapRenderer({
       field: field,
       colorStops: [
@@ -66,12 +70,12 @@ export const createHeatmapLayer = async (
     pointsLayer.renderer = heatmapRenderer;
     console.log("Heatmap renderer applied to points layer.");
 
-    // Set the visibility of the personalized heatmap layer to true using VisibilityState
-    visibilityManager.setLayerVisible(outputTitle);
-
     // Add the points layer to the webMap if not already added
     if (!webMap.layers.includes(pointsLayer)) {
+      console.log("Adding points layer to the map...");
       webMap.add(pointsLayer);
+    } else {
+      console.log("Points layer already exists in the map.");
     }
 
     console.log("Heatmap layer created successfully.");

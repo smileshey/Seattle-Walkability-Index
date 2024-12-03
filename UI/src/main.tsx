@@ -157,7 +157,6 @@ const MainComponent = () => {
       
       // Update visibility after recalculation is triggered
       visibilityState.handlePostRecalculateVisibility();
-  
       setRecalculateTriggered(false);
     }
   }, [recalculateTriggered]);
@@ -167,14 +166,21 @@ const MainComponent = () => {
       console.log("Toggling layers via bottom navigation...");
       const newIsHeatmapLayer = !isFishnetLayer;
       setIsFishnetLayer(newIsHeatmapLayer);
-  
-      // Use VisibilityState to toggle layers instead of handleLayerToggle
       visibilityState.toggleLayerVisibility(newIsHeatmapLayer);
+  
+      // Update legend visibility based on heatmap layer
+      if (newIsHeatmapLayer) {
+        visibilityState.toggleLegendVisibility(false); // Hide legend when heatmap is shown
+      } else {
+        visibilityState.toggleLegendVisibility(true); // Show legend when neighborhoods are shown
+      }
     } else if (selectedWidget === newValue) {
       // If the same widget is selected, we should unmount it
       if (newValue === 'slider') {
         unmountWidget('slider');
       } else if (newValue === 'legend') {
+        // Hide legend when clicking again
+        visibilityState.toggleLegendVisibility(false);
         unmountWidget('legend');
       }
       setSelectedWidget(null);
@@ -188,6 +194,7 @@ const MainComponent = () => {
         }
         sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
       } else if (newValue === 'legend') {
+        visibilityState.toggleLegendVisibility(true); // Show legend when button is toggled on
         visibilityState.setWidgetVisible('legend-container', true);
         const legendDiv = document.querySelector(".legend-container") as HTMLElement;
         if (!legendRoot) {
@@ -206,7 +213,7 @@ const MainComponent = () => {
       <div className="widget-container" id="sliderDiv"></div>
       <div className="legend-container"></div>
 
-      {(isMobilePortrait || isTabletPortrait) && (
+      {(isTabletPortrait) && (
         <div>
           <Box
             sx={{
@@ -245,7 +252,7 @@ const MainComponent = () => {
                 value="slider"
                 sx={{
                   justifyContent: 'center',
-                  padding: '8px',
+                  padding: '20px',
                   whiteSpace: 'normal',
                   textAlign: 'center',
                   lineHeight: 1.2,
@@ -258,7 +265,7 @@ const MainComponent = () => {
                 value="toggle"
                 sx={{
                   justifyContent: 'center',
-                  padding: '8px',
+                  padding: '20px',
                   whiteSpace: 'normal',
                   textAlign: 'center',
                   lineHeight: 1.2,
@@ -271,7 +278,7 @@ const MainComponent = () => {
                 value="legend"
                 sx={{
                   justifyContent: 'center',
-                  padding: '8px',
+                  padding: '20px',
                   whiteSpace: 'normal',
                   textAlign: 'center',
                   lineHeight: 1.2,
@@ -283,86 +290,69 @@ const MainComponent = () => {
         </div>
       )}
 
-      {isMobileLandscape && (
-        <div>
-          <Box
-            sx={{
-              position: 'fixed',
-              top: '5px',
-              right: '5px',
-              zIndex: 1000,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-              padding: '0px',
-              borderRadius: '15px',
-              border: '2px solid rgba(0, 0, 0, 0.4)',
-              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-              minWidth: '80px',
-              maxWidth: '100px',
-              minHeight: '200px',
-              width: 'auto',
-              height: 'auto',
-              maxHeight: '250px',
-            }}
-          >
-            <BottomNavigation
-              value={selectedWidget}
-              onChange={(event, newValue) => handleBottomNavChange(newValue as 'slider' | 'legend' | 'toggle')}
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                padding: 0,
-                backgroundColor: 'transparent',
-                width: 'auto',
-              }}
-              showLabels
-            >
-              <BottomNavigationAction
-                label="Custom Walkscore"
-                icon={<InfoIcon />}
-                value="slider"
-                sx={{
-                  justifyContent: 'center',
-                  padding: '8px',
-                  whiteSpace: 'normal',
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  maxWidth: '80px'
-                }}
-              />
-              <BottomNavigationAction
-                label="View Toggle"
-                icon={<ToggleIcon />}
-                value="toggle"
-                sx={{
-                  justifyContent: 'center',
-                  padding: '8px',
-                  whiteSpace: 'normal',
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  maxWidth: '80px'
-                }}
-              />
-              <BottomNavigationAction
-                label="Legend"
-                icon={<LegendIcon />}
-                value="legend"
-                sx={{
-                  justifyContent: 'center',
-                  padding: '8px',
-                  whiteSpace: 'normal',
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  maxWidth: '80px'
-                }}
-              />
-            </BottomNavigation>
-          </Box>
-        </div>
-      )}
+{(isMobilePortrait || isMobileLandscape) && (
+  <div>
+    {/* Container Box */}
+    <Box className="bottom-nav-container">
+      <BottomNavigation
+        value={selectedWidget}
+        onChange={(event, newValue) => handleBottomNavChange(newValue as 'slider' | 'legend' | 'toggle')}
+        className="bottom-nav" // Add this class for consistent styling with the CSS
+        sx={{
+          display: 'flex',
+          flexDirection: 'column', // Ensure buttons are in column format
+          padding: 0,
+          backgroundColor: 'transparent',
+          width: 'auto',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        showLabels
+      >
+        <BottomNavigationAction
+          label="Custom Walkscore"
+          icon={<InfoIcon />}
+          value="slider"
+          sx={{
+            justifyContent: 'center',
+            padding: '16px', // Increase padding for better spacing
+            whiteSpace: 'normal',
+            textAlign: 'center',
+            lineHeight: 1.2,
+            maxWidth: '80px'
+          }}
+        />
+        <BottomNavigationAction
+          label="View Toggle"
+          icon={<ToggleIcon />}
+          value="toggle"
+          sx={{
+            justifyContent: 'center',
+            padding: '16px', // Increase padding for better spacing
+            whiteSpace: 'normal',
+            textAlign: 'center',
+            lineHeight: 1.2,
+            maxWidth: '80px'
+          }}
+        />
+        <BottomNavigationAction
+          label="Legend"
+          icon={<LegendIcon />}
+          value="legend"
+          sx={{
+            justifyContent: 'center',
+            padding: '16px', // Increase padding for better spacing
+            whiteSpace: 'normal',
+            textAlign: 'center',
+            lineHeight: 1.2,
+            maxWidth: '80px'
+          }}
+        />
+      </BottomNavigation>
+    </Box>
+  </div>
+)}
+
     </div>
   );
 };

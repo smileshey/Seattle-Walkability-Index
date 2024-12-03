@@ -6,6 +6,7 @@ import SimpleFillSymbol from "@arcgis/core/symbols/SimpleFillSymbol";
 import Graphic from "@arcgis/core/Graphic";
 import Collection from "@arcgis/core/core/Collection";
 import PopupTemplate from "@arcgis/core/PopupTemplate";
+import VisibilityState from "./visibility_state"; // Import VisibilityState class
 
 export const aggregateScoresByNeighborhood = (features: __esri.Graphic[]) => {
   const scoresByNeighborhood: { [key: string]: number } = {};
@@ -62,7 +63,8 @@ export const rankNormalizeAndScaleScores = (features: __esri.Graphic[]) => {
 export const createPersonalizedNeighborhoodsLayer = async (
   fishnetLayer: FeatureLayer,
   neighborhoodsLayer: FeatureLayer,
-  webMap: __esri.WebMap
+  webMap: __esri.WebMap,
+  visibilityState: VisibilityState // Add visibilityState as a parameter
 ): Promise<Neighborhood[]> => {
   try {
     const query = fishnetLayer.createQuery();
@@ -80,7 +82,7 @@ export const createPersonalizedNeighborhoodsLayer = async (
 
     const neighborhoodsResult = await neighborhoodsLayer.queryFeatures(neighborhoodsQuery);
 
-    normalizeScoresByArea(neighborhoodsResult.features, scoresByNeighborhood, .85);
+    normalizeScoresByArea(neighborhoodsResult.features, scoresByNeighborhood, 0.85);
     rankNormalizeAndScaleScores(neighborhoodsResult.features);
 
     // Get the existing fields
@@ -110,7 +112,6 @@ export const createPersonalizedNeighborhoodsLayer = async (
         { value: intervals[5], color: new Color([0, 255, 0, 0.5]) } // Green for high values
       ]
     };
-    
 
     const fillSymbol = new SimpleFillSymbol({
       color: "transparent",
@@ -166,14 +167,10 @@ export const createPersonalizedNeighborhoodsLayer = async (
     await personalizedLayer.when();
     personalizedLayer.refresh();
 
-    // Explicitly hide the heatmap after adding the personalized neighborhood layer
-    const heatmapLayer = webMap.allLayers.find(layer => layer.title === "Personalized Heatmap") as FeatureLayer;
-    const neighborhoodLayer = webMap.allLayers.find(layer => layer.title === title) as FeatureLayer;
-
-    if (heatmapLayer) {
-      heatmapLayer.visible = true;
-      neighborhoodLayer.visible = false;
-    }
+    // Use visibilityState to manage the visibility of layers
+    visibilityState.setRecalculateClicked(true);
+    visibilityState.setLayerVisible("Personalized Heatmap");
+    // visibilityState.setLayerHidden("Personalized Neighborhood Walkscore");
 
     // Return the top neighborhoods
     const topNeighborhoods = await getTopNeighborhoods(personalizedLayer, "personalized_walkscore");
@@ -196,8 +193,6 @@ export const getTopNeighborhoods = async (layer: FeatureLayer, field: string): P
 
   try {
     const neighborhoodsResult = await layer.queryFeatures(query);
-    
-    console.log("Fetched neighborhoods");
 
     const topNeighborhoods = neighborhoodsResult.features
       .map(feature => ({
@@ -209,8 +204,6 @@ export const getTopNeighborhoods = async (layer: FeatureLayer, field: string): P
       .filter(nhood => !excluded_nhoods.includes(nhood.name)) // Exclude specified neighborhoods
       .sort((a, b) => b.score - a.score)
       .slice(0, 5); // Top 5 neighborhoods
-
-    console.log("Top neighborhoods", topNeighborhoods);
 
     return topNeighborhoods;
   } catch (error) {
@@ -226,6 +219,7 @@ export interface Neighborhood {
   latitude?: number;  // Make optional if not always present
   longitude?: number; // Make optional if not always present
 }
+
 
 
 

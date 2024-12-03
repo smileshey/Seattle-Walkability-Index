@@ -43,7 +43,7 @@ const createPersonalizedWalkscoreLayer = async (
   title: string,
   userSliderValues: { [key: string]: number },
   webMap: __esri.WebMap,
-  visibilityState: VisibilityState // Inject the visibilityState instance
+  visibilityState: VisibilityState
 ) => {
   try {
     console.log("Creating personalized walkscore layer...");
@@ -122,12 +122,10 @@ const createPersonalizedWalkscoreLayer = async (
     // Remove the old personalized layer if it exists
     let temporaryLayer = webMap.allLayers.find((layer) => layer.title === title) as FeatureLayer;
     if (temporaryLayer) {
-      console.log(`Removing existing layer with title: ${title}`);
       webMap.remove(temporaryLayer);
     }
 
     // Create the new temporary personalized layer
-    console.log("Creating new personalized walkscore layer...");
     temporaryLayer = new FeatureLayer({
       source: new Collection(
         allFeatures.map(
@@ -147,13 +145,11 @@ const createPersonalizedWalkscoreLayer = async (
     });
 
     // Add the personalized layer to the map
-    console.log("Adding personalized walkscore layer to the map...");
     webMap.add(temporaryLayer);
 
     await temporaryLayer.when();
     temporaryLayer.refresh();
 
-    console.log("Added personalized walkscore layer to the map.");
     return temporaryLayer;
   } catch (error) {
     console.error("Error creating personalized walkscore layer:", error);
@@ -181,38 +177,37 @@ const handleRecalculate = async (
     return [];
   }
 
-  // Reset visibility for all layers before making updates
-  visibilityState.resetLayerVisibility();
-
+  // Step 1: Create the personalized walkscore layer
   console.log("Creating personalized walkscore layer...");
   const personalizedPointsLayer = await createPersonalizedWalkscoreLayer(
     walkscorePointsLayer,
-    "Personalized Walkscore",
+    "Personalized Heatmap",
     userSliderValues,
     webMap,
     visibilityState
   );
 
   if (personalizedPointsLayer) {
-    // Generate the heatmap visualization based on the personalized scores
+    // Step 2: Create the personalized heatmap layer
     console.log("Creating personalized heatmap layer...");
     await createHeatmapLayer(personalizedPointsLayer, "Personalized Heatmap", "personalized_walkscore", webMap, view);
 
-    // Set the personalized heatmap to visible
+    // Step 3: Reset visibility of all layers after creating new layers
+    console.log("Resetting visibility for all layers before updating visibility state.");
+    visibilityState.resetLayerVisibility();
+
+    // Step 4: Set personalized heatmap layer to be visible
     visibilityState.setLayerVisible("Personalized Heatmap");
 
-    // Create personalized neighborhood scores and get top neighborhoods
-    const topNeighborhoods = await createPersonalizedNeighborhoodsLayer(personalizedPointsLayer, walkscoreNeighborhoodsLayer, webMap);
+    // Step 5: Create personalized neighborhoods layer and get the top neighborhoods
+    const topNeighborhoods = await createPersonalizedNeighborhoodsLayer(personalizedPointsLayer, walkscoreNeighborhoodsLayer, webMap, visibilityState);
 
-    // Ensure the neighborhood layer is still hidden
-    walkscoreNeighborhoodsLayer.visible = false;
-    console.log("Re-ensuring neighborhood layer visibility set to false.");
+    // Ensure the base neighborhood layer is still hidden
+    // visibilityState.setLayerHidden("walkscore_neighborhoods");
 
+    // Step 6: Restore the view to its original state
     view.extent = currentExtent;
     view.zoom = currentZoom;
-
-    console.log("Finished recalculating, returning to original view.");
-
     return topNeighborhoods; // Return the recalculated top neighborhoods
   }
 
@@ -226,15 +221,11 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
   useEffect(() => {
     const initialLoad = async () => {
       try {
-        console.log("Initial load: Triggering recalculation to generate personalized heatmap visualization.");
-
         // Use base case values for sliders
         const userSliderValues = { slope: 2, streets: 2, amenity: 2, crime: 2 };
 
         // Trigger recalculation to create a personalized walkscore layer and heatmap visualization
         await handleRecalculate(view, webMap, userSliderValues, isDesktop, visibilityState);
-        console.log("Personalized heatmap and walkscore layers created successfully on initial load.");
-
       } catch (error) {
         console.error("Error during initial recalculation for personalized heatmap:", error);
       }

@@ -19,38 +19,58 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
   // Check if bottom navigation is visible, in which case don't show the toggle switch here
   const isBottomNavVisible = isMobilePortrait || isMobileLandscape || isTabletPortrait;
 
+  // Sync toggle state with currently visible layer
   const syncToggleStateWithLayer = () => {
-    // Use VisibilityState to determine which layer is currently visible and update the state accordingly
     const visibleLayer = visibilityState.getCurrentVisibleLayer();
-    if (visibleLayer === "walkscore_fishnet_points" || visibleLayer === "Personalized Heatmap") {
-      setIsHeatmapView(true);
-    } else if (visibleLayer === "walkscore_neighborhoods" || visibleLayer === "Personalized Neighborhood Walkscore") {
-      setIsHeatmapView(false);
-    }
-  };
 
-  const handleToggleChange = (isHeatmap: boolean) => {
-    setIsHeatmapView(isHeatmap);
-    console.log("Handling layer toggle. Toggle state (isHeatmapView):", isHeatmap);
-
-    // Use VisibilityState to update the visibility based on the toggle
-    if (isHeatmap) {
-      if (visibilityState.isPersonalizedLayerAvailable("Personalized Heatmap")) {
-        visibilityState.setVisibilityForLayerType("personalizedHeatmap");
-      } else {
-        visibilityState.setVisibilityForLayerType("baseHeatmap");
+    // Determine layer state based on whether recalculation has occurred
+    if (visibilityState.recalculateClicked) {
+      // Toggle between personalized heatmap and personalized neighborhood layers
+      if (visibleLayer === 'Personalized Heatmap') {
+        setIsHeatmapView(true);
+      } else if (visibleLayer === 'Personalized Neighborhood Walkscore') {
+        setIsHeatmapView(false);
       }
     } else {
-      if (visibilityState.isPersonalizedLayerAvailable("Personalized Neighborhood Walkscore")) {
-        visibilityState.setVisibilityForLayerType("personalizedNeighborhood");
-      } else {
-        visibilityState.setVisibilityForLayerType("neighborhood");
+      // Toggle between base heatmap and neighborhood layers
+      if (visibleLayer === 'walkscore_fishnet_points') {
+        setIsHeatmapView(true);
+      } else if (visibleLayer === 'walkscore_neighborhoods') {
+        setIsHeatmapView(false);
       }
     }
-
-    // Sync the state again after handling the toggle
-    syncToggleStateWithLayer();
   };
+
+  // Handle toggle change
+  const handleToggleChange = (isHeatmap: boolean) => {
+    setIsHeatmapView(isHeatmap);
+    console.log('Handling layer toggle. Toggle state (isHeatmapView):', isHeatmap);
+  
+    // Update visibility based on whether recalculation has occurred
+    if (visibilityState.recalculateClicked) {
+      // If recalculation has occurred, toggle between personalized heatmap and personalized neighborhood walkscore layers
+      if (isHeatmap) {
+        visibilityState.toggleLayerVisibility(true); // Show personalized heatmap
+      } else {
+        visibilityState.toggleLayerVisibility(false); // Show personalized neighborhood walkscore
+      }
+    } else {
+      // If recalculation has not occurred, toggle between base heatmap and base neighborhood walkscore layers
+      if (isHeatmap) {
+        visibilityState.toggleLayerVisibility(true); // Show base heatmap
+      } else {
+        visibilityState.toggleLayerVisibility(false); // Show base neighborhood walkscore
+      }
+    }
+  
+    // Re-sync toggle state with currently visible layer
+    syncToggleStateWithLayer();
+    
+    // Log after changing the layer visibility
+    const currentVisibleLayer = visibilityState.getCurrentVisibleLayer();
+    console.log('After toggle, currently visible layer:', currentVisibleLayer);
+  };
+  
 
   useEffect(() => {
     syncToggleStateWithLayer(); // Sync toggle state with layer visibility on load
@@ -81,13 +101,14 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
         onChange={(event) => handleToggleChange(event.target.checked)}
       />
       <Typography sx={{ fontSize: '10px', marginLeft: 1 }}>
-        Heatmap View
+        {visibilityState.recalculateClicked ? 'Personalized Heatmap View' : 'Heatmap View'}
       </Typography>
     </Box>
   );
 };
 
 export default LayerToggle;
+
 
 
 
