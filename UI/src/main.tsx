@@ -1,13 +1,13 @@
 console.log('main.tsx is being accessed correctly');
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { createRoot, Root } from 'react-dom/client';
 import WebMap from "@arcgis/core/WebMap";
 import MapView from "@arcgis/core/views/MapView";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import SliderWidget from "./slider_widget";
 import LegendWidget from './legend_widget';
-import LayerToggle from './toggle_widget'; // Import the LayerToggle component
+import LayerToggle from './toggle_widget';
 import { getTopNeighborhoods } from './neighborhood_utils';
 import TopNeighborhoods from "./top_neighborhoods";
 import BasicMenu from './navBar';
@@ -15,7 +15,7 @@ import { useMediaQuery, BottomNavigation, BottomNavigationAction, Box } from "@m
 import InfoIcon from '@mui/icons-material/Info';
 import ToggleIcon from '@mui/icons-material/ToggleOn';
 import LegendIcon from '@mui/icons-material/Map';
-import VisibilityState from './visibility_state'; // Import VisibilityState class
+import VisibilityState from './visibility_state';
 
 const webMap = new WebMap({
   portalItem: {
@@ -32,8 +32,13 @@ const view = new MapView({
   zoom: 13,
   ui: {
     components: ["attribution"]
+  },
+  constraints: {
+    rotationEnabled: false, // Disable map rotation
+    snapToZoom: false // Optional: Avoid snapping to discrete zoom levels
   }
 });
+
 
 const visibilityState = new VisibilityState({ webMap });
 
@@ -46,19 +51,16 @@ const MainComponent = () => {
   const [recalculateTriggered, setRecalculateTriggered] = useState(false);
   const [selectedWidget, setSelectedWidget] = useState<null | 'slider' | 'legend'>(null);
   const [isFishnetLayer, setIsFishnetLayer] = useState(true); // Set to true initially as the heatmap layer is visible first
-
+  const [isLegendActive, setIsLegendActive] = useState(false); // State to track legend active status
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
-  const isMobileLandscape = useMediaQuery('(min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
-  const isTabletPortrait = useMediaQuery('(min-width: 601px) and (orientation: portrait)');
-  const isTabletLandscape = useMediaQuery('(min-width: 601px) and (orientation: landscape)');
-  const isDesktop = useMediaQuery('(min-width: 1001px)');
+  const isDesktop = useMediaQuery('(min-width: 601px)'); // Treat everything else as desktop
 
-    // Call default visibility setup when app loads
-    useEffect(() => {
-      view.when(() => {
-        visibilityState.initializeDefaultVisibility();
-      });
-    }, [view]);
+  // Call default visibility setup when app loads
+  useEffect(() => {
+    view.when(() => {
+      visibilityState.initializeDefaultVisibility();
+    });
+  }, [view]);
 
   const forceRenderWidgets = () => {
     if (isDesktop) {
@@ -66,15 +68,15 @@ const MainComponent = () => {
       visibilityState.setWidgetVisible('legend-container', true);
 
       if (!sliderRoot) {
-        const sliderDiv = document.querySelector("#sliderDiv") as HTMLElement;
-        sliderRoot = createRoot(sliderDiv);
+        const sliderContainer = document.querySelector("#sliderContainer") as HTMLElement;
+        sliderRoot = createRoot(sliderContainer);
         sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
       }
 
       if (!legendRoot) {
         const legendDiv = document.querySelector(".legend-container") as HTMLElement;
         legendRoot = createRoot(legendDiv);
-        legendRoot.render(<LegendWidget />);
+        legendRoot.render(<LegendWidget isActive={true} />);
       }
     } else {
       visibilityState.resetAllWidgets();
@@ -103,10 +105,10 @@ const MainComponent = () => {
   useEffect(() => {
     if (isMobilePortrait) {
       visibilityState.resetAllWidgets();
-    } else if (isDesktop || isMobileLandscape) {
+    } else if (isDesktop) {
       forceRenderWidgets();
     }
-  }, [isMobilePortrait, isDesktop, isMobileLandscape]);
+  }, [isMobilePortrait, isDesktop]);
 
   useEffect(() => {
     view.when(() => {
@@ -115,7 +117,6 @@ const MainComponent = () => {
         if (!toggleRoot) {
           toggleRoot = createRoot(toggleDiv);
         }
-        // Pass visibilityState as a prop to LayerToggle
         toggleRoot.render(<LayerToggle view={view} webMap={webMap} visibilityState={visibilityState} />);
       }
       forceRenderWidgets();
@@ -154,7 +155,7 @@ const MainComponent = () => {
     if (recalculateTriggered) {
       console.log("Recalculating neighborhoods...");
       fetchAndRenderNeighborhoods();
-      
+
       // Update visibility after recalculation is triggered
       visibilityState.handlePostRecalculateVisibility();
       setRecalculateTriggered(false);
@@ -167,192 +168,78 @@ const MainComponent = () => {
       const newIsHeatmapLayer = !isFishnetLayer;
       setIsFishnetLayer(newIsHeatmapLayer);
       visibilityState.toggleLayerVisibility(newIsHeatmapLayer);
-  
-      // Update legend visibility based on heatmap layer
-      if (newIsHeatmapLayer) {
-        visibilityState.toggleLegendVisibility(false); // Hide legend when heatmap is shown
-      } else {
-        visibilityState.toggleLegendVisibility(true); // Show legend when neighborhoods are shown
-      }
     } else if (selectedWidget === newValue) {
-      // If the same widget is selected, we should unmount it
       if (newValue === 'slider') {
         unmountWidget('slider');
       } else if (newValue === 'legend') {
-        // Hide legend when clicking again
         visibilityState.toggleLegendVisibility(false);
         unmountWidget('legend');
+        setIsLegendActive(false);
       }
       setSelectedWidget(null);
     } else {
-      // Mount the selected widget
       if (newValue === 'slider') {
         visibilityState.setWidgetVisible('sliderDiv', true);
-        const sliderDiv = document.querySelector("#sliderDiv") as HTMLElement;
+        const sliderContainer = document.querySelector("#sliderContainer") as HTMLElement;
         if (!sliderRoot) {
-          sliderRoot = createRoot(sliderDiv);
+          sliderRoot = createRoot(sliderContainer);
         }
         sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
       } else if (newValue === 'legend') {
-        visibilityState.toggleLegendVisibility(true); // Show legend when button is toggled on
+        visibilityState.toggleLegendVisibility(true);
         visibilityState.setWidgetVisible('legend-container', true);
         const legendDiv = document.querySelector(".legend-container") as HTMLElement;
         if (!legendRoot) {
           legendRoot = createRoot(legendDiv);
         }
-        legendRoot.render(<LegendWidget />);
+        legendRoot.render(<LegendWidget isActive={true} />);
+        setIsLegendActive(true);
       }
       setSelectedWidget(newValue);
     }
   };
-  
+
   return (
     <div id="appRoot">
       <BasicMenu />
 
-      <div className="widget-container" id="sliderDiv"></div>
-      <div className="legend-container"></div>
+      {/* Slider Container */}
+      <div id="sliderContainer">
+        <div id="sliderDiv"></div>
+      </div>
+      <div className={`legend-container ${isLegendActive ? 'active' : ''}`}>
+        <LegendWidget isActive={isLegendActive} />
+      </div>
 
-      {(isTabletPortrait) && (
-        <div>
-          <Box
-            sx={{
-              position: 'fixed',
-              bottom: 20,
-              left: '10%',
-              right: '10%',
-              zIndex: 1000,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-              border: '2px solid rgba(0, 0, 0, 0.4)',
-              padding: '10px',
-              boxShadow: '0px -1px 6px rgba(0, 0, 0, 0.1)',
-              borderRadius: '80px 80px 80px 80px',
-              maxWidth: '400px',
-              margin: '0 auto',
-            }}
+      {/* Bottom Navigation Bar */}
+      {isMobilePortrait && (
+        <Box className="bottom-nav-container">
+          <BottomNavigation
+            value={selectedWidget}
+            onChange={(event, newValue) => handleBottomNavChange(newValue as 'slider' | 'legend' | 'toggle')}
+            className="bottom-nav"
           >
-            <BottomNavigation
-              value={selectedWidget}
-              onChange={(event, newValue) => handleBottomNavChange(newValue as 'slider' | 'legend' | 'toggle')}
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                backgroundColor: 'transparent',
-                width: '100%',
-              }}
-              showLabels
-            >
-              <BottomNavigationAction
-                label="Custom Walkscore"
-                icon={<InfoIcon />}
-                value="slider"
-                sx={{
-                  justifyContent: 'center',
-                  padding: '20px',
-                  whiteSpace: 'normal',
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  maxWidth: '80px'
-                }}
-              />
-              <BottomNavigationAction
-                label="Heatmap Toggle"
-                icon={<ToggleIcon />}
-                value="toggle"
-                sx={{
-                  justifyContent: 'center',
-                  padding: '20px',
-                  whiteSpace: 'normal',
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  maxWidth: '80px'
-                }}
-              />
-              <BottomNavigationAction
-                label="Legend"
-                icon={<LegendIcon />}
-                value="legend"
-                sx={{
-                  justifyContent: 'center',
-                  padding: '20px',
-                  whiteSpace: 'normal',
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  maxWidth: '80px'
-                }}
-              />
-            </BottomNavigation>
-          </Box>
-        </div>
+            <BottomNavigationAction
+              label="Personalize"
+              icon={<InfoIcon />}
+              value="slider"
+              className="bottom-nav-action"
+            />
+            <BottomNavigationAction
+              label="Heatmap Toggle"
+              icon={<ToggleIcon />}
+              value="toggle"
+              className="bottom-nav-action"
+            />
+            <BottomNavigationAction
+              label="Legend"
+              icon={<LegendIcon />}
+              value="legend"
+              className="bottom-nav-action"
+            />
+          </BottomNavigation>
+        </Box>
       )}
-
-{(isMobilePortrait || isMobileLandscape) && (
-  <div>
-    {/* Container Box */}
-    <Box className="bottom-nav-container">
-      <BottomNavigation
-        value={selectedWidget}
-        onChange={(event, newValue) => handleBottomNavChange(newValue as 'slider' | 'legend' | 'toggle')}
-        className="bottom-nav" // Add this class for consistent styling with the CSS
-        sx={{
-          display: 'flex',
-          flexDirection: 'column', // Ensure buttons are in column format
-          padding: 0,
-          backgroundColor: 'transparent',
-          width: 'auto',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        showLabels
-      >
-        <BottomNavigationAction
-          label="Custom Walkscore"
-          icon={<InfoIcon />}
-          value="slider"
-          sx={{
-            justifyContent: 'center',
-            padding: '16px', // Increase padding for better spacing
-            whiteSpace: 'normal',
-            textAlign: 'center',
-            lineHeight: 1.2,
-            maxWidth: '80px'
-          }}
-        />
-        <BottomNavigationAction
-          label="View Toggle"
-          icon={<ToggleIcon />}
-          value="toggle"
-          sx={{
-            justifyContent: 'center',
-            padding: '16px', // Increase padding for better spacing
-            whiteSpace: 'normal',
-            textAlign: 'center',
-            lineHeight: 1.2,
-            maxWidth: '80px'
-          }}
-        />
-        <BottomNavigationAction
-          label="Legend"
-          icon={<LegendIcon />}
-          value="legend"
-          sx={{
-            justifyContent: 'center',
-            padding: '16px', // Increase padding for better spacing
-            whiteSpace: 'normal',
-            textAlign: 'center',
-            lineHeight: 1.2,
-            maxWidth: '80px'
-          }}
-        />
-      </BottomNavigation>
-    </Box>
-  </div>
-)}
-
     </div>
   );
 };
@@ -366,6 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export default MainComponent;
+
+
 
 
 

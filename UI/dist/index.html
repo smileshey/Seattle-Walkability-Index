@@ -6,14 +6,18 @@
   <title>Seattle Walkability</title>
   <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
   
-  <!-- Link to the external styles.css file -->
-  <link rel="stylesheet" href="styles.css" />
+  <!-- Link to the common and device-specific styles -->
+  <link rel="stylesheet" href="styles/styles.common.css">
+  <link rel="stylesheet" href="styles/styles.desktop.css" media="screen and (min-width: 1001px)">
+  <link rel="stylesheet" href="styles/styles.tablet.css" media="screen and (min-width: 601px) and (max-width: 1000px)">
+  <link rel="stylesheet" href="styles/styles.mobile.css" media="screen and (max-width: 600px)">
+  <link rel="stylesheet" href="styles/navbar.css">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-  <div id="headerDiv"></div> <!-- Placeholder for the React navBar -->
+  <div id="headerDiv"></div>
   <div id="viewDiv"></div> <!-- Container for the map -->
   <div id="layerToggleDiv"></div> <!-- Toggle widget container -->
   <div id="sliderDiv"></div> <!-- Widget for sliders -->
@@ -21,11 +25,12 @@
   <div id="root"></div>
   <div id="topNeighborhoodsDiv"></div>
 
-  <script src="bundle.js"></script>
+  <script src="bundles/bundle.js"></script>
   <script src="https://d3js.org/d3.v6.min.js"></script>
   
 </body>
 </html>
+
 
 
 

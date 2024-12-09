@@ -41,26 +41,18 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
     }
   };
 
-  // Handle toggle change
+  // Handle toggle change for heatmap vs. neighborhood layers
   const handleToggleChange = (isHeatmap: boolean) => {
     setIsHeatmapView(isHeatmap);
     console.log('Handling layer toggle. Toggle state (isHeatmapView):', isHeatmap);
   
     // Update visibility based on whether recalculation has occurred
     if (visibilityState.recalculateClicked) {
-      // If recalculation has occurred, toggle between personalized heatmap and personalized neighborhood walkscore layers
-      if (isHeatmap) {
-        visibilityState.toggleLayerVisibility(true); // Show personalized heatmap
-      } else {
-        visibilityState.toggleLayerVisibility(false); // Show personalized neighborhood walkscore
-      }
+      // Toggle between personalized heatmap and personalized neighborhood walkscore layers
+      visibilityState.setHeatmapLayerVisibility(isHeatmap ? 'personalizedHeatmap' : 'personalizedNeighborhood');
     } else {
-      // If recalculation has not occurred, toggle between base heatmap and base neighborhood walkscore layers
-      if (isHeatmap) {
-        visibilityState.toggleLayerVisibility(true); // Show base heatmap
-      } else {
-        visibilityState.toggleLayerVisibility(false); // Show base neighborhood walkscore
-      }
+      // Toggle between base heatmap and base neighborhood walkscore layers
+      visibilityState.setHeatmapLayerVisibility(isHeatmap ? 'baseHeatmap' : 'baseNeighborhood');
     }
   
     // Re-sync toggle state with currently visible layer
@@ -70,12 +62,13 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
     const currentVisibleLayer = visibilityState.getCurrentVisibleLayer();
     console.log('After toggle, currently visible layer:', currentVisibleLayer);
   };
-  
 
+  // Ensure synchronization of state with visible layer when the component mounts
   useEffect(() => {
     syncToggleStateWithLayer(); // Sync toggle state with layer visibility on load
   }, [webMap]);
 
+  // Do not show this component if the bottom navigation is visible
   if (isBottomNavVisible) {
     return null;
   }
@@ -108,6 +101,7 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
 };
 
 export default LayerToggle;
+
 
 
 

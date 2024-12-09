@@ -58,7 +58,7 @@ export const createHeatmapLayer = async (
         { ratio: 0, color: [255, 255, 255, 0] }, // Transparent (replicating ratio: 0)
         { ratio: 0.001, color: [255, 0, 0, 0.5] }, // Red at 50% opacity (replicating ratio: 0.001)
         { ratio: 0.5, color: [255, 255, 0, 0.5] }, // Yellow at 50% opacity (replicating ratio: 0.5)
-        { ratio: 1.0, color: [0, 210, 0, 0.7] }, // Green at 70% opacity (replicating ratio: 1)
+        { ratio: 1.0, color: [20, 175, 0, 0.5] }, // Green at 70% opacity (replicating ratio: 1)
       ],
       radius: 50,
       maxDensity: 0.015,

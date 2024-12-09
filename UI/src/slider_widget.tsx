@@ -7,7 +7,7 @@ import { handleRecalculate } from './walkscore_calculator';
 import TopNeighborhoods from './top_neighborhoods';
 import { Neighborhood } from './neighborhood_utils';
 import { useMediaQuery } from '@mui/material';
-import VisibilityState from './visibility_state'; // Import VisibilityState
+import VisibilityState from './visibility_state';
 
 const marks = [
   { value: 0 },
@@ -33,6 +33,14 @@ const valueLabelFormat = (value: number) => {
       return '';
   }
 };
+
+// New slider captions list
+const sliderCaptions = [
+  'Flat Ground',
+  'Calm Streets',
+  'Business Proximity',
+  'Crime'
+];
 
 const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapView; webMap: __esri.WebMap; triggerRecalculate: () => void }) => {
   const [values, setValues] = useState({
@@ -95,30 +103,19 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
   };
 
   return (
-    <Box
-      sx={{
-        width: isMobile ? '110%' : '125%',
-        padding: isMobile ? 0.6 : 1,
-        background: 'white',
-        borderRadius: 3,
-        boxShadow: 20,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: isMobile ? 0.1 : 0.1,
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: isMobile ? '0.7rem' : '0.9rem' }}>
-          {recalculated ? 'Your Most Walkable Neighborhoods' : "What's Most Important to You?"}
-        </Typography>
+    <Box className="slider-widget-container">
+      <Box className="slider-widget-header">
+      <div className="slider-widget-title">
+        {recalculated ? 'Your Most Walkable Neighborhoods' : "What's Most Important to You?"}
+      </div>
 
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box className="slider-widget-icons">
           <Tooltip
             title="Adjust the sliders to change the walkscore displayed on the map. The more important a feature is, the more heavily the algorithm will weigh that feature"
             arrow
           >
-            <IconButton size="small" sx={{ padding: 0 }}>
-              <InfoIcon sx={{ fontSize: isMobile ? '0.7rem' : '.9rem' }} />
+            <IconButton size="small">
+              <InfoIcon className="slider-info-icon" />
             </IconButton>
           </Tooltip>
           <IconButton size="small" onClick={toggleExpand}>
@@ -129,21 +126,21 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
 
       {isExpanded && (
         <>
-          <Box sx={{ borderBottom: '1px solid #ddd', marginBottom: isMobile ? 0.2 : 1, width: '100%' }}></Box>
+          <Box className="slider-divider"></Box>
 
           {/* Conditional Rendering for Loading and Top Neighborhoods */}
           {isLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
+            <Box className="loading-container">
               <div className="loading-circle">Loading...</div>
             </Box>
           ) : topNeighborhoods ? (
             <TopNeighborhoods neighborhoods={topNeighborhoods} view={view} webMap={webMap} showTextList={true} />
           ) : (
-            <Box>
-              {['slope', 'streets', 'amenity', 'crime'].map((feature) => (
-                <Box key={feature} sx={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 0.2 : 0.5 }}>
-                  <Typography variant="caption" sx={{ width: '110px', textAlign: 'center', marginRight: '8px', fontWeight: 'italic', fontSize: isMobile ? '0.7rem' : '0.8rem' }}>
-                    {feature.charAt(0).toUpperCase() + feature.slice(1)} Density
+            <Box className="slider-content">
+              {['slope', 'streets', 'amenity', 'crime'].map((feature, index) => (
+                <Box key={feature} className="slider-row">
+                  <Typography variant="caption" className="slider-caption">
+                    {sliderCaptions[index]}
                   </Typography>
                   <Slider
                     size="small"
@@ -156,7 +153,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
                     marks={marks}
                     valueLabelDisplay="auto"
                     valueLabelFormat={valueLabelFormat}
-                    sx={{ width: isMobile ? '120px' : '150px' }}
+                    className="slider-element"
                   />
                 </Box>
               ))}
@@ -167,34 +164,18 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
 
       {isExpanded && (
         <>
-          <Box sx={{ borderBottom: '1px solid #ddd', margin: '1px 0', width: '100%' }}></Box>
+          <Box className="slider-divider"></Box>
           {recalculated ? (
-            <>
-              <Button
-                onClick={handleReset}
-                color="secondary"
-                sx={{
-                  fontSize: isMobile ? '0.6rem' : '0.75rem',
-                  backgroundColor: '#f50057',
-                  color: 'white',
-                  '&:hover': {
-                    backgroundColor: '#c51162',
-                  },
-                  width: '100%',
-                }}
-                variant="contained"
-              >
-                Reset
-              </Button>
-            </>
+            <Button
+              onClick={handleReset}
+              className="slider-reset-button"
+            >
+              Reset
+            </Button>
           ) : (
             <Button
               onClick={handleRecalculateButton}
-              color="primary"
-              sx={{
-                fontSize: isMobile ? '0.55rem' : '0.65rem',
-                width: '100%',
-              }}
+              className="slider-recalculate-button"
             >
               Recalculate Walkscore
             </Button>
@@ -206,6 +187,8 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
 };
 
 export default SliderWidget;
+
+
 
 
 

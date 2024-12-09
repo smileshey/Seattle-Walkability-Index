@@ -10,9 +10,9 @@ module.exports = (env, argv) => {
   return {
     entry: './src/main.tsx',
     output: {
-      filename: 'bundle.js',
+      filename: 'bundles/bundle.js', // Specify the exact name for the output bundle
       path: path.resolve(__dirname, 'dist'),
-      publicPath: process.env.PUBLIC_PATH || '/',  // Use PUBLIC_PATH environment variable
+      publicPath: process.env.PUBLIC_PATH || '/', // Use PUBLIC_PATH environment variable
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js'],
@@ -52,6 +52,7 @@ module.exports = (env, argv) => {
     ],
   };
 };
+
 
 
 

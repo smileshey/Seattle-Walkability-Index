@@ -41,6 +41,19 @@ class VisibilityState {
     }
   }
 
+  setHeatmapLayerVisibility(layerType: 'personalizedHeatmap' | 'baseHeatmap' | 'baseNeighborhood' | 'personalizedNeighborhood') {
+    // Update visibility based on layer type without affecting legend visibility
+    if (layerType === 'personalizedHeatmap') {
+        // Show personalized heatmap, hide others
+    } else if (layerType === 'baseHeatmap') {
+        // Show base heatmap, hide others
+    } else if (layerType === 'baseNeighborhood') {
+        // Show base neighborhood, hide others
+    } else if (layerType === 'personalizedNeighborhood') {
+        // Show personalized neighborhood, hide others
+    }
+}
+
   // In visibility_state.tsx
     toggleLegendVisibility(visible: boolean): void {
         const legendElement = document.querySelector(".legend-container") as HTMLElement;

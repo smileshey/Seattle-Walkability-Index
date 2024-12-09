@@ -49,18 +49,18 @@ const TopNeighborhoods: React.FC<TopNeighborhoodsProps> = ({ neighborhoods, view
       const circleSymbol = new SimpleMarkerSymbol({
         style: "circle",
         color: "transparent",
-        size: "12px",
+        size: "15px",
         outline: {
-          color: "white",
+          color: "black",
           width: 2
         }
       });
 
       const textSymbol = new TextSymbol({
         text: `${index + 1}`,
-        color: "white",
+        color: "black",
         font: {
-          size: 6,
+          size: 8,
           weight: "bold"
         },
         yoffset: -1,
@@ -87,61 +87,31 @@ const TopNeighborhoods: React.FC<TopNeighborhoodsProps> = ({ neighborhoods, view
   };
 
   return showTextList ? (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: isMobileLandscape ? .25 : 1,
-      }}
-    >
+    <Box className="top-neighborhoods-list">
       {neighborhoods.map((neighborhood, index) => {
-        // Determine the styling based on the ranking
-        let fontSize = '0.65rem'; // Default font size for ranks 4-5
-        let fontWeight = 'normal';
-        let color = 'black';
-
-        // Adjust font size for mobile landscape
-        if (isMobileLandscape) {
-          fontSize = '0.7rem'; // Smaller font size for mobile landscape
-        }
-
-        if (index === 0) {
-          fontSize = isMobileLandscape ? '0.7rem' : '.89rem'; // Largest font for rank 1
-          fontWeight = 'bold';
-          color = 'black'; // Accent color for rank 1
-        } else if (index === 1) {
-          fontSize = isMobileLandscape ? '0.65rem' : '.85rem'; // Slightly smaller for rank 2
-          fontWeight = 'bold';
-          color = 'black'; // Accent color for rank 2
-        } else if (index === 2) {
-          fontSize = isMobileLandscape ? '0.65rem' : '0.8rem'; // Slightly larger for rank 3
-          fontWeight = 'bold';
-          color = 'black'; // Accent color for rank 3
-        }
-
+        // Determine the class name based on the ranking
+        let rankClass = "rankDefault";
+        if (index === 0) rankClass = "rank1";
+        else if (index === 1) rankClass = "rank2";
+        else if (index === 2) rankClass = "rank3";
+  
         return (
-          <Box
-            key={index}
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: isMobileLandscape ? '2px 0' : '4px 0', // Adjust padding based on mobile landscape
-            }}
-          >
-            <Typography variant="caption" sx={{ fontWeight: fontWeight, fontSize: fontSize, color: color }}>
+          <Box key={index} className="top-neighborhood-row">
+            <Box className={rankClass}>
               {index + 1}.
-            </Typography>
-            <Typography variant="caption" sx={{ fontWeight: fontWeight, fontSize: fontSize, color: color }}>
+            </Box>
+            <Box className={rankClass}>
               {neighborhood.name}
-            </Typography>
-            <Typography variant="caption" sx={{ fontWeight: fontWeight, fontSize: fontSize, color: color }}>
+            </Box>
+            <Box className={rankClass}>
               {neighborhood.score.toFixed(2)}
-            </Typography>
+            </Box>
           </Box>
         );
+        
       })}
     </Box>
-  ) : null;
+  ) : null;  
 };
 
 export default TopNeighborhoods;
