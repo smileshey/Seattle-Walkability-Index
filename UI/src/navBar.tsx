@@ -2,7 +2,7 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import { useMediaQuery } from '@mui/material';
-import '../dist/styles/navbar.css';
+import '../dist/styles/navBar.css';
 
 export default function BasicMenu() {
   // Media query for different view types
