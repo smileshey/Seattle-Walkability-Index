@@ -17,6 +17,12 @@ import ToggleIcon from '@mui/icons-material/ToggleOn';
 import LegendIcon from '@mui/icons-material/Map';
 import VisibilityState from './visibility_state';
 
+declare global {
+  interface ScreenOrientation {
+    lock(orientation: "portrait" | "landscape" | string): Promise<void>;
+  }
+}
+
 const webMap = new WebMap({
   portalItem: {
     id: 'd50d84100894480ca401a350ae85c60a'
@@ -52,8 +58,9 @@ const MainComponent = () => {
   const [selectedWidget, setSelectedWidget] = useState<null | 'slider' | 'legend'>(null);
   const [isFishnetLayer, setIsFishnetLayer] = useState(true); // Set to true initially as the heatmap layer is visible first
   const [isLegendActive, setIsLegendActive] = useState(false); // State to track legend active status
+
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
-  const isDesktop = useMediaQuery('(min-width: 601px)'); // Treat everything else as desktop
+  const isDesktop = useMediaQuery('(min-width: 601px)');
 
   // Call default visibility setup when app loads
   useEffect(() => {
@@ -61,6 +68,15 @@ const MainComponent = () => {
       visibilityState.initializeDefaultVisibility();
     });
   }, [view]);
+
+  // Rest of your code
+  useEffect(() => {
+    if (window.screen.orientation && window.screen.orientation.lock) {
+      window.screen.orientation.lock('portrait').catch((err) => {
+        console.log("Failed to lock orientation:", err);
+      });
+    }
+  }, []);
 
   const forceRenderWidgets = () => {
     if (isDesktop) {
@@ -101,7 +117,7 @@ const MainComponent = () => {
       legendRoot = null;
     }
   };
-
+  
   useEffect(() => {
     if (isMobilePortrait) {
       visibilityState.resetAllWidgets();
