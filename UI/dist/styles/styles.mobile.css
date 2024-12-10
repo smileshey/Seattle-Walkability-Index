@@ -1,0 +1,304 @@
+/* Mobile Styles */
+
+/* Slider Widget Container */
+.slider-widget-container {
+    position: absolute;
+    bottom: 25px; /* Pin to the bottom right of the screen */
+    right: 10px; /* Add padding from the right edge */
+    z-index: 1003;
+    width: 235px; /* Adjusted width for mobile */
+    max-width: 300px; /* Restrict max width for mobile */
+    background: rgba(255, 255, 255, 0.9); /* Ensure a solid white background */
+    border-radius: 15px; /* Rounded corners */
+    padding: 10px; /* Provide padding */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15); /* Shadow for visibility */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Thin border for boundary clarity */
+    display: flex;
+    flex-direction: column;
+
+}
+
+/* Slider Widget Header */
+.slider-widget-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1rem;
+}
+
+.slider-widget-title {
+    font-weight: bold;
+    font-size: .75rem;
+}
+
+.slider-widget-icons {
+    display: flex;
+    align-items: center;
+}
+
+.slider-info-icon {
+    font-size: .8rem !important; /* Ensure the font size is small and add !important to override inline styles */
+    color: gray; /* Optional: Adjust the color if necessary */
+    margin: 0; /* Remove extra spacing if present */
+}
+
+/* Slider Divider */
+.slider-divider {
+    width: 100%;
+    height: 1px;
+    background: #ddd; /* Light grey color for separation */
+    margin: 0px 0; /* Space before and after the line */
+}
+
+/* Slider Content */
+.slider-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.0rem; /* Space between slider rows */
+}
+
+/* Slider Row styles */
+.slider-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.0rem; /* Space between slider rows for mobile */
+}
+
+/* Slider Caption styles */
+.slider-caption {
+    width: 90px; /* Reduced width for mobile */
+    text-align: center;
+    margin-right: 5px;
+    font-weight: italic;
+    font-size: 10rem;
+}
+
+/* Slider Element styles */
+.slider-element {
+    flex: 1; /* Allow the slider to take remaining space in the row */
+}
+
+/* Recalculate Button styling */
+.MuiButton-root.slider-recalculate-button {
+    width: 100%;
+    margin-top: 0px;
+    padding: 5px;
+    background-color: #065cfdaf !important; 
+    color: rgb(245, 245, 245) !important; 
+    font-size: 0.6rem !important;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.MuiButton-root.slider-recalculate-button:hover {
+    background-color: #065cfdaf !important; 
+}
+
+.MuiButton-root.slider-recalculate-button:active {
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+
+/* Reset Button styling */
+.MuiButton-root.slider-reset-button {
+    width: 100%;
+    margin-top: 0px; /* Reduced margin for mobile */
+    padding: 0px; /* Reduced padding for mobile */
+    background-color: #f50056c4 !important; 
+    color: white !important; 
+    font-size: .75rem !important; /* Smaller font size for mobile */
+    font-weight: bold !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.MuiButton-root.slider-reset-button:hover {
+    background-color: #c51162 !important; /* Darker red on hover */
+}
+
+.MuiButton-root.slider-reset-button:active {
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3) !important; /* Reduce shadow on click */
+}
+
+
+/* Legend Container for Mobile */
+.legend-container {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-20%);
+    z-index: 1003;
+    padding: 10px;
+    background: transparent; /* Make it transparent initially */
+    border-radius: 15px;
+    box-shadow: none; /* Remove initial shadow */
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Active Legend Container */
+.legend-container.active {
+    background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background when activated */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15); /* Shadow for better visibility */
+}
+
+#layerToggleDiv {
+    display: none; /* Hide the toggle div in portrait mode */
+}
+
+/* Bottom Navigation Container */
+.bottom-nav-container {
+    position: fixed;
+    bottom: 25px; 
+    left: 10px; 
+    z-index: 1000;
+    display: flex;
+    background-color: rgba(255, 255, 255, 0.4);
+    padding: 0px; 
+    border-radius: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.4);
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    width: auto; 
+    height: 200px; 
+    align-items: center;
+    max-width: 100%;
+    overflow: hidden; /* Prevent content from expanding the container */
+    flex-wrap: wrap; /* Allow items to wrap to the next line if necessary */
+    overflow: 'hidden',
+
+}
+
+.bottom-nav {
+    display: flex;
+    flex-direction: column;
+    width: 100%; /* Make sure it fits within its parent container */
+    max-width: 100%;
+    padding: 0; /* Remove unnecessary padding */
+    overflow: 'hidden',
+
+}
+
+.bottom-nav .MuiBottomNavigationAction-root {
+    margin-bottom: 8px;
+    padding: 8px;
+    width: 100%;
+}
+
+.bottom-nav .MuiBottomNavigationAction-label {
+    font-size: 0.6rem;
+    text-align: center;
+}
+
+/* Bottom Navigation Action Adjustments for Mobile */
+.bottom-nav-action {
+    padding: 0px; /* Reduced padding for smaller screens */
+    max-width: 100px; /* Adjusted max width for mobile */
+  }
+  
+.bottom-nav-action .MuiBottomNavigationAction-label {
+    font-size: 0.55rem;
+}
+  
+/* NavBar Mobile Portrait Overrides */
+.navbar-container.mobile-portrait {
+    width: 100%; /* Set the default width for mobile portrait */
+    max-width: 450px; /* Set a maximum width for the navigation bar on mobile */
+    border-radius: 0; /* Remove rounding */
+    justify-content: flex-start; /* Align items starting from the left */
+    padding: 10px; /* Adjusted padding for mobile */
+    display: flex;
+    align-items: center;
+}
+
+/* NavBar Title for Mobile */
+.navbar-title.mobile-portrait {
+    font-size: 1rem; /* Adjusted font size for mobile portrait */
+    font-weight: bold;
+    color: #000; /* Black color for the title */
+    flex-grow: .75; /* Do not grow, to keep title and links close */
+    text-align: left;
+    margin-right: 5px; /* Add a small margin to create space between the title and links */
+}
+
+/* Navbar Links Styling for Mobile */
+.navbar-links-container {
+    display: flex;
+    gap: 2px; /* Adjust space between links for mobile */
+    align-items: center; /* Align items to the center */
+}
+
+/* Navbar Link Styling for Mobile */
+.navbar-link.mobile-portrait {
+    color: grey;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 0.5rem; /* Adjusted font size for better visibility on mobile */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.navbar-link.mobile-portrait:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Add a slight background color on hover */
+    color: #0072bc; /* Change text color on hover (or any other highlight color) */
+}
+
+
+/* Top Neighborhoods List*/
+
+/* Container for the text list */
+.top-neighborhoods-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem; /* Adjust gap for mobile */
+  }
+  
+  /* General row styles */
+  .top-neighborhood-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0; /* Adjust padding for mobile */
+  }
+  
+  /* Styles for rank 1 */
+  .rank1 {
+    font-size: 1 rem; /* Largest font for rank 1 */
+    font-weight: bold;
+    color: black;
+  }
+  
+  /* Styles for rank 2 */
+  .rank2 {
+    font-size: 0.65rem; /* Slightly smaller font for rank 2 */
+    font-weight: bold;
+    color: black;
+  }
+  
+  /* Styles for rank 3 */
+  .rank3 {
+    font-size: 0.65rem; /* Slightly smaller font for rank 3 */
+    font-weight: bold;
+    color: black;
+  }
+  
+  /* Default styles for ranks 4-5 */
+  .rankDefault {
+    font-size: 0.65rem; /* Default font size for ranks 4-5 */
+    font-weight: normal;
+    color: black;
+  }
+  
+
+
+  
