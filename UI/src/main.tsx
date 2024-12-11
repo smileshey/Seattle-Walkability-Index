@@ -30,14 +30,14 @@ const view = new MapView({
   container: "viewDiv",
   map: webMap,
   center: [-122.3321, 47.6062],
-  zoom: 13,
+  zoom: 11,
   ui: {
-    components: ["attribution"]
+    components: ["attribution"],
   },
   constraints: {
-    rotationEnabled: false, // Disable map rotation
-    snapToZoom: false // Optional: Avoid snapping to discrete zoom levels
-  }
+    maxZoom: 17,
+    minZoom: 10, 
+  },
 });
 
 const visibilityState = new VisibilityState({ webMap });
@@ -51,7 +51,7 @@ const MainComponent = () => {
   const [recalculateTriggered, setRecalculateTriggered] = useState(false);
   const [selectedWidget, setSelectedWidget] = useState<null | 'slider' | 'legend'>(null);
   const [isFishnetLayer, setIsFishnetLayer] = useState(true); // Set to true initially as the heatmap layer is visible first
-  const [isLegendActive, setIsLegendActive] = useState(false); // State to track legend active status
+  const [isLegendActive, setIsLegendActive] = useState(false);
 
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
   const isMobileLandscape = useMediaQuery('(max-height: 600px) and (orientation: landscape)');
@@ -83,11 +83,6 @@ const MainComponent = () => {
     } else {
       visibilityState.resetAllWidgets();
     }
-  };
-
-  const resetWidgets = () => {
-    visibilityState.resetAllWidgets();
-    setSelectedWidget(null);
   };
 
   const unmountWidget = (widget: 'slider' | 'legend') => {
@@ -155,9 +150,7 @@ const MainComponent = () => {
 
   useEffect(() => {
     if (recalculateTriggered) {
-      console.log("Recalculating neighborhoods...");
       fetchAndRenderNeighborhoods();
-
       // Update visibility after recalculation is triggered
       visibilityState.handlePostRecalculateVisibility();
       setRecalculateTriggered(false);
@@ -166,7 +159,6 @@ const MainComponent = () => {
 
   const handleBottomNavChange = (newValue: 'slider' | 'legend' | 'toggle') => {
     if (newValue === 'toggle') {
-      console.log("Toggling layers via bottom navigation...");
       const newIsHeatmapLayer = !isFishnetLayer;
       setIsFishnetLayer(newIsHeatmapLayer);
       visibilityState.toggleLayerVisibility(newIsHeatmapLayer);
@@ -201,9 +193,6 @@ const MainComponent = () => {
     }
   };
 
-  console.log(isMobilePortrait, isMobileLandscape, isDesktop);
-
-
   return (
     <div id="appRoot">
       {/* Rotate Screen Notification */}
@@ -215,7 +204,6 @@ const MainComponent = () => {
       )}
   
       <BasicMenu />
-  
   
       {/* Slider Container */}
       <div id="sliderContainer">
@@ -257,7 +245,6 @@ const MainComponent = () => {
       )}
     </div>
   );
-  
 };
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -17,7 +17,7 @@ import {
   createPersonalizedNeighborhoodsLayer,
   rankNormalizeAndScaleScores,
 } from "./neighborhood_utils";
-import { getTopNeighborhoods, Neighborhood } from "./neighborhood_utils";
+import { Neighborhood } from "./neighborhood_utils";
 import { createHeatmapLayer } from './heatmap_render'; // Update the import here to 'createHeatmapLayer'
 import VisibilityState from './visibility_state'; // Import VisibilityState class
 
@@ -119,6 +119,15 @@ const createPersonalizedWalkscoreLayer = async (
       ],
     });
 
+    const requiredFields = [
+      { name: "IndexID", alias: "Index ID", type: "integer" as const },
+      { name: "nested", alias: "Nested Field", type: "string" as const },
+      { name: "walk_score", alias: "Walk Score", type: "double" as const },
+      { name: "personalized_walkscore", alias: "Personalized Walkscore", type: "double" as const },
+    ];
+    
+    
+
     // Remove the old personalized layer if it exists
     let temporaryLayer = webMap.allLayers.find((layer) => layer.title === title) as FeatureLayer;
     if (temporaryLayer) {
@@ -128,21 +137,28 @@ const createPersonalizedWalkscoreLayer = async (
     // Create the new temporary personalized layer
     temporaryLayer = new FeatureLayer({
       source: new Collection(
-        allFeatures.map(
-          (feature) =>
-            new Graphic({
-              geometry: feature.geometry,
-              attributes: feature.attributes,
-            })
-        )
+        allFeatures.map((feature) => {
+          const filteredAttributes = {
+            IndexID: feature.attributes.IndexID,
+            nested: feature.attributes.nested,
+            walk_score: feature.attributes.walk_score,
+            personalized_walkscore: feature.attributes.personalized_walkscore,
+          };
+    
+          return new Graphic({
+            geometry: feature.geometry,
+            attributes: filteredAttributes,
+          });
+        })
       ),
-      fields: allFields,
-      objectIdField: originalLayer.objectIdField,
+      fields: requiredFields, // Use the filtered fields
+      objectIdField: "IndexID", // Ensure this matches the field in your requiredFields array
       geometryType: originalLayer.geometryType,
       spatialReference: originalLayer.spatialReference,
       title: title,
       popupTemplate: popupTemplate,
     });
+    
 
     // Add the personalized layer to the map
     webMap.add(temporaryLayer);

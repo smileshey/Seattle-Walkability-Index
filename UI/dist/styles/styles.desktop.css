@@ -203,10 +203,51 @@
     gap: 1rem;
   }
   
-  /* Adjust padding for desktop rows */
-  .top-neighborhood-row {
-    padding: 4px 0;
-  }
+/* Adjust padding for desktop rows */
+.top-neighborhood-row {
+padding: 4px 0;
+}
+/* Container for the text list */
+.top-neighborhoods-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem; /* Adjust gap for mobile */
+}
+
+/* General row styles */
+.top-neighborhood-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0; /* Adjust padding for mobile */
+}
+
+/* Styles for rank 1 */
+.rank1 {
+    font-size: 1 rem; /* Largest font for rank 1 */
+    font-weight: bold;
+    color: black;
+}
+
+/* Styles for rank 2 */
+.rank2 {
+    font-size: 0.65rem; /* Slightly smaller font for rank 2 */
+    font-weight: bold;
+    color: black;
+}
+
+/* Styles for rank 3 */
+.rank3 {
+    font-size: 0.65rem; /* Slightly smaller font for rank 3 */
+    font-weight: bold;
+    color: black;
+}
+
+/* Default styles for ranks 4-5 */
+.rankDefault {
+    font-size: 0.65rem; /* Default font size for ranks 4-5 */
+    font-weight: normal;
+    color: black;
+    }
   
 
 

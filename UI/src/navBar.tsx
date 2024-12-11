@@ -10,10 +10,6 @@ export default function BasicMenu() {
   const isMobileLandscape = useMediaQuery('(max-height: 600px) and (orientation: landscape)');
   const isDesktop = useMediaQuery('(min-width: 601px) and (min-height: 601px)');
 
-  console.log("Is Mobile Portrait:", isMobilePortrait);
-  console.log("Is Desktop:", isDesktop);
-  console.log("Is Mobile Landscape:", isMobileLandscape);
-
   return (
     <>
       {/* Conditionally render NavBar based on orientation */}
