@@ -17,6 +17,32 @@
     flex-grow: unset;
     text-align: left;
 }
+
+/* Navbar Links Container */
+.navbar-links-container {
+    display: flex;
+    gap: 10px; /* Space between each link */
+    margin-left: auto; /* Push the links to the right end */
+    align-items: center;
+  }
+  
+  /* Navbar Link Styling */
+  .navbar-link {
+    color: black;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .navbar-link:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Add a slight background color on hover */
+    color: #30373b; /* Change text color on hover (or any other highlight color) */
+  }
   
 
 

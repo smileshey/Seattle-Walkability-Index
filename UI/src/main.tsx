@@ -16,12 +16,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import ToggleIcon from '@mui/icons-material/ToggleOn';
 import LegendIcon from '@mui/icons-material/Map';
 import VisibilityState from './visibility_state';
-
-declare global {
-  interface ScreenOrientation {
-    lock(orientation: "portrait" | "landscape" | string): Promise<void>;
-  }
-}
+import '../dist/styles/styles.mobile.css';
 
 const webMap = new WebMap({
   portalItem: {
@@ -45,7 +40,6 @@ const view = new MapView({
   }
 });
 
-
 const visibilityState = new VisibilityState({ webMap });
 
 // Persistent roots outside of the component to prevent re-creation during re-renders
@@ -60,7 +54,8 @@ const MainComponent = () => {
   const [isLegendActive, setIsLegendActive] = useState(false); // State to track legend active status
 
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
-  const isDesktop = useMediaQuery('(min-width: 601px)');
+  const isMobileLandscape = useMediaQuery('(max-height: 600px) and (orientation: landscape)');
+  const isDesktop = useMediaQuery('(min-width: 601px) and (min-height: 601px)');
 
   // Call default visibility setup when app loads
   useEffect(() => {
@@ -68,15 +63,6 @@ const MainComponent = () => {
       visibilityState.initializeDefaultVisibility();
     });
   }, [view]);
-
-  // Rest of your code
-  useEffect(() => {
-    if (window.screen.orientation && window.screen.orientation.lock) {
-      window.screen.orientation.lock('portrait').catch((err) => {
-        console.log("Failed to lock orientation:", err);
-      });
-    }
-  }, []);
 
   const forceRenderWidgets = () => {
     if (isDesktop) {
@@ -215,10 +201,22 @@ const MainComponent = () => {
     }
   };
 
+  console.log(isMobilePortrait, isMobileLandscape, isDesktop);
+
+
   return (
     <div id="appRoot">
+      {/* Rotate Screen Notification */}
+      {isMobileLandscape && (
+        <Box className="rotate-screen-notification">
+          <Box className="rotate-icon">🔄</Box>
+          <Box className="rotate-text">Rotate Screen</Box>
+        </Box>
+      )}
+  
       <BasicMenu />
-
+  
+  
       {/* Slider Container */}
       <div id="sliderContainer">
         <div id="sliderDiv"></div>
@@ -226,7 +224,7 @@ const MainComponent = () => {
       <div className={`legend-container ${isLegendActive ? 'active' : ''}`}>
         <LegendWidget isActive={isLegendActive} />
       </div>
-
+  
       {/* Bottom Navigation Bar */}
       {isMobilePortrait && (
         <Box className="bottom-nav-container">
@@ -255,9 +253,11 @@ const MainComponent = () => {
             />
           </BottomNavigation>
         </Box>
+        
       )}
     </div>
   );
+  
 };
 
 document.addEventListener('DOMContentLoaded', () => {
