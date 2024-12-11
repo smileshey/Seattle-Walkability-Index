@@ -216,7 +216,7 @@
 
     /* NavBar Mobile Portrait Overrides */
     .navbar-container.mobile-portrait {
-        width: 100%; /* Full width for mobile portrait */
+        width: 95.5%; /* Full width for mobile portrait */
         max-width: 450px; /* Limit max width */
         border-radius: 0 0 10px 10px; /* Round bottom corners */
         justify-content: flex-start; /* Align items to the left */
@@ -232,15 +232,15 @@
         font-weight: bold;
         color: #000; /* Black text color */
         flex-grow: 0.75; /* Adjust spacing */
-        text-align: left;
+        text-align: center;
         margin-right: 5px; /* Space between title and links */
     }
 
     /* NavBar Links Styling for Mobile */
     .navbar-links-container {
         display: flex;
-        gap: 2px; /* Space between links */
-        align-items: center; /* Center-align links */
+        gap: 0px !important; /* Space between links */
+        align-items: stretch; /* Center-align links */
     }
 
     /* NavBar Link Styling for Mobile Portrait */
@@ -248,11 +248,11 @@
         color: grey;
         text-transform: uppercase;
         font-weight: bold;
-        font-size: 0.5rem; /* Font size for better readability */
+        font-size: 0.48rem; /* Font size for better readability */
         background: none;
         border: none;
         cursor: pointer;
-        padding: 2px 4px;
+        padding: 0px 0px !important;
         transition: background-color 0.3s, color 0.3s;
     }
 
