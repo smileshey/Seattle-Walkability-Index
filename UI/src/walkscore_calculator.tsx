@@ -149,20 +149,8 @@ const createPersonalizedWalkscoreLayer = async (
       { name: "walk_score", alias: "Walk Score", type: "double" as const },
       { name: "personalized_walkscore", alias: "Personalized Walkscore", type: "double" as const },
     ];
-
-<<<<<<< HEAD
-=======
-    const requiredFields = [
-      { name: "IndexID", alias: "Index ID", type: "integer" as const },
-      { name: "nested", alias: "Nested Field", type: "string" as const },
-      { name: "walk_score", alias: "Walk Score", type: "double" as const },
-      { name: "personalized_walkscore", alias: "Personalized Walkscore", type: "double" as const },
-    ];
-    
-    
-
+  
     // Remove the old personalized layer if it exists
->>>>>>> 67f56dca7b80e62a02905c9891e97d609ab56462
     let temporaryLayer = webMap.allLayers.find((layer) => layer.title === title) as FeatureLayer;
     if (temporaryLayer) {
       webMap.remove(temporaryLayer);
@@ -177,24 +165,15 @@ const createPersonalizedWalkscoreLayer = async (
             walk_score: feature.attributes.walk_score,
             personalized_walkscore: feature.attributes.personalized_walkscore,
           };
-<<<<<<< HEAD
-
-=======
     
->>>>>>> 67f56dca7b80e62a02905c9891e97d609ab56462
           return new Graphic({
             geometry: feature.geometry,
             attributes: filteredAttributes,
           });
         })
       ),
-<<<<<<< HEAD
-      fields: requiredFields,
-      objectIdField: "IndexID",
-=======
       fields: requiredFields, // Use the filtered fields
       objectIdField: "IndexID", // Ensure this matches the field in your requiredFields array
->>>>>>> 67f56dca7b80e62a02905c9891e97d609ab56462
       geometryType: originalLayer.geometryType,
       spatialReference: originalLayer.spatialReference,
       title: title,
