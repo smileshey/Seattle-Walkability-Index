@@ -8,6 +8,16 @@ import Collection from "@arcgis/core/core/Collection";
 import PopupTemplate from "@arcgis/core/PopupTemplate";
 import VisibilityState from "./visibility_state"; // Import VisibilityState class
 
+const BASE_LAYERS = {
+  FISHNET: "walkscore_fishnet",
+  NEIGHBORHOODS: "walkscore_neighborhoods",
+};
+
+const PERSONALIZED_LAYERS = {
+  FISHNET: "personalized_walkscore_fishnet",
+  NEIGHBORHOODS: "personalized_neighborhood_walkscore",
+};
+
 export const aggregateScoresByNeighborhood = (features: __esri.Graphic[]) => {
   const scoresByNeighborhood: { [key: string]: number } = {};
 
@@ -139,7 +149,7 @@ export const createPersonalizedNeighborhoodsLayer = async (
       ]
     });
 
-    const title = "Personalized Neighborhood Walkscore";
+    const title = PERSONALIZED_LAYERS.NEIGHBORHOODS;
 
     // Remove the old personalized neighborhood layer if it exists
     let personalizedLayer = webMap.allLayers.find(layer => layer.title === title) as FeatureLayer;
@@ -169,7 +179,7 @@ export const createPersonalizedNeighborhoodsLayer = async (
 
     // Use visibilityState to manage the visibility of layers
     visibilityState.setRecalculateClicked(true);
-    visibilityState.setLayerVisible("Personalized Heatmap");
+    visibilityState.setLayerVisible(PERSONALIZED_LAYERS.FISHNET);
     // visibilityState.setLayerHidden("Personalized Neighborhood Walkscore");
 
     // Return the top neighborhoods

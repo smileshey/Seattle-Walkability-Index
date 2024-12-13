@@ -20,7 +20,7 @@ import '../dist/styles/styles.mobile.css';
 
 const webMap = new WebMap({
   portalItem: {
-    id: 'd50d84100894480ca401a350ae85c60a'
+    id: '31c2468b645744df9b01a40a206455df'
   }
 });
 
@@ -40,6 +40,15 @@ const view = new MapView({
   },
 });
 
+const BASE_LAYERS = {
+  FISHNET: "walkscore_fishnet",
+  NEIGHBORHOODS: "walkscore_neighborhoods",
+};
+
+const PERSONALIZED_LAYERS = {
+  FISHNET: "personalized_walkscore_fishnet",
+  NEIGHBORHOODS: "personalized_neighborhood_walkscore",
+};
 const visibilityState = new VisibilityState({ webMap });
 
 // Persistent roots outside of the component to prevent re-creation during re-renders
@@ -50,7 +59,7 @@ let toggleRoot: Root | null = null;
 const MainComponent = () => {
   const [recalculateTriggered, setRecalculateTriggered] = useState(false);
   const [selectedWidget, setSelectedWidget] = useState<null | 'slider' | 'legend'>(null);
-  const [isFishnetLayer, setIsFishnetLayer] = useState(true); // Set to true initially as the heatmap layer is visible first
+  const [isFishnetLayer, setIsFishnetLayer] = useState(true);
   const [isLegendActive, setIsLegendActive] = useState(false);
 
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
@@ -98,7 +107,7 @@ const MainComponent = () => {
       legendRoot = null;
     }
   };
-  
+
   useEffect(() => {
     if (isMobilePortrait) {
       visibilityState.resetAllWidgets();
@@ -121,19 +130,23 @@ const MainComponent = () => {
   }, []);
 
   const fetchAndRenderNeighborhoods = async () => {
-    const personalizedLayer = webMap.allLayers.find(layer => layer.title === "Personalized Neighborhood Walkscore") as FeatureLayer;
-    const baseLayer = webMap.allLayers.find(layer => layer.title === "walkscore_neighborhoods") as FeatureLayer;
-
+    const personalizedLayer = webMap.allLayers.find(
+      layer => layer.title === PERSONALIZED_LAYERS.NEIGHBORHOODS
+    ) as FeatureLayer;
+    const baseLayer = webMap.allLayers.find(
+      layer => layer.title === BASE_LAYERS.NEIGHBORHOODS
+    ) as FeatureLayer;
+  
     let layerToUse = baseLayer;
     let fieldToUse = "rank_normalized_walk_score";
-
+  
     if (personalizedLayer) {
       layerToUse = personalizedLayer;
       fieldToUse = "personalized_walkscore";
     }
-
+  
     const fetchedNeighborhoods = await getTopNeighborhoods(layerToUse, fieldToUse);
-
+  
     const topNeighborhoodsDiv = document.querySelector("#topNeighborhoodsDiv");
     if (topNeighborhoodsDiv && topNeighborhoodsDiv.id !== "root") {
       createRoot(topNeighborhoodsDiv).render(
@@ -141,17 +154,25 @@ const MainComponent = () => {
           neighborhoods={fetchedNeighborhoods}
           view={view}
           webMap={webMap}
-          onNeighborhoodsLoaded={(neighborhoods) => console.log("Neighborhoods loaded:", neighborhoods)}
+          onNeighborhoodsLoaded={(neighborhoods) =>
+            console.log("Neighborhoods loaded:", neighborhoods)
+          }
           showTextList={false}
         />
       );
     }
   };
 
+  view.when(() => {
+    webMap.allLayers.forEach((layer) => {
+      console.log(`Layer Title: ${layer.title}, Visibility: ${layer.visible}`);
+    });
+  });
+  
+
   useEffect(() => {
     if (recalculateTriggered) {
       fetchAndRenderNeighborhoods();
-      // Update visibility after recalculation is triggered
       visibilityState.handlePostRecalculateVisibility();
       setRecalculateTriggered(false);
     }
@@ -159,14 +180,14 @@ const MainComponent = () => {
 
   const handleBottomNavChange = (newValue: 'slider' | 'legend' | 'toggle') => {
     if (newValue === 'toggle') {
-      const newIsHeatmapLayer = !isFishnetLayer;
-      setIsFishnetLayer(newIsHeatmapLayer);
-      visibilityState.toggleLayerVisibility(newIsHeatmapLayer);
+      const newIsFishnetLayer = !isFishnetLayer;
+      setIsFishnetLayer(newIsFishnetLayer);
+      visibilityState.toggleLayerVisibility(newIsFishnetLayer);
     } else if (selectedWidget === newValue) {
       if (newValue === 'slider') {
         unmountWidget('slider');
       } else if (newValue === 'legend') {
-        visibilityState.toggleLegendVisibility(false);
+        visibilityState.toggleLayerVisibility(false);
         unmountWidget('legend');
         setIsLegendActive(false);
       }
@@ -180,7 +201,7 @@ const MainComponent = () => {
         }
         sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
       } else if (newValue === 'legend') {
-        visibilityState.toggleLegendVisibility(true);
+        visibilityState.toggleLayerVisibility(true);
         visibilityState.setWidgetVisible('legend-container', true);
         const legendDiv = document.querySelector(".legend-container") as HTMLElement;
         if (!legendRoot) {
@@ -195,7 +216,6 @@ const MainComponent = () => {
 
   return (
     <div id="appRoot">
-      {/* Rotate Screen Notification */}
       {isMobileLandscape && (
         <Box className="rotate-screen-notification">
           <Box className="rotate-icon">🔄</Box>
@@ -205,7 +225,6 @@ const MainComponent = () => {
   
       <BasicMenu />
   
-      {/* Slider Container */}
       <div id="sliderContainer">
         <div id="sliderDiv"></div>
       </div>
@@ -213,7 +232,6 @@ const MainComponent = () => {
         <LegendWidget isActive={isLegendActive} />
       </div>
   
-      {/* Bottom Navigation Bar */}
       {isMobilePortrait && (
         <Box className="bottom-nav-container">
           <BottomNavigation
@@ -228,7 +246,7 @@ const MainComponent = () => {
               className="bottom-nav-action"
             />
             <BottomNavigationAction
-              label="Heatmap Toggle"
+              label="Toggle"
               icon={<ToggleIcon />}
               value="toggle"
               className="bottom-nav-action"
@@ -241,7 +259,6 @@ const MainComponent = () => {
             />
           </BottomNavigation>
         </Box>
-        
       )}
     </div>
   );
@@ -256,6 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export default MainComponent;
+
 
 
 

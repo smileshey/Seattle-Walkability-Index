@@ -22,9 +22,9 @@ export const createHeatmapLayer = async (
     
     // List of possible layers to hide
     const possibleLayersToHide = [
-        "walkscore_fishnet_points",
+        "walkscore_fishnet",
         "walkscore_neighborhoods",
-        "Personalized Heatmap",
+        "Personalized Walkscore",
         "Personalized Neighborhood Walkscore"
       ];
   

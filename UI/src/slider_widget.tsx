@@ -73,23 +73,21 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
     setIsLoading(true);
     setTopNeighborhoods(null); // Clear out old neighborhoods
     setPreviousValues(values);
-
+  
     try {
       // Call handleRecalculate with updated slider values and visibilityState instance
-      const recalculatedNeighborhoods = await handleRecalculate(view, webMap, values, isDesktop, visibilityState);
-
-      if (recalculatedNeighborhoods && recalculatedNeighborhoods.length > 0) {
-        setTopNeighborhoods(recalculatedNeighborhoods);
-        setRecalculated(true);
-      }
-
+      await handleRecalculate(view, webMap, values, isDesktop, visibilityState);
+  
+      // Once recalculation is complete, update state
+      setRecalculated(true);
       setIsLoading(false);
       triggerRecalculate(); // Trigger recalculation of widgets
     } catch (error) {
-      console.error('Error during recalculation:', error);
+      console.error("Error during recalculation:", error);
       setIsLoading(false);
     }
   };
+  
 
   const handleReset = () => {
     setValues(previousValues);
