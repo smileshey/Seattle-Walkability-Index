@@ -38,7 +38,7 @@ const valueLabelFormat = (value: number) => {
 const sliderCaptions = [
   'Flat Ground',
   'Calm Streets',
-  'Business Proximity',
+  'Business Density',
   'Crime'
 ];
 

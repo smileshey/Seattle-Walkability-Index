@@ -1,4 +1,4 @@
-console.log('main.tsx is being accessed correctly');
+// console.log('main.tsx is being accessed correctly');
 
 import React, { useState, useEffect } from "react";
 import { createRoot, Root } from 'react-dom/client';
@@ -16,6 +16,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import ToggleIcon from '@mui/icons-material/ToggleOn';
 import LegendIcon from '@mui/icons-material/Map';
 import VisibilityState from './visibility_state';
+import '../dist/styles/styles.mobile.css';
 
 const webMap = new WebMap({
   portalItem: {
@@ -29,16 +30,15 @@ const view = new MapView({
   container: "viewDiv",
   map: webMap,
   center: [-122.3321, 47.6062],
-  zoom: 13,
+  zoom: 11,
   ui: {
-    components: ["attribution"]
+    components: ["attribution"],
   },
   constraints: {
-    rotationEnabled: false, // Disable map rotation
-    snapToZoom: false // Optional: Avoid snapping to discrete zoom levels
-  }
+    maxZoom: 17,
+    minZoom: 10, 
+  },
 });
-
 
 const visibilityState = new VisibilityState({ webMap });
 
@@ -51,9 +51,11 @@ const MainComponent = () => {
   const [recalculateTriggered, setRecalculateTriggered] = useState(false);
   const [selectedWidget, setSelectedWidget] = useState<null | 'slider' | 'legend'>(null);
   const [isFishnetLayer, setIsFishnetLayer] = useState(true); // Set to true initially as the heatmap layer is visible first
-  const [isLegendActive, setIsLegendActive] = useState(false); // State to track legend active status
+  const [isLegendActive, setIsLegendActive] = useState(false);
+
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
-  const isDesktop = useMediaQuery('(min-width: 601px)'); // Treat everything else as desktop
+  const isMobileLandscape = useMediaQuery('(max-height: 600px) and (orientation: landscape)');
+  const isDesktop = useMediaQuery('(min-width: 601px) and (min-height: 601px)');
 
   // Call default visibility setup when app loads
   useEffect(() => {
@@ -83,11 +85,6 @@ const MainComponent = () => {
     }
   };
 
-  const resetWidgets = () => {
-    visibilityState.resetAllWidgets();
-    setSelectedWidget(null);
-  };
-
   const unmountWidget = (widget: 'slider' | 'legend') => {
     if (widget === 'slider' && sliderRoot) {
       sliderRoot.unmount();
@@ -101,7 +98,7 @@ const MainComponent = () => {
       legendRoot = null;
     }
   };
-
+  
   useEffect(() => {
     if (isMobilePortrait) {
       visibilityState.resetAllWidgets();
@@ -153,9 +150,7 @@ const MainComponent = () => {
 
   useEffect(() => {
     if (recalculateTriggered) {
-      console.log("Recalculating neighborhoods...");
       fetchAndRenderNeighborhoods();
-
       // Update visibility after recalculation is triggered
       visibilityState.handlePostRecalculateVisibility();
       setRecalculateTriggered(false);
@@ -164,7 +159,6 @@ const MainComponent = () => {
 
   const handleBottomNavChange = (newValue: 'slider' | 'legend' | 'toggle') => {
     if (newValue === 'toggle') {
-      console.log("Toggling layers via bottom navigation...");
       const newIsHeatmapLayer = !isFishnetLayer;
       setIsFishnetLayer(newIsHeatmapLayer);
       visibilityState.toggleLayerVisibility(newIsHeatmapLayer);
@@ -201,8 +195,16 @@ const MainComponent = () => {
 
   return (
     <div id="appRoot">
+      {/* Rotate Screen Notification */}
+      {isMobileLandscape && (
+        <Box className="rotate-screen-notification">
+          <Box className="rotate-icon">🔄</Box>
+          <Box className="rotate-text">Rotate Screen</Box>
+        </Box>
+      )}
+  
       <BasicMenu />
-
+  
       {/* Slider Container */}
       <div id="sliderContainer">
         <div id="sliderDiv"></div>
@@ -210,7 +212,7 @@ const MainComponent = () => {
       <div className={`legend-container ${isLegendActive ? 'active' : ''}`}>
         <LegendWidget isActive={isLegendActive} />
       </div>
-
+  
       {/* Bottom Navigation Bar */}
       {isMobilePortrait && (
         <Box className="bottom-nav-container">
@@ -239,6 +241,7 @@ const MainComponent = () => {
             />
           </BottomNavigation>
         </Box>
+        
       )}
     </div>
   );

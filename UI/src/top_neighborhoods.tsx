@@ -18,10 +18,8 @@ export interface TopNeighborhoodsProps {
 }
 
 const TopNeighborhoods: React.FC<TopNeighborhoodsProps> = ({ neighborhoods, view, webMap, onNeighborhoodsLoaded, showTextList = true }) => {
-  const isMobileLandscape = useMediaQuery('(min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
-
   useEffect(() => {
-    console.log("TopNeighborhoods component mounted");
+    // console.log("TopNeighborhoods component mounted");
     if (neighborhoods && neighborhoods.length > 0 && onNeighborhoodsLoaded) {
       onNeighborhoodsLoaded(neighborhoods);
       renderNeighborhoodsOnMap(neighborhoods);
@@ -29,7 +27,7 @@ const TopNeighborhoods: React.FC<TopNeighborhoodsProps> = ({ neighborhoods, view
   }, [neighborhoods, onNeighborhoodsLoaded]);
 
   const renderNeighborhoodsOnMap = (neighborhoods: Neighborhood[]) => {
-    console.log("Rendering neighborhoods on the map");
+    // console.log("Rendering neighborhoods on the map");
     const existingLayer = webMap.findLayerById("neighborhoodMarkers");
     if (existingLayer) {
       webMap.remove(existingLayer);

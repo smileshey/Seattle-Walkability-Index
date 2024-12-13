@@ -44,7 +44,7 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
   // Handle toggle change for heatmap vs. neighborhood layers
   const handleToggleChange = (isHeatmap: boolean) => {
     setIsHeatmapView(isHeatmap);
-    console.log('Handling layer toggle. Toggle state (isHeatmapView):', isHeatmap);
+    // console.log('Handling layer toggle. Toggle state (isHeatmapView):', isHeatmap);
   
     // Update visibility based on whether recalculation has occurred
     if (visibilityState.recalculateClicked) {
@@ -60,7 +60,7 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
     
     // Log after changing the layer visibility
     const currentVisibleLayer = visibilityState.getCurrentVisibleLayer();
-    console.log('After toggle, currently visible layer:', currentVisibleLayer);
+    // console.log('After toggle, currently visible layer:', currentVisibleLayer);
   };
 
   // Ensure synchronization of state with visible layer when the component mounts

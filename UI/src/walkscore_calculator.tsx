@@ -17,7 +17,7 @@ import {
   createPersonalizedNeighborhoodsLayer,
   rankNormalizeAndScaleScores,
 } from "./neighborhood_utils";
-import { getTopNeighborhoods, Neighborhood } from "./neighborhood_utils";
+import { Neighborhood } from "./neighborhood_utils";
 import { createHeatmapLayer } from './heatmap_render'; // Update the import here to 'createHeatmapLayer'
 import VisibilityState from './visibility_state'; // Import VisibilityState class
 
@@ -46,15 +46,15 @@ const createPersonalizedWalkscoreLayer = async (
   visibilityState: VisibilityState
 ) => {
   try {
-    console.log("Creating personalized walkscore layer...");
-
-    // Query the original layer to get the features
+    console.time("Total Layer Creation Time");
+    // Start timer for querying features
+    console.time("Query Features");
     const query = originalLayer.createQuery();
     query.where = "1=1";
     query.returnGeometry = true;
     query.outFields = ["*"];
     query.start = 0;
-    query.num = 1000;
+    query.num = 20483;
 
     const allFeatures: __esri.Graphic[] = [];
     let result: __esri.FeatureSet | undefined;
@@ -68,14 +68,18 @@ const createPersonalizedWalkscoreLayer = async (
         break;
       }
     } while (result.features.length === query.num);
+    console.timeEnd("Query Features");
 
-    // Recalculate scalers based on user input
-    console.log("Calculating personalized scores for features...");
+    // Start timer for recalculating scalers
+    console.time("Recalculate Scalers");
     allFeatures.forEach((graphic) => {
       const attributes = graphic.attributes as FeatureAttributes;
 
       const slopeScaler = getSlopeScaler(attributes.effective_slope, userSliderValues.slope);
-      const effectiveSpeedLimitScaler = getEffectiveSpeedLimitScaler(attributes.Max_Speed_Limit, userSliderValues.streets);
+      const effectiveSpeedLimitScaler = getEffectiveSpeedLimitScaler(
+        attributes.Max_Speed_Limit,
+        userSliderValues.streets
+      );
       const businessDensityScaler = getBusinessDensityScaler(attributes.business_density, userSliderValues.amenity);
       const crimeDensityScaler = getCrimeDensityScaler(attributes.crime_density_normalized, userSliderValues.crime);
       const crashDensityScaler = getCrashDensityScaler(attributes.crash_density_normalized, userSliderValues.streets);
@@ -88,15 +92,49 @@ const createPersonalizedWalkscoreLayer = async (
 
       const baseWalkscore = attributes.unadjusted_walkscore;
       attributes.personalized_walkscore = baseWalkscore
-        ? (baseWalkscore * slopeScaler * effectiveSpeedLimitScaler * businessDensityScaler * crimeDensityScaler * crashDensityScaler) + 0.001 // Adding 0.001 to ensure non-zero scores
-        : 0.001; // Setting a minimum value of 0.001
+        ? baseWalkscore *
+          slopeScaler *
+          effectiveSpeedLimitScaler *
+          businessDensityScaler *
+          crimeDensityScaler *
+          crashDensityScaler +
+          0.001
+        : 0.001;
     });
+    console.timeEnd("Recalculate Scalers");
 
     // Normalize and scale the scores
-    console.log("Rank normalizing and scaling personalized scores...");
-    rankNormalizeAndScaleScores(allFeatures);
+  console.time("Rank Normalize and Scale");
+  rankNormalizeAndScaleScores(allFeatures);
+  console.timeEnd("Rank Normalize and Scale");
 
-    // Define the new fields to be added
+  // Calculate statistics for rank normalized scores
+  console.time("Calculate Rank-Normalized Statistics");
+  const normalizedScores = allFeatures.map((graphic) => graphic.attributes.personalized_walkscore);
+  if (normalizedScores.length > 0) {
+    const minScore = Math.min(...normalizedScores);
+    const maxScore = Math.max(...normalizedScores);
+
+    normalizedScores.sort((a, b) => a - b); // Sort scores to calculate quantiles
+    const q1 = normalizedScores[Math.floor(normalizedScores.length * 0.25)];
+    const q2 = normalizedScores[Math.floor(normalizedScores.length * 0.5)]; // Median
+    const q3 = normalizedScores[Math.floor(normalizedScores.length * 0.75)];
+
+    console.log("Rank-Normalized Personalized Walkscore Statistics:");
+    console.log(`Min: ${minScore}, Q1: ${q1}, Median: ${q2}, Q3: ${q3}, Max: ${maxScore}`);
+  }
+  console.timeEnd("Calculate Rank-Normalized Statistics");
+
+  // Calculate density statistics
+  const densities = allFeatures.map((feature) => feature.attributes.personalized_walkscore);
+  const minDensity = Math.min(...densities);
+  const maxDensity = Math.max(...densities);
+  console.log(`Density Stats - Min: ${minDensity}, Max: ${maxDensity}`);
+
+
+
+    // Start timer for creating the personalized layer
+    console.time("Create Personalized Layer");
     const allFields = originalLayer.fields.concat([
       new Field({
         name: "personalized_walkscore",
@@ -105,51 +143,47 @@ const createPersonalizedWalkscoreLayer = async (
       }),
     ]);
 
-    // Create the popup template
-    const popupTemplate = new PopupTemplate({
-      title: "{Name}",
-      content: [
-        {
-          type: "fields",
-          fieldInfos: allFields.map((field) => ({
-            fieldName: field.name,
-            label: field.alias || field.name,
-          })),
-        },
-      ],
-    });
+    const requiredFields = [
+      { name: "IndexID", alias: "Index ID", type: "integer" as const },
+      { name: "nested", alias: "Nested Field", type: "string" as const },
+      { name: "walk_score", alias: "Walk Score", type: "double" as const },
+      { name: "personalized_walkscore", alias: "Personalized Walkscore", type: "double" as const },
+    ];
 
-    // Remove the old personalized layer if it exists
     let temporaryLayer = webMap.allLayers.find((layer) => layer.title === title) as FeatureLayer;
     if (temporaryLayer) {
       webMap.remove(temporaryLayer);
     }
 
-    // Create the new temporary personalized layer
     temporaryLayer = new FeatureLayer({
       source: new Collection(
-        allFeatures.map(
-          (feature) =>
-            new Graphic({
-              geometry: feature.geometry,
-              attributes: feature.attributes,
-            })
-        )
+        allFeatures.map((feature) => {
+          const filteredAttributes = {
+            IndexID: feature.attributes.IndexID,
+            nested: feature.attributes.nested,
+            walk_score: feature.attributes.walk_score,
+            personalized_walkscore: feature.attributes.personalized_walkscore,
+          };
+
+          return new Graphic({
+            geometry: feature.geometry,
+            attributes: filteredAttributes,
+          });
+        })
       ),
-      fields: allFields,
-      objectIdField: originalLayer.objectIdField,
+      fields: requiredFields,
+      objectIdField: "IndexID",
       geometryType: originalLayer.geometryType,
       spatialReference: originalLayer.spatialReference,
       title: title,
-      popupTemplate: popupTemplate,
     });
 
-    // Add the personalized layer to the map
     webMap.add(temporaryLayer);
-
     await temporaryLayer.when();
     temporaryLayer.refresh();
+    console.timeEnd("Create Personalized Layer");
 
+    console.timeEnd("Total Layer Creation Time");
     return temporaryLayer;
   } catch (error) {
     console.error("Error creating personalized walkscore layer:", error);
@@ -162,8 +196,10 @@ const handleRecalculate = async (
   webMap: __esri.WebMap,
   userSliderValues: { [key: string]: number },
   isDesktop: boolean,
-  visibilityState: VisibilityState // Inject visibilityState
+  visibilityState: VisibilityState
 ): Promise<Neighborhood[]> => {
+  console.time("Handle Recalculate Total Time");
+
   const currentExtent = view.extent.clone();
   const currentZoom = view.zoom;
 
@@ -172,47 +208,81 @@ const handleRecalculate = async (
   const walkscorePointsLayer = webMap.allLayers.find((layer) => layer.title === "walkscore_fishnet_points") as FeatureLayer;
   const walkscoreNeighborhoodsLayer = webMap.allLayers.find((layer) => layer.title === "walkscore_neighborhoods") as FeatureLayer;
 
-  if (!walkscorePointsLayer || !walkscoreNeighborhoodsLayer) {
-    console.error("Required layers not found");
+  if (!walkscorePointsLayer) {
+    console.error("Walkscore points layer not found.");
+    console.timeEnd("Handle Recalculate Total Time");
     return [];
   }
 
-  // Step 1: Create the personalized walkscore layer
-  console.log("Creating personalized walkscore layer...");
-  const personalizedPointsLayer = await createPersonalizedWalkscoreLayer(
-    walkscorePointsLayer,
-    "Personalized Heatmap",
-    userSliderValues,
-    webMap,
-    visibilityState
-  );
-
-  if (personalizedPointsLayer) {
-    // Step 2: Create the personalized heatmap layer
-    console.log("Creating personalized heatmap layer...");
-    await createHeatmapLayer(personalizedPointsLayer, "Personalized Heatmap", "personalized_walkscore", webMap, view);
-
-    // Step 3: Reset visibility of all layers after creating new layers
-    console.log("Resetting visibility for all layers before updating visibility state.");
-    visibilityState.resetLayerVisibility();
-
-    // Step 4: Set personalized heatmap layer to be visible
-    visibilityState.setLayerVisible("Personalized Heatmap");
-
-    // Step 5: Create personalized neighborhoods layer and get the top neighborhoods
-    const topNeighborhoods = await createPersonalizedNeighborhoodsLayer(personalizedPointsLayer, walkscoreNeighborhoodsLayer, webMap, visibilityState);
-
-    // Ensure the base neighborhood layer is still hidden
-    // visibilityState.setLayerHidden("walkscore_neighborhoods");
-
-    // Step 6: Restore the view to its original state
-    view.extent = currentExtent;
-    view.zoom = currentZoom;
-    return topNeighborhoods; // Return the recalculated top neighborhoods
+  if (!walkscoreNeighborhoodsLayer) {
+    console.error("Walkscore neighborhoods layer not found.");
+    console.timeEnd("Handle Recalculate Total Time");
+    return [];
   }
 
-  return [];
+  let personalizedPointsLayer;
+  try {
+    personalizedPointsLayer = await createPersonalizedWalkscoreLayer(
+      walkscorePointsLayer,
+      "Personalized Heatmap",
+      userSliderValues,
+      webMap,
+      visibilityState
+    );
+  } catch (error) {
+    console.error("Error creating personalized walkscore layer:", error);
+    console.timeEnd("Handle Recalculate Total Time");
+    return [];
+  }
+
+  if (!personalizedPointsLayer) {
+    console.error("Failed to create personalized points layer.");
+    console.timeEnd("Handle Recalculate Total Time");
+    return [];
+  }
+
+  try {
+    console.time("Create Personalized Heatmap Layer");
+    await createHeatmapLayer(personalizedPointsLayer, "Personalized Heatmap", "personalized_walkscore", webMap, view);
+    console.timeEnd("Create Personalized Heatmap Layer");
+  } catch (error) {
+    console.error("Error creating personalized heatmap layer:", error);
+    console.timeEnd("Handle Recalculate Total Time");
+    return [];
+  }
+
+  try {
+    console.time("Reset Layer Visibility");
+    visibilityState.resetLayerVisibility();
+    visibilityState.setLayerVisible("Personalized Heatmap");
+    console.timeEnd("Reset Layer Visibility");
+  } catch (error) {
+    console.error("Error resetting layer visibility:", error);
+  }
+
+  try {
+    console.time("Create Personalized Neighborhood Layer");
+    const topNeighborhoods = await createPersonalizedNeighborhoodsLayer(
+      personalizedPointsLayer,
+      walkscoreNeighborhoodsLayer,
+      webMap,
+      visibilityState
+    );
+    console.timeEnd("Create Personalized Neighborhood Layer");
+
+    view.extent = currentExtent;
+    view.zoom = currentZoom;
+
+    console.timeEnd("Handle Recalculate Total Time");
+    return topNeighborhoods;
+  } catch (error) {
+    console.error("Error creating personalized neighborhoods layer:", error);
+    console.timeEnd("Handle Recalculate Total Time");
+    return [];
+  }
 };
+
+
 
 const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = ({ view, webMap }) => {
   const isDesktop = useMediaQuery("(min-width: 1001px)");

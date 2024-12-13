@@ -1,165 +1,89 @@
 /* Tablet Portrait Layout */
-@media (min-width: 601px) and (orientation: portrait) {
-    #headerDiv {
-      width: 100%;
-      padding: 15px;
-      font-size: 16px;
-      background-color: rgba(240, 240, 240, 0);
-    }
-  
-    #sliderDiv {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      z-index: 1003;
-      width: 220px;
-      padding: 10px;
-      background: rgba(255, 255, 255, 1);
-      border-radius: 10px;
-    }
-  
-    .legend-container {
-      position: absolute;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1003;
-    }
-  
-    #layerToggleDiv {
-      display: none; /* Hide the toggle div in tablet portrait mode */
-    }
-  
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 25%;
-      right: 25%;
-      width: 50%;
-      z-index: 1000;
-      background-color: white;
-      box-shadow: 0px -1px 6px rgba(0, 0, 0, 0.1);
-    }
-  }
-  
-  /* Mobile Landscape Layout */
-  @media (max-width: 1000px) and (orientation: landscape) {
-    #viewDiv {
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      z-index: 1;
-    }
-  
-    #headerDiv {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 50%;
-      padding: 10px;
-      font-size: 14px;
-      background-color: rgba(230, 230, 230, 0);
-      z-index: 1004;
-    }
-  
-    #sliderContainer {
-      display: flex;
-      justify-content: flex-end;
-      position: absolute;
-      bottom: 30px;
-      left: 88%;
-      transform: translateX(-50%);
-      width: 20%;
-      padding-right: 10px;
-      z-index: 1002;
-    }
-  
-    #sliderDiv {
-      visibility: visible;
-      width: 220px;
-    }
-  
-    .legend-container {
-      display: block;
-      position: absolute;
-      bottom: 10px;
-      left: 15%;
-      z-index: 1000;
-      visibility: hidden;
-    }
-  
-    #layerToggleDiv {
-      display: block;
-      position: absolute;
-      bottom: 80px;
-      right: 20px;
-      z-index: 1004;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 10px;
-      border-radius: 5px;
-    }
-  
-    .bottom-nav-container {
-      position: fixed;
-      bottom: 0px;
-      left: 20px;
-      z-index: 1000;
-      display: flex;
-      background-color: rgba(255, 255, 255, 0.7);
-      padding: 5px;
-      border-radius: 10px;
-      border: 2px solid rgba(0, 0, 0, 0.4);
-      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-      width: auto;
-      height: 200px;
-      align-items: center;
-    }
-  
-    .bottom-nav {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-  
-    .bottom-nav .MuiBottomNavigationAction-root {
-      margin-bottom: 8px;
-      padding: 8px;
-      width: 100%;
-    }
-  
-    .bottom-nav .MuiBottomNavigationAction-label {
-      font-size: 0.75rem;
-      text-align: center;
-    }
+@media (min-width: 601px) and (max-width: 1000px) and (orientation: portrait) {
+  #headerDiv {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    background-color: rgba(240, 240, 240, 1);
   }
 
-/* NavBar Tablet Overrides */
+  #sliderDiv {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1003;
+    width: 220px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 1);
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .legend-container {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1003;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  #layerToggleDiv {
+    display: none; /* Hide toggle div in tablet portrait mode */
+  }
+
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 20%;
+    right: 20%;
+    width: 60%;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0px -1px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px 10px 0 0;
+  }
+
+  .top-neighborhoods-list {
+    gap: 0.75rem; /* Slightly increased gap for better visibility on tablets */
+  }
+
+  .top-neighborhood-row {
+    padding: 5px 0; /* Adjust padding for better spacing on tablets */
+  }
+}
+
+/* NavBar Tablet Portrait Overrides */
 .navbar-container.tablet {
-  width: 60%; /* Set a width that takes advantage of more screen space on tablets */
-  max-width: 600px; /* Set a maximum width for the navigation bar on tablets */
-  min-width: 700px; /* Set a minimum width for consistent layout on smaller tablets */
-  border-radius: 0 0 10px 10px; /* Rounded on bottom-left and bottom-right */
-  justify-content: space-between; /* Space between title and links to maintain balance */
-  padding: 12px; /* Adjust padding to improve layout and reduce overcrowding */
+  width: 80%; /* Take most of the screen width for balance */
+  max-width: 700px; /* Cap width for larger tablets */
+  border-radius: 0; /* No rounding for a clean look */
+  justify-content: space-between; /* Balanced spacing between items */
+  padding: 10px;
   display: flex;
   align-items: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* NavBar Title for Tablet */
 .navbar-title.tablet {
-  font-size: 1.2rem; /* Adjusted font size for better visibility on tablets */
+  font-size: 1.2rem; /* Larger text for better readability */
   font-weight: bold;
-  color: #000; /* Black color for the title */
-  flex-grow: 0; /* No extra space allocation, to keep title and links closer */
+  color: #000; /* Black for clear visibility */
+  flex-grow: 0; /* Do not stretch */
   text-align: left;
-  margin-right: 12px; /* Add spacing between the title and links */
+  margin-right: 10px;
 }
 
 /* Navbar Links Styling for Tablet */
 .navbar-links-container {
   display: flex;
-  gap: 8px; /* Set spacing between links for tablet view */
-  align-items: center; /* Center align links vertically */
+  gap: 10px; /* Increased spacing for easier interaction */
+  align-items: center;
 }
 
 /* Navbar Link Styling for Tablet */
@@ -167,28 +91,19 @@
   color: grey;
   text-transform: uppercase;
   font-weight: bold;
-  font-size: 0.65rem; /* Font size adjusted for tablet visibility */
+  font-size: 0.8rem; /* Readable size for tablet users */
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 6px 8px;
   transition: background-color 0.3s, color 0.3s;
 }
 
 .navbar-link.tablet:hover {
-  background-color: rgba(0, 0, 0, 0.1); /* Add a slight background color on hover */
-  color: #0072bc; /* Change text color on hover (or any other highlight color) */
+  background-color: rgba(0, 0, 0, 0.1); /* Highlight background on hover */
+  color: #0072bc; /* Highlight color */
 }
 
-/* Adjust gap for tablet */
-.top-neighborhoods-list {
-  gap: 0.5rem;
-}
-
-/* Adjust padding for tablet rows */
-.top-neighborhood-row {
-  padding: 3px 0;
-}
 
 
   

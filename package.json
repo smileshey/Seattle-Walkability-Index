@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@arcgis/core": "^4.31.6"
+  }
+}

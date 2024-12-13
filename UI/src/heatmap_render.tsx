@@ -2,6 +2,8 @@ import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import MapView from "@arcgis/core/views/MapView";
 import WebMap from "@arcgis/core/WebMap.js";
 import HeatmapRenderer from "@arcgis/core/renderers/HeatmapRenderer";
+import { createRenderer } from "@arcgis/core/smartMapping/renderers/heatmap";
+
 import VisibilityState from "./visibility_state"; // Import VisibilityState
 
 export const createHeatmapLayer = async (
@@ -30,18 +32,15 @@ export const createHeatmapLayer = async (
       const layersToHide = possibleLayersToHide.filter(layerTitle => {
         const layer = webMap.allLayers.find(layer => layer.title === layerTitle);
         return !!layer; // Only include if layer exists
-      });
-
-      console.log(layersToHide)
-  
+      });  
       // Hide the layers that exist in the map
       visibilityManager.hideAllLayers(layersToHide);
 
     // Query the features from the pointsLayer
-    console.log("Querying features from points layer...");
+    // console.log("Querying features from points layer...");
     const query = pointsLayer.createQuery();
     query.where = "1=1"; // Query all features
-    query.returnGeometry = true; // Return geometry of features
+    query.returnGeometry = false; // Return geometry of features
     query.outFields = [field]; // Only retrieve the necessary field
 
     const featureSet = await pointsLayer.queryFeatures(query);
@@ -60,25 +59,29 @@ export const createHeatmapLayer = async (
         { ratio: 0.5, color: [255, 255, 0, 0.5] }, // Yellow at 50% opacity (replicating ratio: 0.5)
         { ratio: 1.0, color: [20, 175, 0, 0.5] }, // Green at 70% opacity (replicating ratio: 1)
       ],
+      // radius: 50,
+      // maxDensity: 0.015,
+      // minDensity: 0.001,
+      // referenceScale: 31000
       radius: 50,
-      maxDensity: 0.015,
-      minDensity: 0.001,
-      referenceScale: 31000
+      maxDensity: .003,
+      minDensity: 0.00001,
+      referenceScale: 45000
     });
 
     // Apply the renderer to the points layer
     pointsLayer.renderer = heatmapRenderer;
-    console.log("Heatmap renderer applied to points layer.");
+    // console.log("Heatmap renderer applied to points layer.");
 
     // Add the points layer to the webMap if not already added
     if (!webMap.layers.includes(pointsLayer)) {
-      console.log("Adding points layer to the map...");
+      // console.log("Adding points layer to the map...");
       webMap.add(pointsLayer);
     } else {
-      console.log("Points layer already exists in the map.");
+      // console.log("Points layer already exists in the map.");
     }
 
-    console.log("Heatmap layer created successfully.");
+    // console.log("Heatmap layer created successfully.");
   } catch (error) {
     console.error("Error creating heatmap layer:", error);
   }

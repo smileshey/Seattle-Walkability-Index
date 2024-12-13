@@ -7,25 +7,45 @@ import '../dist/styles/navBar.css';
 export default function BasicMenu() {
   // Media query for different view types
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
-  const isMobileLandscape = useMediaQuery('(min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
-  const isDesktop = useMediaQuery('(min-width: 1000px)');
+  const isMobileLandscape = useMediaQuery('(max-height: 600px) and (orientation: landscape)');
+  const isDesktop = useMediaQuery('(min-width: 601px) and (min-height: 601px)');
 
   return (
     <>
-      {/* Conditionally render based on screen size */}
+      {/* Conditionally render NavBar based on orientation */}
       {(isDesktop || isMobilePortrait || isMobileLandscape) && (
         <Box
-          className={`navbar-container ${isDesktop ? 'desktop' : isMobilePortrait ? 'mobile-portrait' : 'tablet'}`}
+          className={`navbar-container ${
+            isDesktop
+              ? 'desktop'
+              : isMobilePortrait
+              ? 'mobile-portrait'
+              : 'mobile-landscape'
+          }`}
         >
           {/* Title in the center of the navbar */}
-          <div className={`navbar-title ${isDesktop ? 'desktop' : isMobilePortrait ? 'mobile-portrait' : 'tablet'}`}>
+          <div
+            className={`navbar-title ${
+              isDesktop
+                ? 'desktop'
+                : isMobilePortrait
+                ? 'mobile-portrait'
+                : 'mobile-landscape'
+            }`}
+          >
             Walkability in Seattle
           </div>
 
           {/* Static Menu Items directly in the NavBar */}
           <Box className="navbar-links-container">
             <Button
-              className={`navbar-link ${isDesktop ? 'desktop' : isMobilePortrait ? 'mobile-portrait' : 'tablet'}`}
+              className={`navbar-link ${
+                isDesktop
+                  ? 'desktop'
+                  : isMobilePortrait
+                  ? 'mobile-portrait'
+                  : 'mobile-landscape'
+              }`}
               onClick={() =>
                 window.open(
                   'https://github.com/smileshey/Seattle-Walkability-Index?tab=readme-ov-file#how-it-works',
@@ -36,18 +56,31 @@ export default function BasicMenu() {
               How it works
             </Button>
             <Button
-              className={`navbar-link ${isDesktop ? 'desktop' : isMobilePortrait ? 'mobile-portrait' : 'tablet'}`}
+              className={`navbar-link ${
+                isDesktop
+                  ? 'desktop'
+                  : isMobilePortrait
+                  ? 'mobile-portrait'
+                  : 'mobile-landscape'
+              }`}
               onClick={() =>
-                window.open('https://seattlecitygis.maps.arcgis.com/home/index.html', '_blank')
+                window.open(
+                  'https://seattlecitygis.maps.arcgis.com/home/index.html',
+                  '_blank'
+                )
               }
             >
               Data
             </Button>
             <Button
-              className={`navbar-link ${isDesktop ? 'desktop' : isMobilePortrait ? 'mobile-portrait' : 'tablet'}`}
-              onClick={() =>
-                window.open('https://github.com/smileshey/', '_blank')
-              }
+              className={`navbar-link ${
+                isDesktop
+                  ? 'desktop'
+                  : isMobilePortrait
+                  ? 'mobile-portrait'
+                  : 'mobile-landscape'
+              }`}
+              onClick={() => window.open('https://github.com/smileshey/', '_blank')}
             >
               GitHub
             </Button>
@@ -57,6 +90,7 @@ export default function BasicMenu() {
     </>
   );
 }
+
 
 
 
