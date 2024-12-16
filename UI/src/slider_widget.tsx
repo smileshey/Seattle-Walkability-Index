@@ -76,9 +76,13 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
   
     try {
       // Call handleRecalculate with updated slider values and visibilityState instance
-      await handleRecalculate(view, webMap, values, isDesktop, visibilityState);
+      const recalculatedNeighborhoods = await handleRecalculate(view, webMap, values, isDesktop, visibilityState);
   
-      // Once recalculation is complete, update state
+      // Once recalculation is complete, update state with top neighborhoods
+      if (recalculatedNeighborhoods && recalculatedNeighborhoods.length > 0) {
+        setTopNeighborhoods(recalculatedNeighborhoods);
+      }
+  
       setRecalculated(true);
       setIsLoading(false);
       triggerRecalculate(); // Trigger recalculation of widgets
@@ -88,7 +92,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
     }
   };
   
-
+  
   const handleReset = () => {
     setValues(previousValues);
     setIsLoading(false);

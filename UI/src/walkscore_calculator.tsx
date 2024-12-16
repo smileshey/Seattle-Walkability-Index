@@ -75,11 +75,14 @@ const createPersonalizedWalkscoreLayer = async (
       result = await originalLayer.queryFeatures(query);
       if (result && result.features) {
         allFeatures.push(...result.features);
+        console.log(`Query batch: ${result.features.length} features. Total so far: ${allFeatures.length}`);
         query.start += query.num;
       } else {
+        console.warn(`Query returned no features starting at index ${query.start}.`);
         break;
       }
     } while (result.features.length === query.num);
+    console.log(`Total features queried: ${allFeatures.length}`);
     console.timeEnd("Query Features");
 
     // Start timer for recalculating scalers
