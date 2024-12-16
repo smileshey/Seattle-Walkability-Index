@@ -31,47 +31,37 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
   // Sync toggle state with currently visible layer
   const syncToggleStateWithLayer = () => {
     const visibleLayer = visibilityState.getCurrentVisibleLayer();
-
+  
     // Determine layer state based on whether recalculation has occurred
     if (visibilityState.recalculateClicked) {
-      // Toggle between personalized walkscore and personalized fishnet layers
-      if (visibleLayer === 'Personalized Walkscore') {
-        setIsFishnetView(false);
-      } else if (visibleLayer === 'Personalized Walkscore') {
+      if (visibleLayer === PERSONALIZED_LAYERS.FISHNET) {
         setIsFishnetView(true);
+      } else if (visibleLayer === PERSONALIZED_LAYERS.NEIGHBORHOODS) {
+        setIsFishnetView(false);
       }
     } else {
-      // Toggle between base neighborhood and base fishnet layers
-      if (visibleLayer === 'walkscore_neighborhoods') {
-        setIsFishnetView(false);
-      } else if (visibleLayer === 'walkscore_fishnet') {
+      if (visibleLayer === BASE_LAYERS.FISHNET) {
         setIsFishnetView(true);
+      } else if (visibleLayer === BASE_LAYERS.NEIGHBORHOODS) {
+        setIsFishnetView(false);
       }
     }
   };
-
-// Handle toggle change for fishnet vs. neighborhood layers
-const handleToggleChange = (isFishnet: boolean) => {
-  setIsFishnetView(isFishnet);
-
-  // Update visibility based on whether recalculation has occurred
-  if (visibilityState.recalculateClicked) {
-    // Toggle between personalized layers
-    const personalizedLayer = isFishnet
-      ? PERSONALIZED_LAYERS.FISHNET
-      : PERSONALIZED_LAYERS.NEIGHBORHOODS;
-    visibilityState.setLayerVisible(personalizedLayer);
-  } else {
-    // Toggle between base layers
-    const baseLayer = isFishnet ? BASE_LAYERS.FISHNET : BASE_LAYERS.NEIGHBORHOODS;
-    visibilityState.setLayerVisible(baseLayer);
-  }
-
-  // Re-sync toggle state with currently visible layer
-  syncToggleStateWithLayer();
-};
-
-
+  
+  const handleToggleChange = (isFishnet: boolean) => {
+    setIsFishnetView(isFishnet);
+  
+    // Toggle between appropriate layers
+    if (visibilityState.recalculateClicked) {
+      visibilityState.toggleLayerVisibility(isFishnet ? PERSONALIZED_LAYERS.FISHNET : PERSONALIZED_LAYERS.NEIGHBORHOODS);
+    } else {
+      visibilityState.toggleLayerVisibility(isFishnet ? BASE_LAYERS.FISHNET : BASE_LAYERS.NEIGHBORHOODS);
+    }
+  
+    // Re-sync toggle state with currently visible layer
+    syncToggleStateWithLayer();
+  };
+  
   // Ensure synchronization of state with visible layer when the component mounts
   useEffect(() => {
     syncToggleStateWithLayer(); // Sync toggle state with layer visibility on load

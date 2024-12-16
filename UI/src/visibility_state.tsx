@@ -48,34 +48,53 @@ class VisibilityState {
     }
   }
 
-  toggleLayerVisibility(showFishnet: boolean) {
-    const layerToShow = showFishnet ? BASE_LAYERS.FISHNET : BASE_LAYERS.NEIGHBORHOODS;
-    const personalizedLayerToShow = showFishnet ? PERSONALIZED_LAYERS.FISHNET : PERSONALIZED_LAYERS.NEIGHBORHOODS;
-
+  toggleLayerVisibility(layerTitle: string): void {
+    const excludedLayers = [
+      "World Hillshade",
+      "World Terrain Base",
+      "World Terrain Reference",
+      "citylimits"
+    ]; // Add any other basemap or auxiliary layers that should always remain visible.
+  
     this.webMap.allLayers.forEach((layer) => {
-      if (layer.title === layerToShow || layer.title === personalizedLayerToShow) {
+      if (excludedLayers.includes(layer.title)) {
+        return; // Skip toggling visibility for excluded layers.
+      }
+  
+      if (layer.title === layerTitle) {
         layer.visible = true;
       } else {
         layer.visible = false;
       }
     });
   }
+  
+  
 
   resetLayerVisibility(): void {
     const baseLayerTitles = [BASE_LAYERS.FISHNET, BASE_LAYERS.NEIGHBORHOODS];
     const personalizedLayerTitles = [PERSONALIZED_LAYERS.FISHNET, PERSONALIZED_LAYERS.NEIGHBORHOODS];
+    
+    // Get all existing layer titles from the map
+    const availableLayers = this.webMap.allLayers.map(layer => layer.title);
   
-    // Hide all layers initially
-    const allLayerTitles = [...baseLayerTitles, ...personalizedLayerTitles];
-    this.hideAllLayers(allLayerTitles);
+    // Filter the layers to only include the ones that exist in the map
+    const layersToHide = [
+      ...baseLayerTitles.filter(title => availableLayers.includes(title)),
+      ...personalizedLayerTitles.filter(title => availableLayers.includes(title))
+    ];
+  
+    // Hide only the layers that are currently present
+    this.hideAllLayers(layersToHide);
   
     // Show the appropriate layers based on whether recalculation has occurred
-    if (this.recalculateClicked) {
+    if (this.recalculateClicked && availableLayers.includes(PERSONALIZED_LAYERS.FISHNET)) {
       this.setLayerVisible(PERSONALIZED_LAYERS.FISHNET);
-    } else {
+    } else if (availableLayers.includes(BASE_LAYERS.FISHNET)) {
       this.setLayerVisible(BASE_LAYERS.FISHNET);
     }
   }
+  
   
 
   setVisibilityForLayerType(layerType: 'baseHeatmap' | 'personalizedHeatmap' | 'baseNeighborhood' | 'personalizedNeighborhood'): void {

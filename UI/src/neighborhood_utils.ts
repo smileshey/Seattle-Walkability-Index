@@ -115,11 +115,11 @@ export const createPersonalizedNeighborhoodsLayer = async (
       type: "color",
       field: "personalized_walkscore",
       stops: [
-        { value: intervals[1] - 0.00001, color: new Color([255, 0, 0, 0.5]) }, // Red for low values
-        { value: intervals[2] - 0.00001, color: new Color([255, 165, 0, 0.5]) }, // Orange for lower-mid values
-        { value: intervals[3] - 0.00001, color: new Color([255, 255, 0, 0.5]) }, // Yellow for mid values
-        { value: intervals[4] - 0.00001, color: new Color([173, 255, 47, 0.6]) }, // Light green for higher-mid values
-        { value: intervals[5], color: new Color([20, 175, 0, 0.7]) } // Green for high values
+        { value: intervals[1] - 0.00001, color: new Color([255, 0, 0, 0.3]) }, // Red for low values
+        { value: intervals[2] - 0.00001, color: new Color([255, 165, 0, 0.3]) }, // Orange for lower-mid values
+        { value: intervals[3] - 0.00001, color: new Color([255, 255, 0, 0.3]) }, // Yellow for mid values
+        { value: intervals[4] - 0.00001, color: new Color([173, 255, 47, 0.35]) }, // Light green for higher-mid values
+        { value: intervals[5], color: new Color([20, 175, 0, 0.4]) } // Green for high values
       ]
     };
 

@@ -182,12 +182,19 @@ const MainComponent = () => {
     if (newValue === 'toggle') {
       const newIsFishnetLayer = !isFishnetLayer;
       setIsFishnetLayer(newIsFishnetLayer);
-      visibilityState.toggleLayerVisibility(newIsFishnetLayer);
+  
+      // Use appropriate layer titles for toggling
+      const layerToShow = visibilityState.recalculateClicked
+        ? newIsFishnetLayer ? PERSONALIZED_LAYERS.FISHNET : PERSONALIZED_LAYERS.NEIGHBORHOODS
+        : newIsFishnetLayer ? BASE_LAYERS.FISHNET : BASE_LAYERS.NEIGHBORHOODS;
+  
+      visibilityState.toggleLayerVisibility(layerToShow);
     } else if (selectedWidget === newValue) {
       if (newValue === 'slider') {
         unmountWidget('slider');
       } else if (newValue === 'legend') {
-        visibilityState.toggleLayerVisibility(false);
+        // Hide the legend layer
+        visibilityState.toggleLayerVisibility(BASE_LAYERS.NEIGHBORHOODS); // Example: Hide the neighborhoods layer
         unmountWidget('legend');
         setIsLegendActive(false);
       }
@@ -201,7 +208,8 @@ const MainComponent = () => {
         }
         sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
       } else if (newValue === 'legend') {
-        visibilityState.toggleLayerVisibility(true);
+        // Show the legend layer
+        visibilityState.toggleLayerVisibility(BASE_LAYERS.FISHNET); // Example: Show the fishnet layer
         visibilityState.setWidgetVisible('legend-container', true);
         const legendDiv = document.querySelector(".legend-container") as HTMLElement;
         if (!legendRoot) {
@@ -213,6 +221,7 @@ const MainComponent = () => {
       setSelectedWidget(newValue);
     }
   };
+  
 
   return (
     <div id="appRoot">
