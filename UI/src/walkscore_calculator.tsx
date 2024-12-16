@@ -59,7 +59,8 @@ const createPersonalizedWalkscoreLayer = async (
 ) => {
   try {
     console.time("Total Layer Creation Time");
-    // Start timer for querying features
+
+    // Query features from the original layer
     console.time("Query Features");
     const query = originalLayer.createQuery();
     query.where = "1=1";
@@ -85,7 +86,7 @@ const createPersonalizedWalkscoreLayer = async (
     console.log(`Total features queried: ${allFeatures.length}`);
     console.timeEnd("Query Features");
 
-    // Start timer for recalculating scalers
+    // Recalculate scalers
     console.time("Recalculate Scalers");
     allFeatures.forEach((graphic) => {
       const attributes = graphic.attributes as FeatureAttributes;
@@ -119,60 +120,47 @@ const createPersonalizedWalkscoreLayer = async (
     console.timeEnd("Recalculate Scalers");
 
     // Normalize and scale the scores
-  console.time("Rank Normalize and Scale");
-  rankNormalizeAndScaleScores(allFeatures);
-  console.timeEnd("Rank Normalize and Scale");
+    console.time("Rank Normalize and Scale");
+    rankNormalizeAndScaleScores(allFeatures);
+    console.timeEnd("Rank Normalize and Scale");
 
-  const intervals = [0, 1, 2, 3, 4, 5];
+    // Define visualization
+    const intervals = [0, 1, 2, 3, 4, 5];
+    const colorVisVar = {
+      type: "color",
+      field: "personalized_walkscore",
+      stops: [
+        { value: intervals[1], color: new Color([255, 0, 0, 0.3]) }, // Red
+        { value: intervals[2], color: new Color([255, 165, 0, 0.3]) }, // Orange
+        { value: intervals[3], color: new Color([255, 255, 0, 0.3]) }, // Yellow
+        { value: intervals[4], color: new Color([144, 238, 144, 0.3]) }, // Light Green
+        { value: intervals[5], color: new Color([0, 128, 0, 0.3]) }, // Green
+      ],
+    };
 
-  const colorVisVar = {
-    type: "color",
-    field: "personalized_walkscore",
-    stops: [
-      { value: intervals[1] , color: new Color([255, 0, 0, 0.3]) }, // Red
-      { value: intervals[2] , color: new Color([255, 165, 0, 0.3]) }, // Orange
-      { value: intervals[3] , color: new Color([255, 255, 0, 0.3]) }, // Yellow
-      { value: intervals[4] , color: new Color([144, 238, 144, 0.3]) }, // Light Green
-      { value: intervals[5], color: new Color([0, 128, 0, 0.3]) }, // Green
-    ],
-  };
-
-  const renderer = new SimpleRenderer({
-    symbol: new SimpleFillSymbol({
-      color: "transparent",
-      outline: {
+    const renderer = new SimpleRenderer({
+      symbol: new SimpleFillSymbol({
         color: "transparent",
-        width: 0.0,
-      },
-    }),
-    visualVariables: [colorVisVar],
-  });
-
-
-    // Start timer for creating the personalized layer
-    console.time("Create Personalized Layer");
-    const allFields = originalLayer.fields.concat([
-      new Field({
-        name: "personalized_walkscore",
-        alias: "Personalized Walkscore",
-        type: "double",
+        outline: {
+          color: "transparent",
+          width: 0.0,
+        },
       }),
-    ]);
+      visualVariables: [colorVisVar],
+    });
 
-    const requiredFields = [
-      { name: "IndexID", alias: "Index ID", type: "integer" as const },
-      { name: "nested", alias: "Nested Field", type: "string" as const },
-      { name: "walk_score", alias: "Walk Score", type: "double" as const },
-      { name: "personalized_walkscore", alias: "Personalized Walkscore", type: "double" as const },
-    ];
-  
-    // Remove the old personalized layer if it exists
-    let temporaryLayer = webMap.allLayers.find((layer) => layer.title === title) as FeatureLayer;
-    if (temporaryLayer) {
-      webMap.remove(temporaryLayer);
+    // Ensure old temporary layer is removed
+    console.time("Remove Existing Temporary Layer");
+    const existingLayer = webMap.allLayers.find((layer) => layer.title === title) as FeatureLayer;
+    if (existingLayer) {
+      console.log(`Removing existing temporary layer: ${title}`);
+      webMap.remove(existingLayer);
     }
+    console.timeEnd("Remove Existing Temporary Layer");
 
-    temporaryLayer = new FeatureLayer({
+    // Create new temporary layer
+    console.time("Create Personalized Layer");
+    const temporaryLayer = new FeatureLayer({
       source: new Collection(
         allFeatures.map((feature) => {
           const filteredAttributes = {
@@ -181,21 +169,28 @@ const createPersonalizedWalkscoreLayer = async (
             walk_score: feature.attributes.walk_score,
             personalized_walkscore: feature.attributes.personalized_walkscore,
           };
-    
+
           return new Graphic({
             geometry: feature.geometry,
             attributes: filteredAttributes,
           });
         })
       ),
-      fields: requiredFields, // Use the filtered fields
-      objectIdField: "OBJECTID", // Ensure this matches the field in your requiredFields array
+      fields: [
+        ...originalLayer.fields,
+        new Field({
+          name: "personalized_walkscore",
+          alias: "Personalized Walkscore",
+          type: "double",
+        }),
+      ],
+      objectIdField: "OBJECTID",
       geometryType: originalLayer.geometryType,
       spatialReference: originalLayer.spatialReference,
       title: title,
-      renderer: renderer, // Assign the renderer here
+      renderer: renderer,
     });
-    
+
     webMap.add(temporaryLayer);
     await temporaryLayer.when();
     temporaryLayer.refresh();
@@ -208,6 +203,7 @@ const createPersonalizedWalkscoreLayer = async (
     throw error;
   }
 };
+
 
 const handleRecalculate = async (
   view: MapView,
@@ -233,6 +229,22 @@ const handleRecalculate = async (
     return [];
   }
 
+  // Remove existing temporary layers to avoid memory issues
+  console.time("Remove Existing Temporary Layers");
+  const tempLayersToRemove = [
+    PERSONALIZED_LAYERS.FISHNET,
+    PERSONALIZED_LAYERS.NEIGHBORHOODS,
+  ];
+
+  tempLayersToRemove.forEach((tempLayerTitle) => {
+    const tempLayer = webMap.allLayers.find((layer) => layer.title === tempLayerTitle) as FeatureLayer;
+    if (tempLayer) {
+      console.log(`Removing temporary layer: ${tempLayerTitle}`);
+      webMap.remove(tempLayer);
+    }
+  });
+  console.timeEnd("Remove Existing Temporary Layers");
+
   // Create personalized walkscore layer
   let personalizedWalkscoreLayer;
   try {
@@ -245,6 +257,8 @@ const handleRecalculate = async (
     );
   } catch (error) {
     console.error("Error creating personalized walkscore layer:", error);
+    console.timeEnd("Handle Recalculate Total Time");
+    return [];
   }
 
   if (!personalizedWalkscoreLayer) {
@@ -286,6 +300,7 @@ const handleRecalculate = async (
     return [];
   }
 };
+
 
 const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = ({ view, webMap }) => {
   const isDesktop = useMediaQuery("(min-width: 1001px)");

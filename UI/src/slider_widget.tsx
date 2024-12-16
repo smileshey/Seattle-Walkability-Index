@@ -3,6 +3,7 @@ import { Box, Slider, Typography, Tooltip, IconButton, Button } from '@mui/mater
 import InfoIcon from '@mui/icons-material/Info';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import { handleRecalculate } from './walkscore_calculator';
 import TopNeighborhoods from './top_neighborhoods';
 import { Neighborhood } from './neighborhood_utils';
@@ -39,8 +40,18 @@ const sliderCaptions = [
   'Flat Ground',
   'Calm Streets',
   'Business Density',
-  'Crime'
+  'Low Crime'
 ];
+
+const BASE_LAYERS = {
+  FISHNET: "walkscore_fishnet",
+  NEIGHBORHOODS: "walkscore_neighborhoods",
+};
+
+const PERSONALIZED_LAYERS = {
+  FISHNET: "personalized_walkscore_fishnet",
+  NEIGHBORHOODS: "personalized_neighborhood_walkscore",
+};
 
 const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapView; webMap: __esri.WebMap; triggerRecalculate: () => void }) => {
   const [values, setValues] = useState({
@@ -94,15 +105,33 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
   
   
   const handleReset = () => {
+    // Remove existing temporary layers
+    const temporaryLayerTitles = [
+      PERSONALIZED_LAYERS.FISHNET,
+      PERSONALIZED_LAYERS.NEIGHBORHOODS,
+    ];
+  
+    temporaryLayerTitles.forEach((title) => {
+      const layer = webMap.allLayers.find((layer) => layer.title === title) as FeatureLayer;
+      if (layer) {
+        console.log(`Removing temporary layer: ${title}`);
+        webMap.remove(layer);
+      }
+    });
+  
+    // Reset the application state
     setValues(previousValues);
     setIsLoading(false);
     setTopNeighborhoods(null);
     setRecalculated(false);
+  
+    console.log("Application reset completed. Temporary layers removed.");
   };
-
+  
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
+  
 
   return (
     <Box className="slider-widget-container">
