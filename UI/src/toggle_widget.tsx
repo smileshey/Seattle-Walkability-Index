@@ -28,44 +28,63 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
   // Check if bottom navigation is visible, in which case don't show the toggle switch here
   const isBottomNavVisible = isMobilePortrait || isMobileLandscape || isTabletPortrait;
 
-  // Sync toggle state with currently visible layer
-  const syncToggleStateWithLayer = () => {
+const syncToggleStateWithLayer = () => {
     const visibleLayer = visibilityState.getCurrentVisibleLayer();
-  
-    // Determine layer state based on whether recalculation has occurred
+
+    if (!visibleLayer) {
+      console.warn("No visible layer found. Defaulting to fishnet view.");
+      setIsFishnetView(true);
+      return;
+    }
+
     if (visibilityState.recalculateClicked) {
-      if (visibleLayer === PERSONALIZED_LAYERS.FISHNET) {
-        setIsFishnetView(true);
-      } else if (visibleLayer === PERSONALIZED_LAYERS.NEIGHBORHOODS) {
-        setIsFishnetView(false);
-      }
+      setIsFishnetView(visibleLayer === PERSONALIZED_LAYERS.FISHNET);
     } else {
-      if (visibleLayer === BASE_LAYERS.FISHNET) {
-        setIsFishnetView(true);
-      } else if (visibleLayer === BASE_LAYERS.NEIGHBORHOODS) {
-        setIsFishnetView(false);
-      }
+      setIsFishnetView(visibleLayer === BASE_LAYERS.FISHNET);
     }
   };
-  
+
   const handleToggleChange = (isFishnet: boolean) => {
     setIsFishnetView(isFishnet);
   
-    // Toggle between appropriate layers
-    if (visibilityState.recalculateClicked) {
-      visibilityState.toggleLayerVisibility(isFishnet ? PERSONALIZED_LAYERS.FISHNET : PERSONALIZED_LAYERS.NEIGHBORHOODS);
-    } else {
-      visibilityState.toggleLayerVisibility(isFishnet ? BASE_LAYERS.FISHNET : BASE_LAYERS.NEIGHBORHOODS);
-    }
+    // Determine the correct layer to show
+    const recalculationState = visibilityState.recalculateClicked; // Always check current state
+    const layerToShow = recalculationState
+      ? isFishnet
+        ? PERSONALIZED_LAYERS.FISHNET
+        : PERSONALIZED_LAYERS.NEIGHBORHOODS
+      : isFishnet
+      ? BASE_LAYERS.FISHNET
+      : BASE_LAYERS.NEIGHBORHOODS;
   
-    // Re-sync toggle state with currently visible layer
-    syncToggleStateWithLayer();
+    const excludedLayers = [
+      "World Hillshade",
+      "World Terrain Base",
+      "World Terrain Reference",
+      "citylimits",
+    ]; // Layers that should not be toggled.
+  
+    // Update visibility while preserving excluded layers
+    const targetLayer = webMap.allLayers.find((layer) => layer.title === layerToShow);
+  
+    if (targetLayer) {
+      webMap.allLayers.forEach((layer) => {
+        if (excludedLayers.includes(layer.title)) return;
+        layer.visible = layer.title === layerToShow;
+      });
+      console.log(`Layer to show: ${layerToShow}`);
+    } else {
+      console.warn(`Layer not found: ${layerToShow}. Falling back to default visibility.`);
+      visibilityState.initializeDefaultVisibility(); // Use default visibility logic
+      setIsFishnetView(true); // Reset toggle state
+    }
   };
+  
   
   // Ensure synchronization of state with visible layer when the component mounts
   useEffect(() => {
-    syncToggleStateWithLayer(); // Sync toggle state with layer visibility on load
-  }, [webMap]);
+    syncToggleStateWithLayer(); // Sync toggle state whenever recalculation state or map changes
+  }, [visibilityState.recalculateClicked, webMap]);
 
   // Do not show this component if the bottom navigation is visible
   if (isBottomNavVisible) {

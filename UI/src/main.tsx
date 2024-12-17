@@ -165,7 +165,7 @@ const MainComponent = () => {
 
   view.when(() => {
     webMap.allLayers.forEach((layer) => {
-      console.log(`Layer Title: ${layer.title}, Visibility: ${layer.visible}`);
+      // console.log(`Layer Title: ${layer.title}, Visibility: ${layer.visible}`);
     });
   });
   
@@ -180,36 +180,46 @@ const MainComponent = () => {
 
   const handleBottomNavChange = (newValue: 'slider' | 'legend' | 'toggle') => {
     if (newValue === 'toggle') {
+      // Toggle logic for layers
       const newIsFishnetLayer = !isFishnetLayer;
       setIsFishnetLayer(newIsFishnetLayer);
   
-      // Use appropriate layer titles for toggling
       const layerToShow = visibilityState.recalculateClicked
-        ? newIsFishnetLayer ? PERSONALIZED_LAYERS.FISHNET : PERSONALIZED_LAYERS.NEIGHBORHOODS
-        : newIsFishnetLayer ? BASE_LAYERS.FISHNET : BASE_LAYERS.NEIGHBORHOODS;
+        ? newIsFishnetLayer
+          ? PERSONALIZED_LAYERS.FISHNET
+          : PERSONALIZED_LAYERS.NEIGHBORHOODS
+        : newIsFishnetLayer
+        ? BASE_LAYERS.FISHNET
+        : BASE_LAYERS.NEIGHBORHOODS;
   
       visibilityState.toggleLayerVisibility(layerToShow);
+  
+      console.log(
+        `Toggle clicked. Recalculate flag: ${visibilityState.recalculateClicked}, Layer to show: ${layerToShow}`
+      );
     } else if (selectedWidget === newValue) {
+      // Unmount and hide widgets if already active
       if (newValue === 'slider') {
         unmountWidget('slider');
       } else if (newValue === 'legend') {
-        // Hide the legend layer
-        visibilityState.toggleLayerVisibility(BASE_LAYERS.NEIGHBORHOODS); // Example: Hide the neighborhoods layer
+        visibilityState.setWidgetVisible('legend-container', false); // Hide legend widget
         unmountWidget('legend');
         setIsLegendActive(false);
       }
       setSelectedWidget(null);
     } else {
+      // Mount and show widgets
       if (newValue === 'slider') {
         visibilityState.setWidgetVisible('sliderDiv', true);
         const sliderContainer = document.querySelector("#sliderContainer") as HTMLElement;
         if (!sliderRoot) {
           sliderRoot = createRoot(sliderContainer);
         }
-        sliderRoot.render(<SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />);
+        sliderRoot.render(
+          <SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />
+        );
       } else if (newValue === 'legend') {
-        // Show the legend layer
-        visibilityState.toggleLayerVisibility(BASE_LAYERS.FISHNET); // Example: Show the fishnet layer
+        // Only render the legend widget without altering layer visibility
         visibilityState.setWidgetVisible('legend-container', true);
         const legendDiv = document.querySelector(".legend-container") as HTMLElement;
         if (!legendRoot) {
@@ -222,7 +232,6 @@ const MainComponent = () => {
     }
   };
   
-
   return (
     <div id="appRoot">
       {isMobileLandscape && (

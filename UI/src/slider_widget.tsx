@@ -105,7 +105,12 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
   
   
   const handleReset = () => {
-    // Remove existing temporary layers
+    console.log("Reset triggered. Synchronizing toggle state.");
+  
+    // Use initializeDefaultVisibility to reset visibility and recalculate flag
+    visibilityState.initializeDefaultVisibility();
+  
+    // Remove temporary layers
     const temporaryLayerTitles = [
       PERSONALIZED_LAYERS.FISHNET,
       PERSONALIZED_LAYERS.NEIGHBORHOODS,
@@ -119,15 +124,18 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
       }
     });
   
-    // Reset the application state
-    setValues(previousValues);
-    setIsLoading(false);
-    setTopNeighborhoods(null);
+    // Reset relevant state for UI rendering
     setRecalculated(false);
+    setTopNeighborhoods(null);
+    setValues(previousValues); // Reset slider values to their previous state
+    setIsLoading(false);
   
-    console.log("Application reset completed. Temporary layers removed.");
+    console.log("Application reset completed. Default visibility restored and UI reset.");
   };
   
+  
+  
+
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };

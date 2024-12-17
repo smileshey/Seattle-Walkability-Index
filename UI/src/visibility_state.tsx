@@ -69,7 +69,11 @@ class VisibilityState {
     });
   }
   
-  
+  synchronizeStateAfterReset(): void {
+    this.recalculateClicked = false;
+    this.resetLayerVisibility();
+    console.log("Visibility state synchronized after reset.");
+  }
 
   resetLayerVisibility(): void {
     const baseLayerTitles = [BASE_LAYERS.FISHNET, BASE_LAYERS.NEIGHBORHOODS];
@@ -96,7 +100,6 @@ class VisibilityState {
   }
   
   
-
   setVisibilityForLayerType(layerType: 'baseHeatmap' | 'personalizedHeatmap' | 'baseNeighborhood' | 'personalizedNeighborhood'): void {
     const layerTitleMap: { [key: string]: string } = {
       baseHeatmap: BASE_LAYERS.FISHNET,
@@ -124,6 +127,7 @@ class VisibilityState {
   }
 
   initializeDefaultVisibility(): void {
+    this.setRecalculateClicked(false);
     this.resetLayerVisibility();
     this.setLayerVisible(BASE_LAYERS.FISHNET);
   }
