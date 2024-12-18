@@ -7,6 +7,8 @@ import Graphic from "@arcgis/core/Graphic";
 import Collection from "@arcgis/core/core/Collection";
 import PopupTemplate from "@arcgis/core/PopupTemplate";
 import VisibilityState from "./visibility_state"; // Import VisibilityState class
+import { neighborhoodPopupTemplate} from './popup_template';
+
 
 const BASE_LAYERS = {
   FISHNET: "walkscore_fishnet",
@@ -136,19 +138,7 @@ export const createPersonalizedNeighborhoodsLayer = async (
       visualVariables: [colorVisVar]
     });
 
-    const popupTemplate = new PopupTemplate({
-      title: "{Name}",
-      content: [
-        {
-          type: "fields",
-          fieldInfos: allFields.map(field => ({
-            fieldName: field.name,
-            label: field.alias || field.name
-          }))
-        }
-      ]
-    });
-
+    const popupTemplate = neighborhoodPopupTemplate;
     const title = PERSONALIZED_LAYERS.NEIGHBORHOODS;
 
     // Remove the old personalized neighborhood layer if it exists

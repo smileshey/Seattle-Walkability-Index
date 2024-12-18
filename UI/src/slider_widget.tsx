@@ -133,9 +133,6 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
     console.log("Application reset completed. Default visibility restored and UI reset.");
   };
   
-  
-  
-
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };

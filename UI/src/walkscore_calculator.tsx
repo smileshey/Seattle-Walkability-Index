@@ -6,6 +6,7 @@ import Field from "@arcgis/core/layers/support/Field";
 import Graphic from "@arcgis/core/Graphic";
 import Collection from "@arcgis/core/core/Collection";
 import PopupTemplate from "@arcgis/core/PopupTemplate";
+import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template';
 import {
   getSlopeScaler,
   getEffectiveSpeedLimitScaler,
@@ -169,7 +170,7 @@ const createPersonalizedWalkscoreLayer = async (
             walk_score: feature.attributes.walk_score,
             personalized_walkscore: feature.attributes.personalized_walkscore,
           };
-
+    
           return new Graphic({
             geometry: feature.geometry,
             attributes: filteredAttributes,
@@ -189,8 +190,9 @@ const createPersonalizedWalkscoreLayer = async (
       spatialReference: originalLayer.spatialReference,
       title: title,
       renderer: renderer,
+      popupTemplate: fishnetPopupTemplate, // Correctly assign the popupTemplate
     });
-
+    
     webMap.add(temporaryLayer);
     await temporaryLayer.when();
     temporaryLayer.refresh();
@@ -203,7 +205,6 @@ const createPersonalizedWalkscoreLayer = async (
     throw error;
   }
 };
-
 
 const handleRecalculate = async (
   view: MapView,

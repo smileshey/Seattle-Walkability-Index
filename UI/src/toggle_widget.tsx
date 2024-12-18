@@ -112,7 +112,7 @@ const syncToggleStateWithLayer = () => {
         onChange={(event) => handleToggleChange(event.target.checked)}
       />
       <Typography sx={{ fontSize: '10px', marginLeft: 1 }}>
-        {visibilityState.recalculateClicked ? 'Personalized Fishnet View' : 'Fishnet View'}
+        {visibilityState.recalculateClicked ? 'Fishnet View' : 'Fishnet View'}
       </Typography>
     </Box>
   );

@@ -16,6 +16,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import ToggleIcon from '@mui/icons-material/ToggleOn';
 import LegendIcon from '@mui/icons-material/Map';
 import VisibilityState from './visibility_state';
+import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template';
 import '../dist/styles/styles.mobile.css';
 
 const webMap = new WebMap({
@@ -70,6 +71,17 @@ const MainComponent = () => {
   useEffect(() => {
     view.when(() => {
       visibilityState.initializeDefaultVisibility();
+
+      // Apply popup templates
+      const fishnetLayer = webMap.allLayers.find(layer => layer.title === BASE_LAYERS.FISHNET) as FeatureLayer;
+      const neighborhoodLayer = webMap.allLayers.find(layer => layer.title === BASE_LAYERS.NEIGHBORHOODS) as FeatureLayer;
+
+      if (fishnetLayer) {
+        fishnetLayer.popupTemplate = fishnetPopupTemplate;
+      }
+      if (neighborhoodLayer) {
+        neighborhoodLayer.popupTemplate = neighborhoodPopupTemplate;
+      }
     });
   }, [view]);
 
@@ -136,20 +148,21 @@ const MainComponent = () => {
     const baseLayer = webMap.allLayers.find(
       layer => layer.title === BASE_LAYERS.NEIGHBORHOODS
     ) as FeatureLayer;
-  
+
     let layerToUse = baseLayer;
     let fieldToUse = "rank_normalized_walk_score";
-  
+
     if (personalizedLayer) {
       layerToUse = personalizedLayer;
       fieldToUse = "personalized_walkscore";
     }
-  
+
     const fetchedNeighborhoods = await getTopNeighborhoods(layerToUse, fieldToUse);
-  
+
     const topNeighborhoodsDiv = document.querySelector("#topNeighborhoodsDiv");
     if (topNeighborhoodsDiv && topNeighborhoodsDiv.id !== "root") {
-      createRoot(topNeighborhoodsDiv).render(
+      const root = createRoot(topNeighborhoodsDiv);
+      root.render(
         <TopNeighborhoods
           neighborhoods={fetchedNeighborhoods}
           view={view}
@@ -163,13 +176,6 @@ const MainComponent = () => {
     }
   };
 
-  view.when(() => {
-    webMap.allLayers.forEach((layer) => {
-      // console.log(`Layer Title: ${layer.title}, Visibility: ${layer.visible}`);
-    });
-  });
-  
-
   useEffect(() => {
     if (recalculateTriggered) {
       fetchAndRenderNeighborhoods();
@@ -179,59 +185,72 @@ const MainComponent = () => {
   }, [recalculateTriggered]);
 
   const handleBottomNavChange = (newValue: 'slider' | 'legend' | 'toggle') => {
+    // Handle toggling layers
     if (newValue === 'toggle') {
-      // Toggle logic for layers
-      const newIsFishnetLayer = !isFishnetLayer;
-      setIsFishnetLayer(newIsFishnetLayer);
-  
-      const layerToShow = visibilityState.recalculateClicked
-        ? newIsFishnetLayer
-          ? PERSONALIZED_LAYERS.FISHNET
-          : PERSONALIZED_LAYERS.NEIGHBORHOODS
-        : newIsFishnetLayer
-        ? BASE_LAYERS.FISHNET
-        : BASE_LAYERS.NEIGHBORHOODS;
-  
-      visibilityState.toggleLayerVisibility(layerToShow);
-  
-      console.log(
-        `Toggle clicked. Recalculate flag: ${visibilityState.recalculateClicked}, Layer to show: ${layerToShow}`
-      );
-    } else if (selectedWidget === newValue) {
-      // Unmount and hide widgets if already active
-      if (newValue === 'slider') {
+        const newIsFishnetLayer = !isFishnetLayer;
+        setIsFishnetLayer(newIsFishnetLayer);
+
+        const layerToShow = visibilityState.recalculateClicked
+            ? newIsFishnetLayer
+                ? PERSONALIZED_LAYERS.FISHNET
+                : PERSONALIZED_LAYERS.NEIGHBORHOODS
+            : newIsFishnetLayer
+            ? BASE_LAYERS.FISHNET
+            : BASE_LAYERS.NEIGHBORHOODS;
+
+        visibilityState.toggleLayerVisibility(layerToShow);
+
+        console.log(
+            `Toggle clicked. Recalculate flag: ${visibilityState.recalculateClicked}, Layer to show: ${layerToShow}`
+        );
+        return;
+    }
+
+    // If the same button is clicked again, unmount the active widget
+    if (selectedWidget === newValue) {
+        if (newValue === 'slider') {
+            unmountWidget('slider');
+        } else if (newValue === 'legend') {
+            unmountWidget('legend');
+            setIsLegendActive(false);
+        }
+        setSelectedWidget(null);
+        return;
+    }
+
+    // Hide any currently active widget if switching
+    if (selectedWidget === 'slider' && newValue !== 'slider') {
         unmountWidget('slider');
-      } else if (newValue === 'legend') {
-        visibilityState.setWidgetVisible('legend-container', false); // Hide legend widget
+    }
+    if (selectedWidget === 'legend' && newValue !== 'legend') {
         unmountWidget('legend');
         setIsLegendActive(false);
-      }
-      setSelectedWidget(null);
-    } else {
-      // Mount and show widgets
-      if (newValue === 'slider') {
+    }
+
+    // Mount and display the new widget
+    if (newValue === 'slider') {
         visibilityState.setWidgetVisible('sliderDiv', true);
         const sliderContainer = document.querySelector("#sliderContainer") as HTMLElement;
         if (!sliderRoot) {
-          sliderRoot = createRoot(sliderContainer);
+            sliderRoot = createRoot(sliderContainer);
         }
         sliderRoot.render(
-          <SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />
+            <SliderWidget view={view} webMap={webMap} triggerRecalculate={() => setRecalculateTriggered(true)} />
         );
-      } else if (newValue === 'legend') {
-        // Only render the legend widget without altering layer visibility
+    } else if (newValue === 'legend') {
         visibilityState.setWidgetVisible('legend-container', true);
         const legendDiv = document.querySelector(".legend-container") as HTMLElement;
         if (!legendRoot) {
-          legendRoot = createRoot(legendDiv);
+            legendRoot = createRoot(legendDiv);
         }
         legendRoot.render(<LegendWidget isActive={true} />);
         setIsLegendActive(true);
-      }
-      setSelectedWidget(newValue);
     }
-  };
-  
+
+    // Update the selected widget
+    setSelectedWidget(newValue);
+};
+
   return (
     <div id="appRoot">
       {isMobileLandscape && (
@@ -284,8 +303,13 @@ const MainComponent = () => {
 
 document.addEventListener('DOMContentLoaded', () => {
   const rootElement = document.getElementById('root');
+  
+  // Use a static variable to store the root instance
   if (rootElement) {
-    const root = createRoot(rootElement);
+    if (!(window as any)._rootInstance) {
+      (window as any)._rootInstance = createRoot(rootElement); // Store root instance globally
+    }
+    const root = (window as any)._rootInstance;
     root.render(<MainComponent />);
   }
 });
