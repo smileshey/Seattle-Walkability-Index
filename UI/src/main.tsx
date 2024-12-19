@@ -56,6 +56,8 @@ const visibilityState = new VisibilityState({ webMap });
 let sliderRoot: Root | null = null;
 let legendRoot: Root | null = null;
 let toggleRoot: Root | null = null;
+let topNeighborhoodsRoot: Root | null = null;
+
 
 const MainComponent = () => {
   const [recalculateTriggered, setRecalculateTriggered] = useState(false);
@@ -148,21 +150,25 @@ const MainComponent = () => {
     const baseLayer = webMap.allLayers.find(
       layer => layer.title === BASE_LAYERS.NEIGHBORHOODS
     ) as FeatureLayer;
-
+  
     let layerToUse = baseLayer;
     let fieldToUse = "rank_normalized_walk_score";
-
+  
     if (personalizedLayer) {
       layerToUse = personalizedLayer;
       fieldToUse = "personalized_walkscore";
     }
-
+  
     const fetchedNeighborhoods = await getTopNeighborhoods(layerToUse, fieldToUse);
-
-    const topNeighborhoodsDiv = document.querySelector("#topNeighborhoodsDiv");
-    if (topNeighborhoodsDiv && topNeighborhoodsDiv.id !== "root") {
-      const root = createRoot(topNeighborhoodsDiv);
-      root.render(
+  
+    const topNeighborhoodsDiv = document.querySelector("#topNeighborhoodsDiv") as HTMLElement;
+    if (topNeighborhoodsDiv) {
+      if (!topNeighborhoodsRoot) {
+        // Initialize the root only once
+        topNeighborhoodsRoot = createRoot(topNeighborhoodsDiv);
+      }
+      // Use the existing root to render
+      topNeighborhoodsRoot.render(
         <TopNeighborhoods
           neighborhoods={fetchedNeighborhoods}
           view={view}
@@ -173,6 +179,13 @@ const MainComponent = () => {
           showTextList={false}
         />
       );
+    }
+  };
+
+  const unmountTopNeighborhoods = () => {
+    if (topNeighborhoodsRoot) {
+      topNeighborhoodsRoot.unmount();
+      topNeighborhoodsRoot = null;
     }
   };
 
