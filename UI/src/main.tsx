@@ -18,6 +18,8 @@ import LegendIcon from '@mui/icons-material/Map';
 import VisibilityState from './visibility_state';
 import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template';
 import '../dist/styles/styles.mobile.css';
+import '../dist/styles/styles.desktop.css';
+
 
 const webMap = new WebMap({
   portalItem: {
@@ -68,6 +70,10 @@ const MainComponent = () => {
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
   const isMobileLandscape = useMediaQuery('(max-height: 600px) and (orientation: landscape)');
   const isDesktop = useMediaQuery('(min-width: 601px) and (min-height: 601px)');
+
+  console.log(isMobilePortrait)
+  console.log(isMobileLandscape)
+  console.log(isDesktop)
 
   // Call default visibility setup when app loads
   useEffect(() => {
@@ -179,13 +185,6 @@ const MainComponent = () => {
           showTextList={false}
         />
       );
-    }
-  };
-
-  const unmountTopNeighborhoods = () => {
-    if (topNeighborhoodsRoot) {
-      topNeighborhoodsRoot.unmount();
-      topNeighborhoodsRoot = null;
     }
   };
 
