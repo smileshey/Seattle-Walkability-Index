@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import { useMediaQuery } from '@mui/material';
@@ -8,18 +7,21 @@ export default function BasicMenu() {
   // Media query for different view types
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
   const isMobileLandscape = useMediaQuery('(max-height: 600px) and (orientation: landscape)');
-  const isDesktop = useMediaQuery('(min-width: 601px) and (min-height: 601px)');
+  const isTabletPortrait = useMediaQuery('(min-width: 601px) and (max-width: 1000px) and (orientation: portrait)');
+  const isDesktop = useMediaQuery('(min-width: 1001px)');
 
   return (
     <>
       {/* Conditionally render NavBar based on orientation */}
-      {(isDesktop || isMobilePortrait || isMobileLandscape) && (
+      {(isDesktop || isMobilePortrait || isMobileLandscape || isTabletPortrait) && (
         <Box
           className={`navbar-container ${
             isDesktop
               ? 'desktop'
               : isMobilePortrait
               ? 'mobile-portrait'
+              : isTabletPortrait
+              ? 'tablet-portrait'
               : 'mobile-landscape'
           }`}
         >
@@ -30,6 +32,8 @@ export default function BasicMenu() {
                 ? 'desktop'
                 : isMobilePortrait
                 ? 'mobile-portrait'
+                : isTabletPortrait
+                ? 'tablet-portrait'
                 : 'mobile-landscape'
             }`}
           >
@@ -44,6 +48,8 @@ export default function BasicMenu() {
                   ? 'desktop'
                   : isMobilePortrait
                   ? 'mobile-portrait'
+                  : isTabletPortrait
+                  ? 'tablet-portrait'
                   : 'mobile-landscape'
               }`}
               onClick={() =>
@@ -61,6 +67,8 @@ export default function BasicMenu() {
                   ? 'desktop'
                   : isMobilePortrait
                   ? 'mobile-portrait'
+                  : isTabletPortrait
+                  ? 'tablet-portrait'
                   : 'mobile-landscape'
               }`}
               onClick={() =>
@@ -78,6 +86,8 @@ export default function BasicMenu() {
                   ? 'desktop'
                   : isMobilePortrait
                   ? 'mobile-portrait'
+                  : isTabletPortrait
+                  ? 'tablet-portrait'
                   : 'mobile-landscape'
               }`}
               onClick={() => window.open('https://github.com/smileshey/', '_blank')}
@@ -90,6 +100,7 @@ export default function BasicMenu() {
     </>
   );
 }
+
 
 
 

@@ -17,8 +17,9 @@ import ToggleIcon from '@mui/icons-material/ToggleOn';
 import LegendIcon from '@mui/icons-material/Map';
 import VisibilityState from './visibility_state';
 import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template';
-import '../dist/styles/styles.mobile.css';
-import '../dist/styles/styles.desktop.css';
+// import '../dist/styles/styles.mobile.css';
+// import '../dist/styles/styles.desktop.css';
+// import '../dist/styles/styles.tablet.css';
 
 
 const webMap = new WebMap({
@@ -33,13 +34,13 @@ const view = new MapView({
   container: "viewDiv",
   map: webMap,
   center: [-122.3321, 47.6062],
-  zoom: 11,
+  zoom: 12,
   ui: {
     components: ["attribution"],
   },
   constraints: {
     maxZoom: 17,
-    minZoom: 10, 
+    minZoom: 12, 
   },
 });
 
@@ -69,12 +70,9 @@ const MainComponent = () => {
 
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
   const isMobileLandscape = useMediaQuery('(max-height: 600px) and (orientation: landscape)');
-  const isDesktop = useMediaQuery('(min-width: 601px) and (min-height: 601px)');
-
-  console.log(isMobilePortrait)
-  console.log(isMobileLandscape)
-  console.log(isDesktop)
-
+  const isTabletPortrait = useMediaQuery('(min-width: 601px) and (max-width: 1000px) and (orientation: portrait)');
+  const isDesktop = useMediaQuery('(min-width: 1001px)'); // Desktop starts from width > 1000px
+  
   // Call default visibility setup when app loads
   useEffect(() => {
     view.when(() => {
@@ -129,12 +127,19 @@ const MainComponent = () => {
   };
 
   useEffect(() => {
-    if (isMobilePortrait) {
+    console.log(isMobilePortrait)
+    console.log(isTabletPortrait)
+    console.log(isDesktop)
+    console.log(isMobileLandscape)
+    if (isMobilePortrait || isTabletPortrait) {
+      // For mobile and tablet portrait, reset and ensure widgets are not rendered initially
       visibilityState.resetAllWidgets();
-    } else if (isDesktop) {
+    } else if (isDesktop || isMobileLandscape) {
+      // For desktop and mobile landscape, force widgets to render
       forceRenderWidgets();
     }
-  }, [isMobilePortrait, isDesktop]);
+  }, [isMobilePortrait, isTabletPortrait, isDesktop, isMobileLandscape]);
+  
 
   useEffect(() => {
     view.when(() => {
@@ -281,34 +286,35 @@ const MainComponent = () => {
         <LegendWidget isActive={isLegendActive} />
       </div>
   
-      {isMobilePortrait && (
-        <Box className="bottom-nav-container">
-          <BottomNavigation
-            value={selectedWidget}
-            onChange={(event, newValue) => handleBottomNavChange(newValue as 'slider' | 'legend' | 'toggle')}
-            className="bottom-nav"
-          >
-            <BottomNavigationAction
-              label="Personalize"
-              icon={<InfoIcon />}
-              value="slider"
-              className="bottom-nav-action"
-            />
-            <BottomNavigationAction
-              label="Toggle"
-              icon={<ToggleIcon />}
-              value="toggle"
-              className="bottom-nav-action"
-            />
-            <BottomNavigationAction
-              label="Legend"
-              icon={<LegendIcon />}
-              value="legend"
-              className="bottom-nav-action"
-            />
-          </BottomNavigation>
-        </Box>
-      )}
+      {isMobilePortrait || isTabletPortrait ? (
+      <Box className="bottom-nav-container">
+        <BottomNavigation
+          value={selectedWidget}
+          onChange={(event, newValue) => handleBottomNavChange(newValue as 'slider' | 'legend' | 'toggle')}
+          className="bottom-nav"
+        >
+          <BottomNavigationAction
+            label="Personalize"
+            icon={<InfoIcon />}
+            value="slider"
+            className="bottom-nav-action"
+          />
+          <BottomNavigationAction
+            label="Toggle"
+            icon={<ToggleIcon />}
+            value="toggle"
+            className="bottom-nav-action"
+          />
+          <BottomNavigationAction
+            label="Legend"
+            icon={<LegendIcon />}
+            value="legend"
+            className="bottom-nav-action"
+          />
+        </BottomNavigation>
+      </Box>
+    ) : null}
+
     </div>
   );
 };

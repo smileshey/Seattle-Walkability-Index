@@ -7,6 +7,7 @@ interface LayerToggleProps {
   webMap: __esri.WebMap;
   visibilityState: VisibilityState; // Add VisibilityState as a prop
 }
+
 const BASE_LAYERS = {
   FISHNET: "walkscore_fishnet",
   NEIGHBORHOODS: "walkscore_neighborhoods",
@@ -14,21 +15,22 @@ const BASE_LAYERS = {
 
 const PERSONALIZED_LAYERS = {
   FISHNET: "personalized_walkscore_fishnet",
-  NEIGHBORHOODS: "personalized_neighborhood_walkscore",
+  NEIGHBORHOODS: "personalized_walkscore_neighborhoodscore",
 };
 
 const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState }) => {
   const [isFishnetView, setIsFishnetView] = useState(true);
 
-  // Media query to check for small screens
+  // Media query to check for different screen sizes
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
-  const isMobileLandscape = useMediaQuery('(min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
-  const isTabletPortrait = useMediaQuery('(min-width: 601px) and (orientation: portrait)');
-
-  // Check if bottom navigation is visible, in which case don't show the toggle switch here
+  const isMobileLandscape = useMediaQuery('(max-height: 600px) and (orientation: landscape)');
+  const isTabletPortrait = useMediaQuery('(min-width: 601px) and (max-width: 1000px) and (orientation: portrait)');
+  const isDesktop = useMediaQuery('(min-width: 1001px)');
+  
+  // Treat tablet portrait like mobile portrait
   const isBottomNavVisible = isMobilePortrait || isMobileLandscape || isTabletPortrait;
 
-const syncToggleStateWithLayer = () => {
+  const syncToggleStateWithLayer = () => {
     const visibleLayer = visibilityState.getCurrentVisibleLayer();
 
     if (!visibleLayer) {
@@ -46,7 +48,7 @@ const syncToggleStateWithLayer = () => {
 
   const handleToggleChange = (isFishnet: boolean) => {
     setIsFishnetView(isFishnet);
-  
+
     // Determine the correct layer to show
     const recalculationState = visibilityState.recalculateClicked; // Always check current state
     const layerToShow = recalculationState
@@ -56,17 +58,17 @@ const syncToggleStateWithLayer = () => {
       : isFishnet
       ? BASE_LAYERS.FISHNET
       : BASE_LAYERS.NEIGHBORHOODS;
-  
+
     const excludedLayers = [
       "World Hillshade",
       "World Terrain Base",
       "World Terrain Reference",
       "citylimits",
     ]; // Layers that should not be toggled.
-  
+
     // Update visibility while preserving excluded layers
     const targetLayer = webMap.allLayers.find((layer) => layer.title === layerToShow);
-  
+
     if (targetLayer) {
       webMap.allLayers.forEach((layer) => {
         if (excludedLayers.includes(layer.title)) return;
@@ -79,14 +81,13 @@ const syncToggleStateWithLayer = () => {
       setIsFishnetView(true); // Reset toggle state
     }
   };
-  
-  
+
   // Ensure synchronization of state with visible layer when the component mounts
   useEffect(() => {
     syncToggleStateWithLayer(); // Sync toggle state whenever recalculation state or map changes
   }, [visibilityState.recalculateClicked, webMap]);
 
-  // Do not show this component if the bottom navigation is visible
+  // Do not show this component if the bottom navigation is visible (mobile or tablet portrait)
   if (isBottomNavVisible) {
     return null;
   }
@@ -112,13 +113,15 @@ const syncToggleStateWithLayer = () => {
         onChange={(event) => handleToggleChange(event.target.checked)}
       />
       <Typography sx={{ fontSize: '10px', marginLeft: 1 }}>
-        {visibilityState.recalculateClicked ? 'Fishnet View' : 'Fishnet View'}
+        {visibilityState.recalculateClicked ? 'Personalized Fishnet' : 'Base Fishnet'}
       </Typography>
     </Box>
   );
 };
 
 export default LayerToggle;
+
+
 
 
 
