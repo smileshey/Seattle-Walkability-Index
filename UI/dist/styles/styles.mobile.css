@@ -309,6 +309,12 @@
 
     /* NavBar Mobile Landscape Overrides */
     @media (orientation: landscape) {
+    #notificationRoot {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        }
+
     .navbar-container.mobile-landscape {
         width: 60%; /* Utilize the full width in landscape mode */
         max-width: none; /* Remove max-width constraint */
@@ -357,28 +363,26 @@
 
     /* Rotate Screen Notification */
     .rotate-screen-notification {
-        display: flex; /* Enable flexbox */
-        align-items: center; /* Center-align items vertically */
-        justify-content: center; /* Center the entire content horizontally */
-        position: fixed;
-        bottom: 10%;
-        left: 15%;
-        transform: translateX(-50%);
-        background-color: rgba(255, 255, 255, 0.45); /* Light background for readability */
-        padding: 10px 20px;
-        border-radius: 8px;
-        text-align: center;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-        z-index: 1000; /* Ensure it's above other elements */
+        display: flex; /* Enables flexbox for alignment */
+        align-items: center; /* Centers items vertically */
+        justify-content: center; /* Centers items horizontally */
+        padding: 10px 15px; /* Adds padding around the notification */
+        background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+        border-radius: 8px; /* Rounds the corners */
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Adds shadow for visibility */
         color: #333; /* Text color */
-        font-weight: bold;
-    }
-    .rotate-screen-notification .rotate-icon {
-        font-size: 1.5rem; /* Larger icon */
-        margin-right: 10px;
-    }
-
-    .rotate-screen-notification .rotate-text {
-        font-size: 0.8rem; /* Adjust text size */
-    }
+        font-weight: bold; /* Bold text */
+        border: 1px solid gray; /* Optional border for clarity */
+        pointer-events: auto; /* Allows the notification itself to interact */
+        z-index: 10000; /* Ensures it is above other elements */
+      }
+      
+      .rotate-screen-notification .rotate-icon {
+        font-size: 1.5rem; /* Enlarges the icon */
+        margin-right: 10px; /* Adds spacing between the icon and text */
+      }
+      
+      .rotate-screen-notification .rotate-text {
+        font-size: 0.9rem; /* Adjusts text size */
+      }
   }

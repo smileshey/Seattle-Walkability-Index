@@ -1,6 +1,7 @@
 // console.log('main.tsx is being accessed correctly');
 
 import React, { useState, useEffect } from "react";
+import ReactDOM from 'react-dom';
 import { createRoot, Root } from 'react-dom/client';
 import WebMap from "@arcgis/core/WebMap";
 import MapView from "@arcgis/core/views/MapView";
@@ -17,14 +18,11 @@ import ToggleIcon from '@mui/icons-material/ToggleOn';
 import LegendIcon from '@mui/icons-material/Map';
 import VisibilityState from './visibility_state';
 import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_template';
-// import '../dist/styles/styles.mobile.css';
-// import '../dist/styles/styles.desktop.css';
-// import '../dist/styles/styles.tablet.css';
 
 
 const webMap = new WebMap({
   portalItem: {
-    id: '31c2468b645744df9b01a40a206455df'
+    id: '338ce356c5bf4a11b9e71e8b2bdac981'
   }
 });
 
@@ -40,7 +38,7 @@ const view = new MapView({
   },
   constraints: {
     maxZoom: 17,
-    minZoom: 12, 
+    minZoom: 11, 
   },
 });
 
@@ -71,7 +69,7 @@ const MainComponent = () => {
   const isMobilePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
   const isMobileLandscape = useMediaQuery('(max-height: 600px) and (orientation: landscape)');
   const isTabletPortrait = useMediaQuery('(min-width: 601px) and (max-width: 1000px) and (orientation: portrait)');
-  const isDesktop = useMediaQuery('(min-width: 1001px)'); // Desktop starts from width > 1000px
+  const isDesktop = useMediaQuery('(min-width: 1001px)'); 
   
   // Call default visibility setup when app loads
   useEffect(() => {
@@ -127,10 +125,6 @@ const MainComponent = () => {
   };
 
   useEffect(() => {
-    console.log(isMobilePortrait)
-    console.log(isTabletPortrait)
-    console.log(isDesktop)
-    console.log(isMobileLandscape)
     if (isMobilePortrait || isTabletPortrait) {
       // For mobile and tablet portrait, reset and ensure widgets are not rendered initially
       visibilityState.resetAllWidgets();
@@ -268,56 +262,115 @@ const MainComponent = () => {
     setSelectedWidget(newValue);
 };
 
-  return (
+  // Notification JSX
+  const rotateNotification = (
+    <div className="rotate-screen-notification">
+      <span className="rotate-icon">🔄</span>
+      <span className="rotate-text">Rotate your screen</span>
+    </div>
+  );
+
+if (isMobileLandscape) {
+  console.log('isMobileLandscape is true');
+}
+
+return (
+  <>
+  {/* Render the notification into #notificationRoot */}
+  {isMobileLandscape &&
+        document.getElementById('notificationRoot') && (
+          ReactDOM.createPortal(
+            <div
+              className="rotate-screen-notification"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'fixed',
+                bottom: '8%',
+                left: '12%',
+                transform: 'translateX(-50%)',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                textAlign: 'center',
+                zIndex: 10000,
+                color: '#333',
+                fontWeight: 'bold',
+              }}
+            >
+              <span
+                className="rotate-icon"
+                style={{
+                  fontSize: '1.5rem',
+                  marginRight: '10px',
+                }}
+              >
+                🔄
+              </span>
+              <span
+                className="rotate-text"
+                style={{
+                  fontSize: '0.8rem',
+                }}
+              >
+                Rotate your screen
+              </span>
+            </div>,
+            document.getElementById('notificationRoot')!
+          )
+        )}
+
+    {/* Main App Root */}
     <div id="appRoot">
-      {isMobileLandscape && (
-        <Box className="rotate-screen-notification">
-          <Box className="rotate-icon">🔄</Box>
-          <Box className="rotate-text">Rotate Screen</Box>
-        </Box>
-      )}
-  
       <BasicMenu />
-  
+
       <div id="sliderContainer">
         <div id="sliderDiv"></div>
       </div>
-      <div className={`legend-container ${isLegendActive ? 'active' : ''}`}>
+      <div
+        className={`legend-container ${
+          isLegendActive ? 'active' : ''
+        }`}
+      >
         <LegendWidget isActive={isLegendActive} />
       </div>
-  
-      {isMobilePortrait || isTabletPortrait ? (
-      <Box className="bottom-nav-container">
-        <BottomNavigation
-          value={selectedWidget}
-          onChange={(event, newValue) => handleBottomNavChange(newValue as 'slider' | 'legend' | 'toggle')}
-          className="bottom-nav"
-        >
-          <BottomNavigationAction
-            label="Personalize"
-            icon={<InfoIcon />}
-            value="slider"
-            className="bottom-nav-action"
-          />
-          <BottomNavigationAction
-            label="Toggle"
-            icon={<ToggleIcon />}
-            value="toggle"
-            className="bottom-nav-action"
-          />
-          <BottomNavigationAction
-            label="Legend"
-            icon={<LegendIcon />}
-            value="legend"
-            className="bottom-nav-action"
-          />
-        </BottomNavigation>
-      </Box>
-    ) : null}
 
+      {(isMobilePortrait || isTabletPortrait) && (
+        <Box className="bottom-nav-container">
+          <BottomNavigation
+            value={selectedWidget}
+            onChange={(event, newValue) =>
+              handleBottomNavChange(newValue as 'slider' | 'legend' | 'toggle')
+            }
+            className="bottom-nav"
+          >
+            <BottomNavigationAction
+              label="Personalize"
+              icon={<InfoIcon />}
+              value="slider"
+              className="bottom-nav-action"
+            />
+            <BottomNavigationAction
+              label="Toggle"
+              icon={<ToggleIcon />}
+              value="toggle"
+              className="bottom-nav-action"
+            />
+            <BottomNavigationAction
+              label="Legend"
+              icon={<LegendIcon />}
+              value="legend"
+              className="bottom-nav-action"
+            />
+          </BottomNavigation>
+        </Box>
+      )}
     </div>
-  );
+  </>
+);
 };
+
 
 document.addEventListener('DOMContentLoaded', () => {
   const rootElement = document.getElementById('root');

@@ -14,12 +14,13 @@ const LegendWidget: React.FC<LegendWidgetProps> = ({ isActive }) => {
       // Set up the data for 5 dots in the legend
       const keys = ["Not", "", "", "", "Most"];
       const colors: string[] = [
-        "rgba(255, 0, 0, 0.6)",   // Red (Least walkable)
-        "rgba(255, 127, 0, 0.6)", // Orange
-        "rgba(255, 255, 0, 0.6)", // Yellow
-        "rgba(127, 255, 0, 0.6)", // Light Green
-        "rgba(56, 168, 0, 0.6)"   // Green (Most walkable)
+        "rgba(255, 0, 0, 0.5)",    // Red for low values
+        "rgba(255, 165, 0, 0.5)",  // Orange for lower-mid values
+        "rgba(255, 255, 0, 0.5)",  // Yellow for mid values
+        "rgba(173, 255, 47, 0.5)", // Light green for higher-mid values
+        "rgba(20, 175, 0, 0.5)"    // Green for high values
       ];
+      
 
       // Append the SVG to the legend-container
       const svg = d3.select(".legend-container").append("svg")
