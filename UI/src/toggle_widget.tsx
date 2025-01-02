@@ -15,7 +15,7 @@ const BASE_LAYERS = {
 
 const PERSONALIZED_LAYERS = {
   FISHNET: "personalized_walkscore_fishnet",
-  NEIGHBORHOODS: "personalized_walkscore_neighborhoodscore",
+  NEIGHBORHOODS: "personalized_walkscore_neighborhood",
 };
 
 const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState }) => {

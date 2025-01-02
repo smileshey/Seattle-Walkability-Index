@@ -126,7 +126,7 @@ const createPersonalizedWalkscoreLayer = async (
     console.timeEnd("Rank Normalize and Scale");
 
     // Define visualization
-    const intervals = [0, 1, 2, 3, 4, 5];
+    const intervals = [0, 20, 40, 60, 80, 100];
     const colorVisVar = {
       type: "color",
       field: "personalized_walkscore",

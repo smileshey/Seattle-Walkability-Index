@@ -66,7 +66,7 @@ export const rankNormalizeAndScaleScores = (features: __esri.Graphic[]) => {
     const rawScore = feature.attributes["personalized_walkscore"];
     const rank = rankMap.get(rawScore);
     if (rank !== undefined) {
-      const scaledScore = ((rank - minRank) / (maxRank - minRank)) * 5;
+      const scaledScore = ((rank - minRank) / (maxRank - minRank)) * 100;
       feature.attributes["personalized_walkscore"] = scaledScore;
     }
   });
@@ -111,7 +111,7 @@ export const createPersonalizedNeighborhoodsLayer = async (
 
     const allFields = neighborhoodsLayer.fields.concat(additionalFields);
 
-    const intervals = [0, 1, 2, 3, 4, 5];
+    const intervals = [0, 20, 40, 60, 80, 100];
 
     const colorVisVar = {
       type: "color",
