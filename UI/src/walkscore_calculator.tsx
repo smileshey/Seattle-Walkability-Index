@@ -67,6 +67,7 @@ const createPersonalizedWalkscoreLayer = async (
     query.where = "1=1";
     query.returnGeometry = true;
     query.outFields = ["*"];
+    query.maxRecordCountFactor =5;
     query.start = 0;
     query.num = 2000;
 
@@ -91,23 +92,44 @@ const createPersonalizedWalkscoreLayer = async (
     console.time("Recalculate Scalers");
     allFeatures.forEach((graphic) => {
       const attributes = graphic.attributes as FeatureAttributes;
-
-      const slopeScaler = getSlopeScaler(attributes.effective_slope, userSliderValues.slope);
-      const effectiveSpeedLimitScaler = getEffectiveSpeedLimitScaler(
-        attributes.Max_Speed_Limit,
-        userSliderValues.streets
-      );
-      const businessDensityScaler = getBusinessDensityScaler(attributes.business_density, userSliderValues.amenity);
-      const crimeDensityScaler = getCrimeDensityScaler(attributes.crime_density_normalized, userSliderValues.crime);
-      const crashDensityScaler = getCrashDensityScaler(attributes.crash_density_normalized, userSliderValues.streets);
-
-      attributes.slope_scaler = slopeScaler;
-      attributes.effective_speed_limit_scaler = effectiveSpeedLimitScaler;
-      attributes.business_density_scaler = businessDensityScaler;
-      attributes.crime_density_scaler = crimeDensityScaler;
-      attributes.crash_density_scaler = crashDensityScaler;
-
-      const baseWalkscore = attributes.unadjusted_walkscore;
+    
+      // Use precomputed scalers if the corresponding slider value is 2, otherwise calculate
+      const slopeScaler =
+        userSliderValues.slope === 2
+          ? attributes.slope_scaler || 1 // Default to 1 if undefined
+          : getSlopeScaler(attributes.effective_slope, userSliderValues.slope);
+    
+      const effectiveSpeedLimitScaler =
+        userSliderValues.streets === 2
+          ? attributes.effective_speed_limit_scaler || 1 // Default to 1 if undefined
+          : getEffectiveSpeedLimitScaler(attributes.Max_Speed_Limit, userSliderValues.streets);
+    
+      const businessDensityScaler =
+        userSliderValues.amenity === 2
+          ? attributes.business_density_scaler || 1 // Default to 1 if undefined
+          : getBusinessDensityScaler(attributes.business_density, userSliderValues.amenity);
+    
+      const crimeDensityScaler =
+        userSliderValues.crime === 2
+          ? attributes.crime_density_scaler || 1 // Default to 1 if undefined
+          : getCrimeDensityScaler(attributes.crime_density_normalized, userSliderValues.crime);
+    
+      const crashDensityScaler =
+        userSliderValues.streets === 2
+          ? attributes.crash_density_scaler || 1 // Default to 1 if undefined
+          : getCrashDensityScaler(attributes.crash_density_normalized, userSliderValues.streets);
+    
+      // Update attributes with scalers (only necessary for recalculated ones)
+      if (userSliderValues.slope !== 2) attributes.slope_scaler = slopeScaler;
+      if (userSliderValues.streets !== 2) {
+        attributes.effective_speed_limit_scaler = effectiveSpeedLimitScaler;
+        attributes.crash_density_scaler = crashDensityScaler;
+      }
+      if (userSliderValues.amenity !== 2) attributes.business_density_scaler = businessDensityScaler;
+      if (userSliderValues.crime !== 2) attributes.crime_density_scaler = crimeDensityScaler;
+    
+      // Recalculate the personalized walkscore
+      const baseWalkscore = attributes.unadjusted_walkscore || 0; // Default to 0 if undefined
       attributes.personalized_walkscore = baseWalkscore
         ? baseWalkscore *
           slopeScaler *
@@ -118,6 +140,7 @@ const createPersonalizedWalkscoreLayer = async (
           0.001
         : 0.001;
     });
+    
     console.timeEnd("Recalculate Scalers");
 
     // Normalize and scale the scores

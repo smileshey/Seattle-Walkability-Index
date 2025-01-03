@@ -22,7 +22,7 @@ import { neighborhoodPopupTemplate, fishnetPopupTemplate } from './popup_templat
 
 const webMap = new WebMap({
   portalItem: {
-    id: '338ce356c5bf4a11b9e71e8b2bdac981'
+    id: '31f3f7e2a1fb4b0fb57267c471998b55'
   }
 });
 
