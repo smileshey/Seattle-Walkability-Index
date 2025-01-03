@@ -67,7 +67,7 @@ const createPersonalizedWalkscoreLayer = async (
     query.where = "1=1";
     query.returnGeometry = true;
     query.outFields = ["*"];
-    query.maxRecordCountFactor =5;
+    query.maxRecordCountFactor =2;
     query.start = 0;
     query.num = 2000;
 
