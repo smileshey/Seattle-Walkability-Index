@@ -51,6 +51,9 @@ const PERSONALIZED_LAYERS = {
   NEIGHBORHOODS: "personalized_neighborhood_walkscore",
 };
 
+// Prepare arrays to track distributions
+const preNormalizationScores: number[] = [];
+
 const createPersonalizedWalkscoreLayer = async (
   originalLayer: FeatureLayer,
   title: string,
@@ -67,9 +70,11 @@ const createPersonalizedWalkscoreLayer = async (
     query.where = "1=1";
     query.returnGeometry = true;
     query.outFields = ["*"];
-    query.maxRecordCountFactor =2;
+  
+    query.maxRecordCountFactor =5;
     query.start = 0;
     query.num = 2000;
+    // query.geometryPrecision = 1;
 
     const allFeatures: __esri.Graphic[] = [];
     let result: __esri.FeatureSet | undefined;
@@ -129,24 +134,64 @@ const createPersonalizedWalkscoreLayer = async (
       if (userSliderValues.crime !== 2) attributes.crime_density_scaler = crimeDensityScaler;
     
       // Recalculate the personalized walkscore
-      const baseWalkscore = attributes.unadjusted_walkscore || 0; // Default to 0 if undefined
-      attributes.personalized_walkscore = baseWalkscore
-        ? baseWalkscore *
+      const maxPositiveScore = .00006;
+      const baseWalkscore = attributes.unadjusted_walkscore || 0;
+      const normalizedPositive = baseWalkscore / maxPositiveScore; 
+      
+      // 2. Multiply by scalers
+      attributes.personalized_walkscore = parseFloat(
+        (
+          normalizedPositive *
           slopeScaler *
           effectiveSpeedLimitScaler *
           businessDensityScaler *
           crimeDensityScaler *
           crashDensityScaler +
           0.001
-        : 0.001;
+        ).toFixed(2)
+      );
+      
+      // 3. (Optional) Ensure a minimum of 0.01 if needed
+      if (attributes.personalized_walkscore < 0.01) {
+        attributes.personalized_walkscore = 0.01;
+      }
+      
+      // 4. Push to preNormalizationScores
+      preNormalizationScores.push(attributes.personalized_walkscore);
     });
     
     console.timeEnd("Recalculate Scalers");
+
+    const logDistribution = (label: string, values: number[]) => {
+      if (values.length === 0) {
+        console.log(`${label} distribution: [No values]`);
+        return;
+      }
+      const minVal = Math.min(...values);
+      const maxVal = Math.max(...values);
+      const meanVal = values.reduce((acc, v) => acc + v, 0) / values.length;
+
+      console.log(
+        `${label} distribution => min: ${minVal.toFixed(2)}, max: ${maxVal.toFixed(4)}, mean: ${meanVal.toFixed(2)}`
+      );
+    };
+
+    // Log distribution of pre-normalized personalized_walkscore
+    logDistribution("Personalized Walkscore (pre-normalization)", preNormalizationScores);
 
     // Normalize and scale the scores
     console.time("Rank Normalize and Scale");
     rankNormalizeAndScaleScores(allFeatures);
     console.timeEnd("Rank Normalize and Scale");
+
+    // Collect distribution after normalization
+    const postNormalizationScores: number[] = allFeatures.map(
+      (g) => g.attributes.personalized_walkscore
+    );
+
+    // Log distribution of post-normalized personalized_walkscore
+    logDistribution("Personalized Walkscore (post-normalization)", postNormalizationScores);
+
 
     // Define visualization
     const intervals = [0, 20, 40, 60, 80, 100];
@@ -191,7 +236,7 @@ const createPersonalizedWalkscoreLayer = async (
             IndexID: feature.attributes.IndexID,
             nested: feature.attributes.nested,
             walk_score: feature.attributes.walk_score,
-            personalized_walkscore: feature.attributes.personalized_walkscore,
+            personalized_walkscore: feature.attributes.personalized_walkscore.toFixed(2),
           };
     
           return new Graphic({
