@@ -77,9 +77,6 @@ const createPersonalizedWalkscoreLayer = async (
       result = await originalLayer.queryFeatures(query);
       if (result && result.features) {
         allFeatures.push(...result.features);
-        console.log(
-          `Query batch: ${result.features.length} features. Total so far: ${allFeatures.length}`
-        );
         query.start += query.num;
       } else {
         console.warn(
@@ -88,8 +85,6 @@ const createPersonalizedWalkscoreLayer = async (
         break;
       }
     } while (result.features.length === query.num);
-
-    console.log(`Total features queried: ${allFeatures.length}`);
 
     // Recalculate scalers
     allFeatures.forEach((graphic) => {
@@ -168,25 +163,6 @@ const createPersonalizedWalkscoreLayer = async (
       preNormalizationScores.push(attributes.personalized_walkscore);
     });
 
-    const logDistribution = (label: string, values: number[]) => {
-      if (values.length === 0) {
-        console.log(`${label} distribution: [No values]`);
-        return;
-      }
-      const minVal = Math.min(...values);
-      const maxVal = Math.max(...values);
-      const meanVal = values.reduce((acc, v) => acc + v, 0) / values.length;
-
-      console.log(
-        `${label} distribution => min: ${minVal.toFixed(
-          2
-        )}, max: ${maxVal.toFixed(4)}, mean: ${meanVal.toFixed(2)}`
-      );
-    };
-
-    // Log distribution of pre-normalized personalized_walkscore
-    logDistribution("Personalized Walkscore (pre-normalization)", preNormalizationScores);
-
     // Normalize and scale the scores
     rankNormalizeAndScaleScores(allFeatures);
 
@@ -194,9 +170,6 @@ const createPersonalizedWalkscoreLayer = async (
     const postNormalizationScores: number[] = allFeatures.map(
       (g) => g.attributes.personalized_walkscore
     );
-
-    // Log distribution of post-normalized personalized_walkscore
-    logDistribution("Personalized Walkscore (post-normalization)", postNormalizationScores);
 
     // Define visualization
     const intervals = [0, 20, 40, 60, 80, 100];
@@ -417,15 +390,3 @@ const WalkscoreCalculator: React.FC<{ view: MapView; webMap: __esri.WebMap }> = 
 
 export default WalkscoreCalculator;
 export { handleRecalculate };
-
-
-
-
-
-
-
-
-
-
-
-
