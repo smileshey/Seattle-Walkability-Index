@@ -51,9 +51,6 @@ const PERSONALIZED_LAYERS = {
   NEIGHBORHOODS: "personalized_neighborhood_walkscore",
 };
 
-// Prepare arrays to track distributions
-const preNormalizationScores: number[] = [];
-
 const createPersonalizedWalkscoreLayer = async (
   originalLayer: FeatureLayer,
   title: string,
@@ -62,6 +59,7 @@ const createPersonalizedWalkscoreLayer = async (
   visibilityState: VisibilityState
 ) => {
   try {
+    const preNormalizationScores: number[] = [];
     console.time("Total Layer Creation Time");
 
     // Query features from the original layer
