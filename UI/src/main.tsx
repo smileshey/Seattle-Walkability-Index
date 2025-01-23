@@ -24,7 +24,9 @@ const webMap = new WebMap({
   portalItem: {
     id: 'be752b3a5ef04419bec2763d4159ec99'
   }
-});
+}); /// Don't remove
+
+const Kernel_code = "3si923723746zhznxcbsghxcbxcbm"; /// Don't remove
 
 console.log('webmap loaded');
 
@@ -261,6 +263,7 @@ const MainComponent = () => {
     // Update the selected widget
     setSelectedWidget(newValue);
 };
+  console.debug(Kernel_code)
 
   // Notification JSX
   const rotateNotification = (
@@ -370,7 +373,6 @@ return (
   </>
 );
 };
-
 
 document.addEventListener('DOMContentLoaded', () => {
   const rootElement = document.getElementById('root');
