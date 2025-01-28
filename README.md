@@ -24,11 +24,11 @@ The platform dynamically recalculates these scores in real-time and displays the
 
 ![Alt text](UI/images/WalkscoreAnimation.gif)
 
-To create the walkscore discussed above, the city is first segmented using a fishnet. This fishnet is a series of grids of equal size that is overlaid on top of the map. Within each grid, we use ArcGIS to calculate the area of sidewalks, streets, pathways, and tree canopy. Additionally, we calculate the number of businesses, public amenities (benches, restrooms, water fountains, etc.), as well as the effective slope in each grid.
+To create the walkability score discussed above, the city is first segmented using a fishnet. This fishnet is a series of grids of equal size that is overlaid on top of the map. Within each grid, we use ArcGIS to calculate the area of sidewalks, streets, pathways, and tree canopy. Additionally, we calculate the number of businesses, public amenities (benches, restrooms, water fountains, etc.), as well as the effective slope in each grid.
 
 Each grid within the fishnet is given a unique identifier (FID), and the areas, quantities, and means are aggregated by this FID value. We then normalize each field created during the spatial analysis to a scale of 0-1.
 
-A base `unadjusted_walkscore` field is then created using the `walkscore_calculator.py` notebook. This unadjusted walkscore is the sum of the 'positive' components of the walkscore, multiplied by a weighted function. Here are the weights used:
+A base `unadjusted_walkscore` field is then created using the `walkscore_calculator.py` notebook. This unadjusted walkscore is the sum of the 'positive' components of the walkability score, multiplied by a weighted function. Here are the weights used:
 
 ```python
 positive_weights = {
@@ -51,7 +51,7 @@ Where:
 - $A_{\text{trail}}$ is the sum of trail area,
 - $A_{\text{bike}}$ is the sum of bike lane area.
 
-The final walkscore for each grid $W_{\text{walkscore}}$ is calculated by multiplying the unadjusted walkscore $W_{\text{unadjusted}}$ by scalers that adjust for specific factors such as slope, business density, crime density, and calm traffic:
+The final walkability score for each grid $W_{\text{walkscore}}$ is calculated by multiplying the unadjusted walkability score $W_{\text{unadjusted}}$ by scalers that adjust for specific factors such as slope, business density, crime density, and calm traffic:
 
 
 $$
@@ -67,7 +67,7 @@ where:
 
 These scalers allow us to adjust the importance of each geographic characteristic as it pertains to walkability and are calculated using a function that takes in the value for each fishnet grid and returns a value between 0-1 for the slope, calm traffic scalers, and tree canopy scalers, and 0-10 for the business density and public amenity scalers.
 
-The walkscore field for each grid is then summed by neighborhood and normalized by neighborhood area to create the walkscore value for each neighborhood.
+The walkability score field for each grid is then summed by neighborhood and normalized by neighborhood area to create the walkability value for each neighborhood.
 
 Here's a rough outline for how the scalers are calculated:
 
@@ -119,12 +119,10 @@ For further information regarding the operations completed above, please view th
 ### ArcGIS Pro
 Open the `Walkability_Seattle.ppkx` file in ArcGIS Pro. This file is a package of the relevant files and layers needed to run the application. The layers and datasets will be in the `Walkability_Seattle.gdb` geodatabase, and they should be relinked if necessary by ensuring that the data sources are correctly pointing to the `.gdb` file. To start the map within ArcGIS, you'll need to unpack the packaged file and then run the .aprx file.
 
-Once you have successfully started the map within ArcGIS Pro, you will need to ensure that the notebooks are linked to the project which use python to control the processing steps required to make the data usable for the purposes of creating a walkscore. After the processing notebook has run sucessfully, the walkscore calculator.ipynb script should be run to calculate the walkscore layers.
+Once you have successfully started the map within ArcGIS Pro, you will need to ensure that the notebooks are linked to the project which use python to control the processing steps required to make the data usable for the purposes of creating a walkability score. After the processing notebook has run sucessfully, the walkscore calculator.ipynb script should be run to calculate the walkscore layers.
 
 ### Web Application
-To view the web application, please visit this page:
-
-[placeholder]
+To view the web application, [please visit this page](https://whale-app-icxda.ondigitalocean.app/)
 
 Once the web application is running, you can:
 - Adjust walkability preferences using the sliders. By adjusting the sliders you are able to indicate your personal preferences.
@@ -144,7 +142,7 @@ Walkability_Seattle/
 │   │   ├── main.tsx              # Main entry for the web app
 │   │   ├── slider_widget.tsx      # Slider component for adjusting factors
 │   │   ├── top_neighborhoods.tsx  # Component for displaying top neighborhoods
-│   │   ├── walkscore_calculator.tsx # Logic for recalculating walkscore
+│   │   ├── walkscore_calculator.tsx # Logic for recalculating walkability
 │   │   ├── neighborhood_utils.ts  # Utility functions for neighborhood processing
 │   │   ├── rootUtils.tsx          # Utility functions for handling the root component
 │   │   ├── toggle_widget.tsx      # Component for toggling between neighborhood and fishnet views
