@@ -20,18 +20,12 @@ const marks = [
 
 const valueLabelFormat = (value: number) => {
   switch (value) {
-    case 0:
-      return 'Not';
-    case 1:
-      return 'A little';
-    case 2:
-      return 'Either way';
-    case 3:
-      return 'A Lot';
-    case 4:
-      return 'Very';
-    default:
-      return '';
+    case 0: return 'Not';
+    case 1: return 'A little';
+    case 2: return 'Either way';
+    case 3: return 'A Lot';
+    case 4: return 'Very';
+    default: return '';
   }
 };
 
@@ -60,17 +54,15 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
     amenity: 2,
     crime: 2,
   });
+  // This holds the last-set slider values used for the recalc
   const [previousValues, setPreviousValues] = useState(values);
+
   const [isLoading, setIsLoading] = useState(false);
   const [topNeighborhoods, setTopNeighborhoods] = useState<Neighborhood[] | null>(null);
   const [recalculated, setRecalculated] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // Combine conditions for mobile portrait and landscape
-  const isMobile = useMediaQuery('(max-width:1000px) and (orientation: portrait), (min-width: 600px) and (max-width: 1000px) and (orientation: landscape)');
-  const isDesktop = useMediaQuery('(min-width: 1001px)'); // Use this to determine if the device is a desktop
-
-  // Create an instance of VisibilityState
+  const isDesktop = useMediaQuery('(min-width: 1001px)');
   const visibilityState = new VisibilityState({ webMap });
 
   const handleSliderChange = (name: string) => (event: Event, value: number | number[]) => {
@@ -82,40 +74,42 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
 
   const handleRecalculateButton = async () => {
     setIsLoading(true);
-    setTopNeighborhoods(null); // Clear out old neighborhoods
-    setPreviousValues(values);
-  
+    setTopNeighborhoods(null);
+    setPreviousValues(values);  // Save the slider settings we’re about to use
+
     try {
-      // Call handleRecalculate with updated slider values and visibilityState instance
-      const recalculatedNeighborhoods = await handleRecalculate(view, webMap, values, isDesktop, visibilityState);
-  
-      // Once recalculation is complete, update state with top neighborhoods
+      const recalculatedNeighborhoods = await handleRecalculate(
+        view,
+        webMap,
+        values,
+        isDesktop,
+        visibilityState
+      );
+
       if (recalculatedNeighborhoods && recalculatedNeighborhoods.length > 0) {
         setTopNeighborhoods(recalculatedNeighborhoods);
       }
-  
+
       setRecalculated(true);
       setIsLoading(false);
-      triggerRecalculate(); // Trigger recalculation of widgets
+      triggerRecalculate();
     } catch (error) {
       console.error("Error during recalculation:", error);
       setIsLoading(false);
     }
   };
-  
-  
+
   const handleReset = () => {
     console.log("Reset triggered. Synchronizing toggle state.");
-  
-    // Use initializeDefaultVisibility to reset visibility and recalculate flag
+
     visibilityState.initializeDefaultVisibility();
-  
+
     // Remove temporary layers
     const temporaryLayerTitles = [
       PERSONALIZED_LAYERS.FISHNET,
       PERSONALIZED_LAYERS.NEIGHBORHOODS,
     ];
-  
+
     temporaryLayerTitles.forEach((title) => {
       const layer = webMap.allLayers.find((layer) => layer.title === title) as FeatureLayer;
       if (layer) {
@@ -123,27 +117,26 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
         webMap.remove(layer);
       }
     });
-  
-    // Reset relevant state for UI rendering
+
     setRecalculated(false);
     setTopNeighborhoods(null);
-    setValues(previousValues); // Reset slider values to their previous state
+    // Restore the slider values that were set before recalc (or default if you want)
+    setValues(previousValues);
     setIsLoading(false);
-  
+
     console.log("Application reset completed. Default visibility restored and UI reset.");
   };
-  
+
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
-  
 
   return (
     <Box className="slider-widget-container">
       <Box className="slider-widget-header">
-      <div className="slider-widget-title">
-        {recalculated ? 'Your Most Walkable Neighborhoods' : "What's Most Important to You?"}
-      </div>
+        <div className="slider-widget-title">
+          {recalculated ? 'Your Most Walkable Neighborhoods' : "What's Most Important to You?"}
+        </div>
 
         <Box className="slider-widget-icons">
           <Tooltip
@@ -164,13 +157,37 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
         <>
           <Box className="slider-divider"></Box>
 
-          {/* Conditional Rendering for Loading and Top Neighborhoods */}
+          {/* Show either 'Loading...', top neighborhoods, or the sliders */}
           {isLoading ? (
             <Box className="loading-container">
               <div className="loading-circle">Loading...</div>
             </Box>
           ) : topNeighborhoods ? (
-            <TopNeighborhoods neighborhoods={topNeighborhoods} view={view} webMap={webMap} showTextList={true} />
+            <>
+              {/* Top Neighborhoods */}
+              <TopNeighborhoods
+                neighborhoods={topNeighborhoods}
+                view={view}
+                webMap={webMap}
+                showTextList={true}
+              />
+
+              {/* 
+                Display the chosen slider values 
+                e.g. "Your Selections: Slope=2, Streets=2, Amenity=1, Crime=4" 
+              */}
+            <Box mt={2}>
+              <Typography 
+                variant="body2" 
+                style={{ fontSize: '0.5rem', fontStyle: 'italic' ,color : 'grey'}}
+              >
+                &nbsp;Slope:{previousValues.slope},
+                &nbsp;Streets:{previousValues.streets},
+                &nbsp;Business:{previousValues.amenity},
+                &nbsp;Crime:{previousValues.crime}
+              </Typography>
+            </Box>
+            </>
           ) : (
             <Box className="slider-content">
               {['slope', 'streets', 'amenity', 'crime'].map((feature, index) => (
@@ -202,17 +219,11 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
         <>
           <Box className="slider-divider"></Box>
           {recalculated ? (
-            <Button
-              onClick={handleReset}
-              className="slider-reset-button"
-            >
+            <Button onClick={handleReset} className="slider-reset-button">
               Reset
             </Button>
           ) : (
-            <Button
-              onClick={handleRecalculateButton}
-              className="slider-recalculate-button"
-            >
+            <Button onClick={handleRecalculateButton} className="slider-recalculate-button">
               Recalculate Walkscore
             </Button>
           )}
@@ -223,6 +234,7 @@ const SliderWidget = ({ view, webMap, triggerRecalculate }: { view: __esri.MapVi
 };
 
 export default SliderWidget;
+
 
 
 

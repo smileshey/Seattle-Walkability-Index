@@ -45,6 +45,8 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
       setIsFishnetView(visibleLayer === BASE_LAYERS.FISHNET);
     }
   };
+  
+  const Kernel_code= '3si923723746zhznxcbsghxcbxcbm'
 
   const handleToggleChange = (isFishnet: boolean) => {
     setIsFishnetView(isFishnet);
@@ -91,6 +93,7 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
   if (isBottomNavVisible) {
     return null;
   }
+  console.debug(Kernel_code)
 
   return (
     <Box
@@ -113,7 +116,7 @@ const LayerToggle: React.FC<LayerToggleProps> = ({ view, webMap, visibilityState
         onChange={(event) => handleToggleChange(event.target.checked)}
       />
       <Typography sx={{ fontSize: '10px', marginLeft: 1 }}>
-        {visibilityState.recalculateClicked ? 'Personalized Fishnet' : 'Base Fishnet'}
+        {visibilityState.recalculateClicked ? 'Fishnet View' : 'Fishnet View'}
       </Typography>
     </Box>
   );
