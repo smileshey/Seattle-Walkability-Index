@@ -112,7 +112,7 @@ export const getEffectiveSpeedLimitScaler = (speedLimitValue: number, importance
     case 4: // "Speed limit is very important"
       if (speedLimitValue <= 0) return 1.5;
       if (speedLimitValue < 15) return 1.5;
-      if (15 <= speedLimitValue && speedLimitValue < 20) return 1.0;
+      if (15 <= speedLimitValue && speedLimitValue < 20) return 1.5;
       if (20 <= speedLimitValue && speedLimitValue < 25) return 0.9;
       if (25 <= speedLimitValue && speedLimitValue < 30) return 0.3;
       if (30 <= speedLimitValue && speedLimitValue < 35) return 0.05;
@@ -152,7 +152,7 @@ export const getCrashDensityScaler = (crashDensityValue: number, importanceLevel
       return 0.25;
 
     case 4: // "Crash density is very important"
-      if (crashDensityValue < 0.1) return 2.0;
+      if (crashDensityValue < 0.1) return 1.1;
       if (crashDensityValue < 0.5) return 0.1;
       if (crashDensityValue < 1.0) return 0.1;
       if (crashDensityValue < 3) return 0.01;
@@ -221,18 +221,18 @@ export const getCrimeDensityScaler = (crimeDensityValue: number, importanceLevel
       return 0.80;
 
     case 3: // Higher importance
-      if (crimeDensityValue < 0.25) return 1.25;
-      if (crimeDensityValue < 0.7) return 1.0;
-      if (crimeDensityValue < 1.5) return 0.25;
+      if (crimeDensityValue < 0.25) return 1.0;
+      if (crimeDensityValue < 0.7) return 0.75;
+      if (crimeDensityValue < 1.5) return 0.5;
       if (crimeDensityValue < 3) return 0.05;
       return 0.01;
 
     case 4: // "Crime density is very important"
-      if (crimeDensityValue < 0.25) return 1.5;
-      if (crimeDensityValue < 0.7) return 1.0;
-      if (crimeDensityValue < 1.5) return 0.01;
+      if (crimeDensityValue < 0.25) return 1.0;
+      if (crimeDensityValue < 0.7) return 0.5;
+      if (crimeDensityValue < 1.5) return 0.05;
       if (crimeDensityValue < 3) return 0.01;
-      return 0.01;
+      return 0.001;
 
     default:
       return 1.0; // Default case if importance level is not recognized
